@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic – Competitors</title>
+  <title>FTK Classic 2025 – Competitors</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
       --red: #b91c1c;
@@ -32,27 +33,48 @@
       padding: 0.75rem;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      gap: 0.75rem;
-      flex-wrap: wrap;
+    @media (min-width: 768px) {
+      body {
+        max-width: 700px;
+        margin: 0 auto;
+      }
     }
 
-    header h1 {
-      font-size: 1.2rem;
+    /* Global header */
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+
+    .site-title {
+      font-size: 1rem;
       font-weight: 700;
     }
 
-    header small {
+    .site-subtitle {
+      font-size: 0.75rem;
       color: var(--muted);
-      font-size: 0.8rem;
-      display: block;
     }
 
     .nav-links {
+      margin-left: auto;
       display: flex;
       gap: 0.4rem;
       flex-wrap: wrap;
@@ -68,10 +90,8 @@
       color: var(--text);
     }
 
-    .nav-btn.primary {
-      border-color: #1d4ed8;
-      color: #ffffff;
-      background: #2563eb;
+    .nav-btn.secondary {
+      background: #f3f4f6;
     }
 
     main {
@@ -91,10 +111,12 @@
     .section-title {
       font-size: 0.9rem;
       font-weight: 600;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
     }
 
     .team-header {
@@ -256,24 +278,20 @@
       text-align: center;
       padding: 0.75rem 0.5rem;
     }
-
-    @media (min-width: 768px) {
-      body {
-        max-width: 700px;
-        margin: 0 auto;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>FTK Classic Competitors</h1>
-      <small>Teams, handicaps & match assignments</small>
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Competitors & Match Assignments</div>
+      </div>
     </div>
     <div class="nav-links">
-      <a href="index.html" class="nav-btn">Home</a>
-      <a href="spectator.html" class="nav-btn primary">View scores</a>
+      <a href="index.html" class="nav-btn secondary">Home</a>
+      <a href="spectator.html" class="nav-btn">View scores</a>
     </div>
   </header>
 
@@ -281,7 +299,7 @@
     <section class="card">
       <div class="section-title">Red Team</div>
       <div class="team-header">
-        <div class="team-name red">Red</div>
+        <div class="team-name red" id="redTeamTitle">Red</div>
         <div class="team-meta" id="redCount">0 players</div>
       </div>
       <div id="redList" class="competitor-list">
@@ -292,7 +310,7 @@
     <section class="card">
       <div class="section-title">Blue Team</div>
       <div class="team-header">
-        <div class="team-name blue">Blue</div>
+        <div class="team-name blue" id="blueTeamTitle">Blue</div>
         <div class="team-meta" id="blueCount">0 players</div>
       </div>
       <div id="blueList" class="competitor-list">
@@ -322,6 +340,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
 
@@ -329,11 +348,22 @@
     const blueListEl = document.getElementById("blueList");
     const redCountEl = document.getElementById("redCount");
     const blueCountEl = document.getElementById("blueCount");
+    const redTeamTitleEl = document.getElementById("redTeamTitle");
+    const blueTeamTitleEl = document.getElementById("blueTeamTitle");
 
+    let settings = {};
     let players = {};
     let matches = {};
 
-    // ----- Match state helpers -----
+    // ---- Helpers ----
+
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
+    }
 
     function computeMatchState(holes, type) {
       const arr = Array.isArray(holes) ? holes : [];
@@ -391,15 +421,6 @@
       return { diff, done, throughHole, margin, holesLeft };
     }
 
-    function getTeamTag(team) {
-      if (team === "red") {
-        return '<span class="tag team-red">Red</span>';
-      } else if (team === "blue") {
-        return '<span class="tag team-blue">Blue</span>';
-      }
-      return "";
-    }
-
     function getPlayerSide(match, playerId) {
       const redPlayers = match.red?.players || [];
       const bluePlayers = match.blue?.players || [];
@@ -408,7 +429,7 @@
       return null;
     }
 
-    // Pair label (combined) for the side this player is on
+    // Pair label for the side this player is on
     function getPairLabel(match, playerId) {
       const side = getPlayerSide(match, playerId);
       if (!side) return "";
@@ -469,6 +490,10 @@
     }
 
     function render() {
+      const { red: redTeamName, blue: blueTeamName } = getTeamNames();
+      redTeamTitleEl.textContent = redTeamName;
+      blueTeamTitleEl.textContent = blueTeamName;
+
       const playerIds = Object.keys(players || {});
 
       const redPlayers = [];
@@ -511,8 +536,8 @@
         }
       }
 
-      redPlayers.sort((a, b) => a.name.localeCompare(b.name));
-      bluePlayers.sort((a, b) => a.name.localeCompare(b.name));
+      redPlayers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      bluePlayers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
       const redSummary = (() => {
         const count = redPlayers.length;
@@ -531,7 +556,7 @@
       redCountEl.textContent = redSummary;
       blueCountEl.textContent = blueSummary;
 
-      function renderTeam(listEl, teamPlayers) {
+      function renderTeam(listEl, teamPlayers, teamKey) {
         listEl.innerHTML = "";
         if (teamPlayers.length === 0) {
           listEl.innerHTML = '<div class="empty-state">No players yet.</div>';
@@ -552,7 +577,10 @@
               ? `Handicap: ${p.handicap}`
               : "Handicap: —";
 
-          const teamTag = getTeamTag((p.team || "").toLowerCase());
+          const teamTag =
+            teamKey === "red"
+              ? `<span class="tag team-red">${redTeamName}</span>`
+              : `<span class="tag team-blue">${blueTeamName}</span>`;
 
           let matchesHTML = "";
           if (matchesForPlayer.length > 0) {
@@ -566,7 +594,6 @@
                 const status = getMatchStatusForPair(mid, m, p.id);
                 const chipClass = getMatchChipClass(mid, m);
 
-                // Mark player as on-course if this match is started and not done
                 if (state.throughHole !== null && !state.done) {
                   isOnCourse = true;
                 }
@@ -581,8 +608,6 @@
                   currentHolePart = `currently on hole ${currentHole}`;
                 }
 
-                // Combined pair-level status:
-                // e.g. "Match 1 - currently on hole 7 - Thru 6 • 2 down"
                 const text = `Match ${mid} - ${currentHolePart} - ${status}`;
 
                 return `<a class="tag match ${chipClass}" href="match_spectator.html?id=${mid}">
@@ -619,9 +644,14 @@
         }
       }
 
-      renderTeam(redListEl, redPlayers);
-      renderTeam(blueListEl, bluePlayers);
+      renderTeam(redListEl, redPlayers, "red");
+      renderTeam(blueListEl, bluePlayers, "blue");
     }
+
+    onValue(settingsRef, (snapshot) => {
+      settings = snapshot.val() || {};
+      render();
+    });
 
     onValue(playersRef, (snapshot) => {
       players = snapshot.val() || {};

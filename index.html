@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic – Welcome</title>
+  <title>FTK Classic 2025 – Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
       --muted: #6b7280;
-      --accent: #1d4ed8;
       --border: #d1d5db;
+      --accent: #1d4ed8;
+      --accent-soft: #dbeafe;
     }
 
     * {
@@ -22,143 +24,156 @@
     }
 
     body {
-      background: radial-gradient(circle at top, #e5e7eb 0, #f3f4f6 40%, #e5e7eb 100%);
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.25rem;
-    }
-
-    .shell {
-      background: var(--card);
-      border-radius: 1.25rem;
-      padding: 1.5rem 1.25rem 1.75rem;
-      border: 1px solid var(--border);
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .logo-wrap {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-
-    .logo-wrap img {
-      max-width: 220px;
-      width: 70%;
-      height: auto;
-      display: block;
-    }
-
-    h1 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-    }
-
-    .subtitle {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 1.1rem;
-    }
-
-    .info {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-bottom: 1.4rem;
-      line-height: 1.5;
-    }
-
-    .buttons {
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 0.8rem;
+      align-items: stretch;
     }
 
-    .btn {
-      display: inline-flex;
+    @media (min-width: 768px) {
+      body {
+        max-width: 700px;
+        margin: 0 auto;
+      }
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+
+    .site-title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .site-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0.6rem 1.4rem;
+      padding-bottom: 2rem;
+    }
+
+    .hero-card {
+      background: var(--card);
+      border-radius: 1.1rem;
+      border: 1px solid var(--border);
+      padding: 1.1rem;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(15,23,42,0.15);
+      width: 100%;
+    }
+
+    .hero-logo {
+      width: 140px;
+      max-width: 60%;
+      border-radius: 0.75rem;
+      object-fit: cover;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    .hero-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .hero-btn {
+      display: block;
+      width: 100%;
+      padding: 0.7rem 0.9rem;
       border-radius: 999px;
-      border: 1px solid transparent;
-      background: var(--accent);
+      border: none;
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
       color: #ffffff;
       font-size: 0.95rem;
       font-weight: 600;
       text-decoration: none;
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.38);
+      margin-bottom: 0.5rem;
+      box-shadow: 0 8px 18px rgba(37,99,235,0.55);
+    }
+
+    .hero-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 12px rgba(37,99,235,0.45);
+    }
+
+    .hero-btn-secondary {
+      display: block;
       width: 100%;
-      max-width: 260px;
-    }
-
-    .btn span {
-      margin-left: 0.4rem;
-      font-size: 1.05rem;
-    }
-
-    .btn.secondary {
-      background: #ffffff;
-      color: var(--accent);
-      border-color: var(--border);
-      box-shadow: none;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
-    }
-
-    .footnote {
-      font-size: 0.74rem;
-      color: var(--muted);
-      background: #e5edff;
-      padding: 0.4rem 0.7rem;
+      padding: 0.6rem 0.9rem;
       border-radius: 999px;
-      display: inline-block;
+      border: 1px solid var(--border);
+      background: var(--accent-soft);
+      color: #1e3a8a;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
     }
 
-    @media (max-width: 500px) {
-      .shell {
-        padding: 1.25rem 1rem 1.4rem;
-      }
+    .hero-footer {
+      margin-top: 0.7rem;
+      font-size: 0.75rem;
+      color: var(--muted);
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="logo-wrap">
-      <!-- Change src if your logo file has a different name -->
-      <img src="ftk-classic-logo.png" alt="FTK Classic Logo" />
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Ryder Cup Format • 2025</div>
+      </div>
     </div>
-    <h1>FTK Classic</h1>
-    <div class="subtitle">Spring 2026 • Ryder Cup Style</div>
+  </header>
 
-    <p class="info">
-      Welcome to the FTK Classic live hub. View the live scores or browse all competitors,
-      teams, and handicaps.
-    </p>
+  <main>
+    <section class="hero-card">
+      <img src="IMG_7296.jpg" alt="FTK Classic" class="hero-logo" />
+      <div class="hero-title">Welcome to the FTK Classic</div>
+      <div class="hero-subtitle">Follow every match in real time. Designed for easy viewing on the course.</div>
 
-    <div class="buttons">
-      <a class="btn" href="spectator.html">
-        Click to view scores <span>▶</span>
-      </a>
-      <a class="btn secondary" href="competitors.html">
-        View competitors
-      </a>
-    </div>
+      <a href="spectator.html" class="hero-btn">Click to view scores</a>
+      <a href="competitors.html" class="hero-btn-secondary">View competitors</a>
 
-    <div class="footnote">
-      Scores update live as the admins enter results.
-    </div>
-  </div>
+      <div class="hero-footer">
+        Live scores update automatically from the scorers’ devices.
+      </div>
+    </section>
+  </main>
 </body>
 </html>
