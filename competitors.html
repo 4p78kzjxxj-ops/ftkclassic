@@ -35,18 +35,16 @@
 
     @media (min-width: 768px) {
       body {
-        max-width: 700px;
+        max-width: 900px;
         margin: 0 auto;
       }
     }
-
-    /* Global header */
 
     .site-header {
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     .site-header-left {
@@ -71,6 +69,12 @@
     .site-subtitle {
       font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    .viewer-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
     }
 
     .nav-links {
@@ -111,146 +115,146 @@
     .section-title {
       font-size: 0.9rem;
       font-weight: 600;
-      margin-bottom: 0.35rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
+      margin-bottom: 0.35rem;
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
 
-    .team-header {
+    .team-header-row {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.4rem;
     }
 
-    .team-name {
-      font-size: 1rem;
+    .team-title {
+      font-size: 0.9rem;
       font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .team-name.red {
+    .team-title.red {
       color: var(--red);
     }
 
-    .team-name.blue {
+    .team-title.blue {
       color: var(--blue);
     }
 
     .team-meta {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      text-align: right;
     }
 
     .competitor-list {
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
-      margin-top: 0.3rem;
+      gap: 0.4rem;
     }
 
-    .competitor {
-      padding: 0.4rem 0.45rem;
-      border-radius: 0.6rem;
-      background: #f9fafb;
+    .competitor-group {
+      border-radius: 0.8rem;
       border: 1px solid #e5e7eb;
+      padding: 0.4rem 0.5rem;
+      background: #f9fafb;
     }
 
-    .comp-top {
+    .competitor-group-header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.25rem;
     }
 
-    .comp-name {
-      font-size: 0.9rem;
+    .competitor-names {
+      font-size: 0.88rem;
       font-weight: 600;
     }
 
-    .comp-hcp {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .comp-flags {
+    .mulligan-row {
+      font-size: 0.74rem;
+      margin-top: 0.1rem;
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.2rem;
-    }
-
-    .comp-tags {
-      margin-top: 0.3rem;
-      display: flex;
+      gap: 0.25rem;
       flex-wrap: wrap;
-      gap: 0.25rem;
     }
 
-    .tag {
-      font-size: 0.75rem;
-      padding: 0.12rem 0.55rem;
+    .m-tag {
+      padding: 0.06rem 0.45rem;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #ffffff;
+      border: 1px solid #d1d5db;
+      line-height: 1.3;
+      white-space: nowrap;
     }
 
-    .tag.match {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
+    .m-tag.available {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+      color: #166534;
     }
 
-    .tag.match-red {
+    .m-tag.used {
       background: #fee2e2;
       border-color: #fecaca;
-      color: var(--red);
+      color: #7f1d1d;
     }
 
-    .tag.match-blue {
-      background: #dbeafe;
+    .match-status-chip {
+      font-size: 0.74rem;
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f3f4f6;
+      white-space: nowrap;
+    }
+
+    .match-status-chip.red {
+      background: var(--pill-red);
+      border-color: #fecaca;
+      color: #7f1d1d;
+    }
+
+    .match-status-chip.blue {
+      background: var(--pill-blue);
       border-color: #93c5fd;
-      color: var(--blue);
+      color: #1e3a8a;
     }
 
-    .tag.match-even {
+    .match-status-chip.even {
       background: #e5e7eb;
       border-color: #d1d5db;
       color: #374151;
     }
 
-    .tag.team-red {
-      background: var(--pill-red);
-      border-color: #fecaca;
-      color: var(--red);
+    .group-footer {
+      margin-top: 0.2rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
     }
 
-    .tag.team-blue {
-      background: var(--pill-blue);
-      border-color: #93c5fd;
-      color: var(--blue);
-    }
-
-    .on-course-badge {
-      font-size: 0.7rem;
-      padding: 0.12rem 0.5rem;
+    .on-course-pill {
+      font-size: 0.72rem;
+      padding: 0.08rem 0.5rem;
       border-radius: 999px;
       border: 1px solid #bbf7d0;
       background: #dcfce7;
       color: #166534;
       display: inline-flex;
       align-items: center;
-      gap: 0.2rem;
+      gap: 0.25rem;
     }
 
-    .on-course-badge::before {
-      content: "";
-      width: 6px;
-      height: 6px;
+    .on-course-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 999px;
       background: var(--live);
       box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
@@ -264,12 +268,18 @@
       }
       70% {
         transform: scale(1.9);
-        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
       }
       100% {
         transform: scale(1);
         box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
       }
+    }
+
+    .match-link {
+      font-size: 0.74rem;
+      text-decoration: none;
+      color: #2563eb;
     }
 
     .empty-state {
@@ -286,7 +296,8 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Competitors & Match Assignments</div>
+        <div class="site-subtitle">Competitors & live match status</div>
+        <div id="viewerCount" class="viewer-count">Viewing competitors: 0 people</div>
       </div>
     </div>
     <div class="nav-links">
@@ -297,24 +308,24 @@
 
   <main>
     <section class="card">
-      <div class="section-title">Red Team</div>
-      <div class="team-header">
-        <div class="team-name red" id="redTeamTitle">Red</div>
-        <div class="team-meta" id="redCount">0 players</div>
+      <div class="section-title">Red team</div>
+      <div class="team-header-row">
+        <div class="team-title red" id="redTeamTitle">Red team</div>
+        <div class="team-meta" id="redTeamMeta">0 players • Total HCP 0.0</div>
       </div>
-      <div id="redList" class="competitor-list">
-        <div class="empty-state">No Red team players yet.</div>
+      <div id="redCompetitors" class="competitor-list">
+        <div class="empty-state">Loading players…</div>
       </div>
     </section>
 
     <section class="card">
-      <div class="section-title">Blue Team</div>
-      <div class="team-header">
-        <div class="team-name blue" id="blueTeamTitle">Blue</div>
-        <div class="team-meta" id="blueCount">0 players</div>
+      <div class="section-title">Blue team</div>
+      <div class="team-header-row">
+        <div class="team-title blue" id="blueTeamTitle">Blue team</div>
+        <div class="team-meta" id="blueTeamMeta">0 players • Total HCP 0.0</div>
       </div>
-      <div id="blueList" class="competitor-list">
-        <div class="empty-state">No Blue team players yet.</div>
+      <div id="blueCompetitors" class="competitor-list">
+        <div class="empty-state">Loading players…</div>
       </div>
     </section>
   </main>
@@ -325,6 +336,10 @@
       getDatabase,
       ref,
       onValue,
+      onDisconnect,
+      serverTimestamp,
+      push,
+      set,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -344,16 +359,50 @@
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
 
-    const redListEl = document.getElementById("redList");
-    const blueListEl = document.getElementById("blueList");
-    const redCountEl = document.getElementById("redCount");
-    const blueCountEl = document.getElementById("blueCount");
+    const viewerCountEl = document.getElementById("viewerCount");
     const redTeamTitleEl = document.getElementById("redTeamTitle");
     const blueTeamTitleEl = document.getElementById("blueTeamTitle");
+    const redTeamMetaEl = document.getElementById("redTeamMeta");
+    const blueTeamMetaEl = document.getElementById("blueTeamMeta");
+    const redCompetitorsEl = document.getElementById("redCompetitors");
+    const blueCompetitorsEl = document.getElementById("blueCompetitors");
 
     let settings = {};
     let players = {};
     let matches = {};
+
+    // Presence helper
+    function setupPresence(db, pageKey, onCountChange) {
+      const connectionsRef = ref(db, `presence/${pageKey}`);
+      const connectedRef = ref(db, ".info/connected");
+
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === false) return;
+        const conRef = push(connectionsRef);
+        onDisconnect(conRef).remove().catch(() => {});
+        set(conRef, { connectedAt: serverTimestamp() }).catch(() => {});
+      });
+
+      onValue(
+        connectionsRef,
+        (snap) => {
+          const val = snap.val();
+          const count = val ? Object.keys(val).length : 0;
+          console.log("Presence competitors =", count, val);
+          onCountChange(count);
+        },
+        () => onCountChange(0)
+      );
+    }
+
+    setupPresence(db, "competitors", (count) => {
+      viewerCountEl.textContent =
+        count === 1
+          ? "Viewing competitors: 1 person"
+          : `Viewing competitors: ${count} people`;
+    });
+
+    // Helpers
 
     function getTeamNames() {
       const t = settings.teamNames || {};
@@ -361,6 +410,12 @@
         red: t.red || "Red",
         blue: t.blue || "Blue",
       };
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
     }
 
     function computeMatchState(holes, type) {
@@ -419,261 +474,244 @@
       return { diff, done, throughHole, margin, holesLeft };
     }
 
-    function getLastName(fullName) {
-      if (!fullName) return "";
-      const parts = fullName.trim().split(/\s+/);
-      return parts[parts.length - 1];
-    }
-
-    // Pair label in the SAME order as assigned in Firebase (Option B)
-    function getPairLabel(match, side) {
-      const playerIds = (match[side]?.players || []);
-      const names = playerIds
-        .map((pid) => players[pid]?.name)
-        .filter(Boolean)
-        .map(getLastName);
-      if (!names.length) return "";
-      return names.join(" / ");
-    }
-
-    function getStatusForSide(side, state) {
-      const { diff, done, throughHole, margin, holesLeft } = state;
-      const pairDiff = side === "red" ? diff : -diff;
-
-      if (throughHole === null) return "Not started";
-
-      if (done) {
-        if (pairDiff === 0) return "Halved";
-        const result = pairDiff > 0 ? "Won" : "Lost";
-        return `${result} ${margin}&${holesLeft}`;
-      }
-
-      if (pairDiff === 0) {
-        return `Thru ${throughHole} • AS`;
-      } else if (pairDiff > 0) {
-        return `Thru ${throughHole} • ${pairDiff} up`;
-      } else {
-        return `Thru ${throughHole} • ${Math.abs(pairDiff)} down`;
-      }
-    }
-
-    function getMatchChipClassForSide(side, state) {
-      const pairDiff = side === "red" ? state.diff : -state.diff;
-      if (pairDiff > 0) return "match-red";
-      if (pairDiff < 0) return "match-blue";
-      return "match-even";
-    }
-
-    function render() {
+    // Build groups: if players are in the same match+side, group them
+    function buildGroups() {
+      const redGroups = [];
+      const blueGroups = [];
       const { red: redTeamName, blue: blueTeamName } = getTeamNames();
-      redTeamTitleEl.textContent = redTeamName;
-      blueTeamTitleEl.textContent = blueTeamName;
 
-      const playerIds = Object.keys(players || {});
-      const redPlayersAll = [];
-      const bluePlayersAll = [];
-      let redTotalHcp = 0;
-      let blueTotalHcp = 0;
+      const matchIds = Object.keys(matches || {}).sort((a, b) => Number(a) - Number(b));
 
-      for (const pid of playerIds) {
-        const p = players[pid];
-        if (!p) continue;
-        const team = (p.team || "").toLowerCase();
-        const hRaw = p.handicap;
-        const hcp =
-          hRaw === "" || hRaw === undefined || hRaw === null
-            ? NaN
-            : parseFloat(hRaw);
-
-        if (team === "red") {
-          redPlayersAll.push({ id: pid, ...p });
-          if (!isNaN(hcp)) redTotalHcp += hcp;
-        } else if (team === "blue") {
-          bluePlayersAll.push({ id: pid, ...p });
-          if (!isNaN(hcp)) blueTotalHcp += hcp;
-        }
-      }
-
-      redPlayersAll.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-      bluePlayersAll.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-
-      const redSummary = (() => {
-        const count = redPlayersAll.length;
-        const hcpTotal = redTotalHcp.toFixed(1);
-        if (count === 0) return "0 players • Total HCP 0.0";
-        return `${count} player${count === 1 ? "" : "s"} • Total HCP ${hcpTotal}`;
-      })();
-
-      const blueSummary = (() => {
-        const count = bluePlayersAll.length;
-        const hcpTotal = blueTotalHcp.toFixed(1);
-        if (count === 0) return "0 players • Total HCP 0.0";
-        return `${count} player${count === 1 ? "" : "s"} • Total HCP ${hcpTotal}`;
-      })();
-
-      redCountEl.textContent = redSummary;
-      blueCountEl.textContent = blueSummary;
-
-      // Build pairs from matches
-      const pairsByTeam = {
-        red: [],
-        blue: [],
-      };
-
-      const matchIds = Object.keys(matches || {});
-      for (const mid of matchIds) {
-        const m = matches[mid];
+      for (const id of matchIds) {
+        const m = matches[id];
         if (!m) continue;
-        const type = m.type || (Number(mid) <= 8 ? "front" : "back");
-        const state = computeMatchState(m.holes || [], type);
+        const type = m.type || (Number(id) <= 8 ? "front" : "back");
+        const holes = m.holes || [];
+        const state = computeMatchState(holes, type);
+        const { diff, done, throughHole, margin, holesLeft } = state;
 
-        ["red", "blue"].forEach((side) => {
-          const playerIdsSide = (m[side]?.players || []).filter((pid) => players[pid]);
-          if (!playerIdsSide.length) return;
+        const hasActivity = throughHole !== null;
 
-          pairsByTeam[side].push({
-            matchId: mid,
-            side,
-            playerIds: playerIdsSide,
-            state,
-          });
-        });
-      }
+        let statusText = "";
+        let chipClass = "even";
+        let onCourse = false;
 
-      // Helper to render a team’s list
-      function renderTeam(listEl, teamPlayersAll, teamKey) {
-        listEl.innerHTML = "";
-
-        // Set of player ids that are part of any pair
-        const pairedIds = new Set();
-        pairsByTeam[teamKey].forEach((pair) => {
-          pair.playerIds.forEach((pid) => pairedIds.add(pid));
-        });
-
-        // First: render pairs (grouped)
-        const pairs = pairsByTeam[teamKey].slice();
-        if (pairs.length === 0 && teamPlayersAll.length === 0) {
-          listEl.innerHTML = '<div class="empty-state">No players yet.</div>';
-          return;
-        }
-
-        for (const pair of pairs) {
-          const { matchId, side, playerIds, state } = pair;
-          const label = getPairLabel(matches[matchId], side) || "Pair";
-          const chipClass = getMatchChipClassForSide(side, state);
-          const status = getStatusForSide(side, state);
-
-          let currentHolePart = "";
-          if (state.throughHole === null) {
-            currentHolePart = "not started";
-          } else if (state.done) {
-            currentHolePart = "finished";
+        if (!hasActivity) {
+          statusText = `Match ${id} – not started`;
+        } else if (done) {
+          if (diff === 0) {
+            statusText = `Match ${id} – halved`;
+            chipClass = "even";
+          } else if (diff > 0) {
+            statusText = `Match ${id} – ${redTeamName} win ${margin}&${holesLeft}`;
+            chipClass = "red";
           } else {
-            const currentHole = state.throughHole + 1;
-            currentHolePart = `currently on hole ${currentHole}`;
+            statusText = `Match ${id} – ${blueTeamName} win ${margin}&${holesLeft}`;
+            chipClass = "blue";
           }
-
-          const text = `Match ${matchId} - ${currentHolePart} - ${status}`;
-
-          // Determine "On course"
-          const isOnCourse = !state.done && state.throughHole !== null;
-
-          // Handicap info for both players
-          const p1 = players[playerIds[0]] || {};
-          const p2 = players[playerIds[1]] || {};
-          const h1 = p1.handicap !== undefined && p1.handicap !== null && p1.handicap !== ""
-            ? p1.handicap
-            : "—";
-          const h2 = p2.handicap !== undefined && p2.handicap !== null && p2.handicap !== ""
-            ? p2.handicap
-            : "—";
-
-          const teamTag =
-            teamKey === "red"
-              ? `<span class="tag team-red">${redTeamName}</span>`
-              : `<span class="tag team-blue">${blueTeamName}</span>`;
-
-          const comp = document.createElement("div");
-          comp.className = "competitor";
-
-          comp.innerHTML = `
-            <div class="comp-top">
-              <div>
-                <div class="comp-name">${label}</div>
-                <div class="comp-hcp">Handicaps: ${h1} &amp; ${h2}</div>
-              </div>
-              <div class="comp-flags">
-                ${teamTag}
-                ${isOnCourse ? '<span class="on-course-badge">On course</span>' : ""}
-              </div>
-            </div>
-            <div class="comp-tags">
-              <a class="tag match ${chipClass}" href="match_spectator.html?id=${matchId}">
-                ${text}
-              </a>
-            </div>
-          `;
-
-          listEl.appendChild(comp);
+        } else {
+          const currentHole = throughHole + 1;
+          const absDiff = Math.abs(diff);
+          const dir = diff > 0 ? "up" : "down";
+          const leaderName = diff > 0 ? redTeamName : blueTeamName;
+          statusText = `Match ${id} – currently on hole ${currentHole} – Thru ${throughHole} • ${absDiff} ${dir}`;
+          chipClass = diff === 0 ? "even" : diff > 0 ? "red" : "blue";
+          onCourse = true;
         }
 
-        // Then: render solo players not in any pair
-        const soloPlayers = teamPlayersAll.filter((p) => !pairedIds.has(p.id));
+        const common = {
+          matchId: id,
+          type,
+          statusText,
+          chipClass,
+          onCourse,
+          diff,
+          done,
+        };
 
-        for (const p of soloPlayers) {
-          const hcpText =
-            p.handicap !== undefined && p.handicap !== null && p.handicap !== ""
-              ? `Handicap: ${p.handicap}`
-              : "Handicap: —";
+        const redPlayersIds = m.red?.players || [];
+        const bluePlayersIds = m.blue?.players || [];
 
-          const teamTag =
-            teamKey === "red"
-              ? `<span class="tag team-red">${redTeamName}</span>`
-              : `<span class="tag team-blue">${blueTeamName}</span>`;
-
-          const comp = document.createElement("div");
-          comp.className = "competitor";
-
-          comp.innerHTML = `
-            <div class="comp-top">
-              <div>
-                <div class="comp-name">${p.name || "Unnamed player"}</div>
-                <div class="comp-hcp">${hcpText}</div>
-              </div>
-              <div class="comp-flags">
-                ${teamTag}
-              </div>
-            </div>
-            <div class="comp-tags">
-              <span class="tag">No matches assigned</span>
-            </div>
-          `;
-
-          listEl.appendChild(comp);
+        if (redPlayersIds.length) {
+          redGroups.push({
+            ...common,
+            side: "red",
+            playerIds: redPlayersIds,
+          });
         }
 
-        if (!listEl.children.length) {
-          listEl.innerHTML = '<div class="empty-state">No players yet.</div>';
+        if (bluePlayersIds.length) {
+          blueGroups.push({
+            ...common,
+            side: "blue",
+            playerIds: bluePlayersIds,
+          });
         }
       }
 
-      renderTeam(redListEl, redPlayersAll, "red");
-      renderTeam(blueListEl, bluePlayersAll, "blue");
+      return { redGroups, blueGroups };
     }
 
-    onValue(settingsRef, (snapshot) => {
-      settings = snapshot.val() || {};
-      render();
+    function renderTeam(teamKey) {
+      const isRed = teamKey === "red";
+      const teamNameKey = isRed ? "red" : "blue";
+      const titleEl = isRed ? redTeamTitleEl : blueTeamTitleEl;
+      const metaEl = isRed ? redTeamMetaEl : blueTeamMetaEl;
+      const containerEl = isRed ? redCompetitorsEl : blueCompetitorsEl;
+
+      const { red: redTeamName, blue: blueTeamName } = getTeamNames();
+      const teamName = isRed ? redTeamName : blueTeamName;
+
+      titleEl.textContent = teamName;
+
+      const teamPlayers = Object.entries(players || {})
+        .filter(([, p]) => (p.team || "").toLowerCase() === teamKey)
+        .map(([id, p]) => ({ id, ...p }))
+        .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+      const totalHcp = teamPlayers.reduce((sum, p) => {
+        const h = parseFloat(p.handicap);
+        return sum + (isNaN(h) ? 0 : h);
+      }, 0);
+
+      metaEl.textContent = `${teamPlayers.length} players • Total HCP ${totalHcp.toFixed(
+        1
+      )}`;
+
+      const { redGroups, blueGroups } = buildGroups();
+      const groups = isRed ? redGroups : blueGroups;
+
+      if (!teamPlayers.length) {
+        containerEl.innerHTML =
+          '<div class="empty-state">No players on this team yet.</div>';
+        return;
+      }
+
+      if (!groups.length) {
+        // fall back to simple list of players if no matches yet
+        let html = "";
+        for (const p of teamPlayers) {
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+
+          html += `
+            <div class="competitor-group">
+              <div class="competitor-group-header">
+                <div>
+                  <div class="competitor-names">${p.name || "Unnamed"}</div>
+                  <div class="mulligan-row">
+                    <span class="m-tag ${mUsed ? "used" : "available"}">
+                      M ${mUsed ? "used" : "available"}
+                    </span>
+                    <span class="m-tag ${rmUsed ? "used" : "available"}">
+                      RM ${rmUsed ? "used" : "available"}
+                    </span>
+                    <span class="mulligan-note">HCP: ${p.handicap ?? "—"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        containerEl.innerHTML = html;
+        return;
+      }
+
+      // Map from player id -> player data
+      const pMap = players || {};
+
+      let html = "";
+
+      for (const g of groups) {
+        const names = g.playerIds
+          .map((pid) => pMap[pid]?.name)
+          .filter(Boolean);
+        const lastNames = g.playerIds
+          .map((pid) => getLastName(pMap[pid]?.name))
+          .filter(Boolean)
+          .join(" / ");
+
+        const fullNames = names.join(" & ") || "TBD";
+
+        // Mulligan badges for each player in group
+        const mulTags = g.playerIds
+          .map((pid) => {
+            const p = pMap[pid] || {};
+            const base = getLastName(p.name || "Player");
+            const mUsed = !!p.mulliganUsed;
+            const rmUsed = !!p.reverseMulliganUsed;
+            return `
+              <div style="display:flex;gap:0.2rem;align-items:center;">
+                <span>${base}</span>
+                <span class="m-tag ${mUsed ? "used" : "available"}">
+                  M${mUsed ? " used" : ""}
+                </span>
+                <span class="m-tag ${rmUsed ? "used" : "available"}">
+                  RM${rmUsed ? " used" : ""}
+                </span>
+              </div>
+            `;
+          })
+          .join("");
+
+        const chipClass = `match-status-chip ${g.chipClass}`;
+        const onCoursePill = g.onCourse
+          ? `<span class="on-course-pill"><span class="on-course-dot"></span>On Course</span>`
+          : "";
+
+        html += `
+          <div class="competitor-group">
+            <div class="competitor-group-header">
+              <div>
+                <div class="competitor-names">${fullNames}</div>
+                <div class="mulligan-row">
+                  ${mulTags}
+                </div>
+              </div>
+              <div class="${chipClass}">
+                ${g.statusText.replace(`Match ${g.matchId} – `, "")}
+              </div>
+            </div>
+            <div class="group-footer">
+              <span>${g.statusText}</span>
+              <div style="display:flex;gap:0.35rem;align-items:center;">
+                ${onCoursePill}
+                <a class="match-link" href="match_spectator.html?id=${g.matchId}">
+                  View match ${g.matchId}
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      containerEl.innerHTML = html;
+    }
+
+    function renderAll() {
+      const { red: redName, blue: blueName } = getTeamNames();
+      redTeamTitleEl.textContent = redName;
+      blueTeamTitleEl.textContent = blueName;
+
+      renderTeam("red");
+      renderTeam("blue");
+    }
+
+    // Listeners
+
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      renderAll();
     });
 
-    onValue(playersRef, (snapshot) => {
-      players = snapshot.val() || {};
-      render();
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      renderAll();
     });
 
-    onValue(matchesRef, (snapshot) => {
-      matches = snapshot.val() || {};
-      render();
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      renderAll();
     });
   </script>
 </body>

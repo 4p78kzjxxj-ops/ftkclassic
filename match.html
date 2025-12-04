@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic 2025 – Match Admin</title>
+  <title>FTK Classic 2025 – Match Scoring</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
@@ -14,9 +14,9 @@
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
-      --dot-empty: #e5e7eb;
-      --dot-half: #9ca3af;
-      --danger: #b91c1c;
+      --live: #22c55e;
+      --pill-red: #fee2e2;
+      --pill-blue: #dbeafe;
     }
 
     * {
@@ -39,8 +39,6 @@
         margin: 0 auto;
       }
     }
-
-    /* Global header */
 
     .site-header {
       display: flex;
@@ -94,17 +92,6 @@
       background: #f3f4f6;
     }
 
-    .admin-banner {
-      background: #fef3c7;
-      border: 1px solid #facc15;
-      color: #92400e;
-      border-radius: 0.5rem;
-      padding: 0.35rem 0.6rem;
-      font-size: 0.8rem;
-      margin-bottom: 0.75rem;
-      text-align: center;
-    }
-
     main {
       display: flex;
       flex-direction: column;
@@ -132,28 +119,23 @@
 
     /* Match summary */
 
-    .match-summary-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
     .match-title {
       font-size: 1rem;
       font-weight: 700;
+      margin-bottom: 0.1rem;
     }
 
     .match-subtitle {
       font-size: 0.8rem;
       color: var(--muted);
+      margin-bottom: 0.25rem;
     }
 
-    .teams-summary {
+    .teams-row {
       display: flex;
       justify-content: space-between;
-      margin-top: 0.45rem;
-      gap: 0.5rem;
-      font-size: 0.82rem;
+      gap: 0.6rem;
+      margin-bottom: 0.3rem;
     }
 
     .team-block {
@@ -162,72 +144,57 @@
     }
 
     .team-name {
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 0.05rem;
     }
 
-    .team-name.red {
-      color: var(--red);
-    }
-
-    .team-name.blue {
-      color: var(--blue);
-      text-align: right;
-    }
+    .team-name.red { color: var(--red); }
+    .team-name.blue { color: var(--blue); text-align: right; }
 
     .team-players {
       font-size: 0.78rem;
       color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-bottom: 0.2rem;
     }
 
-    .pair-pills {
+    .mulligan-row {
+      font-size: 0.72rem;
       display: flex;
-      justify-content: space-between;
-      margin-top: 0.35rem;
-      gap: 0.4rem;
-      font-size: 0.78rem;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      justify-content: flex-start;
     }
 
-    .pair-pill {
-      flex: 1;
-      min-width: 0;
-      padding: 0.2rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f9fafb;
-      text-align: center;
+    .m-group {
+      display: flex;
+      gap: 0.2rem;
+      align-items: center;
     }
 
-    .pair-pill.red {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #7f1d1d;
+    .m-name {
+      font-weight: 500;
     }
 
-    .pair-pill.blue {
-      background: #dbeafe;
-      border-color: #93c5fd;
-      color: #1e3a8a;
-    }
-
-    .current-hole-chip {
-      font-size: 0.75rem;
-      padding: 0.15rem 0.55rem;
+    .pill-btn {
       border-radius: 999px;
       border: 1px solid #d1d5db;
-      background: #e5e7eb;
-      display: inline-block;
-      margin-top: 0.35rem;
+      padding: 0.05rem 0.45rem;
+      font-size: 0.7rem;
+      background: #ffffff;
+      cursor: pointer;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #166534;
+      font-weight: 600;
     }
 
     .match-slider {
-      margin-top: 0.35rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
+      margin-top: 0.4rem;
     }
 
     .slider-bar {
@@ -239,27 +206,21 @@
       overflow: hidden;
     }
 
-    .slider-red {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      background: #fecaca;
-    }
-
+    .slider-red,
     .slider-blue {
       position: absolute;
       top: 0;
       bottom: 0;
-      right: 0;
-      background: #bfdbfe;
     }
+    .slider-red { left: 0; background: #fecaca; }
+    .slider-blue { right: 0; background: #bfdbfe; }
 
     .slider-labels {
       display: flex;
       justify-content: space-between;
       font-size: 0.75rem;
       color: var(--muted);
+      margin-top: 0.15rem;
     }
 
     .slider-center {
@@ -272,8 +233,8 @@
     .dots-row {
       display: flex;
       gap: 0.25rem;
-      margin-top: 0.35rem;
       flex-wrap: wrap;
+      margin-top: 0.4rem;
     }
 
     .dot {
@@ -281,41 +242,31 @@
       height: 18px;
       padding: 0 6px;
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: 1px solid #d1d5db;
       background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.7rem;
       font-weight: 600;
-      box-sizing: border-box;
     }
 
-    .dot.red {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #7f1d1d;
+    .dot.red   { background: #fee2e2; border-color: #fca5a5; color: #7f1d1d; }
+    .dot.blue  { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
+    .dot.half  { background: #9ca3af; border-color: #9ca3af; color: #ffffff; }
+    .dot.empty { background: #e5e7eb; color: transparent; opacity: 0.4; }
+
+    .current-hole-chip {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #e5e7eb;
+      display: inline-block;
+      margin-top: 0.2rem;
     }
 
-    .dot.blue {
-      background: #dbeafe;
-      border-color: #93c5fd;
-      color: #1e3a8a;
-    }
-
-    .dot.half {
-      background: var(--dot-half);
-      border-color: var(--dot-half);
-      color: #ffffff;
-    }
-
-    .dot.empty {
-      background: var(--dot-empty);
-      color: transparent;
-      opacity: 0.4;
-    }
-
-    /* Holes list & controls */
+    /* Holes */
 
     .holes-list {
       display: flex;
@@ -326,11 +277,8 @@
     .hole-card {
       background: #f9fafb;
       border-radius: 0.8rem;
-      border: 1px solid var(--border);
-      padding: 0.45rem 0.5rem 0.6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.45rem 0.5rem 0.55rem;
     }
 
     .hole-header-line {
@@ -339,6 +287,7 @@
       align-items: baseline;
       font-size: 0.8rem;
       color: var(--muted);
+      margin-bottom: 0.2rem;
     }
 
     .hole-name {
@@ -349,78 +298,51 @@
     .hole-info {
       font-size: 0.75rem;
       color: var(--muted);
+      margin-bottom: 0.3rem;
     }
 
-    .hole-status {
-      font-size: 0.78rem;
-    }
-
-    .hole-status.red {
-      color: var(--red);
-    }
-
-    .hole-status.blue {
-      color: var(--blue);
-    }
-
-    .hole-status.half {
-      color: #4b5563;
-    }
-
-    .hole-actions {
-      display: flex;
+    .hole-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.25rem;
-      margin-top: 0.25rem;
-      flex-wrap: wrap;
     }
 
     .hole-btn {
-      flex: 1;
-      min-width: 0;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.3rem;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      padding: 0.3rem 0.4rem;
-      font-size: 0.78rem;
+      border: 1px solid #d1d5db;
       background: #ffffff;
-      cursor: pointer;
       text-align: center;
+      cursor: pointer;
       white-space: nowrap;
     }
 
-    .hole-btn.red {
-      background: #fee2e2;
+    .hole-btn.red-active {
+      background: var(--pill-red);
       border-color: #fca5a5;
       color: #7f1d1d;
+      font-weight: 600;
     }
 
-    .hole-btn.blue {
-      background: #dbeafe;
+    .hole-btn.blue-active {
+      background: var(--pill-blue);
       border-color: #93c5fd;
       color: #1e3a8a;
+      font-weight: 600;
     }
 
-    .hole-btn.half {
+    .hole-btn.half-active {
       background: #e5e7eb;
       border-color: #9ca3af;
       color: #111827;
+      font-weight: 600;
     }
 
-    .hole-btn.clear {
-      flex: 0 0 auto;
-      padding: 0.3rem 0.55rem;
-      border-color: #fecaca;
-      color: var(--danger);
-      background: #fef2f2;
-    }
-
-    .hole-btn.active {
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.15);
-    }
-
-    .small-hint {
-      font-size: 0.75rem;
+    .small-note {
+      font-size: 0.72rem;
       color: var(--muted);
-      margin-top: 0.2rem;
+      margin-top: 0.35rem;
     }
   </style>
 </head>
@@ -430,68 +352,58 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Match Admin Scoring</div>
+        <div class="site-subtitle">Match scoring – admin</div>
       </div>
     </div>
     <div class="nav-links">
-      <a href="admin.html" class="nav-btn secondary">Admin home</a>
-      <a href="spectator.html" class="nav-btn">View scores</a>
+      <a href="spectator.html" class="nav-btn secondary">All matches</a>
+      <a href="admin.html" class="nav-btn">Admin</a>
     </div>
   </header>
 
-  <div class="admin-banner">
-    ADMIN MODE – Scoring here updates live for all spectators.
-  </div>
-
   <main>
-    <!-- MATCH SUMMARY -->
     <section class="card">
       <div class="section-title">Match summary</div>
-      <div class="match-summary-header">
-        <div class="match-title" id="matchTitle">Match</div>
-        <div class="match-subtitle" id="matchType">Front / Back 9</div>
+      <div class="match-title" id="matchTitle">Match</div>
+      <div class="match-subtitle" id="matchType">Front / Back 9 match</div>
 
-        <div class="pair-pills">
-          <div class="pair-pill red" id="redPairPill">Red pair</div>
-          <div class="pair-pill blue" id="bluePairPill">Blue pair</div>
+      <div class="teams-row">
+        <div class="team-block">
+          <div class="team-name red" id="redTeamNameLabel">Red</div>
+          <div class="team-players" id="redPlayers">TBD</div>
+          <div class="mulligan-row" id="redMulligans"></div>
         </div>
-
-        <div class="current-hole-chip" id="currentHoleChip">Loading…</div>
-
-        <div class="match-slider">
-          <div class="slider-bar">
-            <div class="slider-red" id="sliderRed" style="width:50%;"></div>
-            <div class="slider-blue" id="sliderBlue" style="width:50%;"></div>
-          </div>
-          <div class="slider-labels">
-            <span id="sliderLeftLabel">Red</span>
-            <span class="slider-center" id="sliderCenter">Even</span>
-            <span id="sliderRightLabel">Blue</span>
-          </div>
+        <div class="team-block">
+          <div class="team-name blue" id="blueTeamNameLabel" style="text-align:right;">Blue</div>
+          <div class="team-players" id="bluePlayers" style="text-align:right;">TBD</div>
+          <div class="mulligan-row" id="blueMulligans" style="justify-content:flex-end;"></div>
         </div>
-
-        <div class="teams-summary">
-          <div class="team-block">
-            <div class="team-name red" id="redTeamNameLabel">Red</div>
-            <div class="team-players" id="redPlayers">TBD</div>
-          </div>
-          <div class="team-block" style="text-align:right;">
-            <div class="team-name blue" id="blueTeamNameLabel">Blue</div>
-            <div class="team-players" id="bluePlayers">TBD</div>
-          </div>
-        </div>
-
-        <div class="dots-row" id="dotsRow"></div>
       </div>
+
+      <div id="currentHoleChip" class="current-hole-chip">Loading…</div>
+
+      <div class="match-slider">
+        <div class="slider-bar">
+          <div class="slider-red" id="sliderRed" style="width:50%;"></div>
+          <div class="slider-blue" id="sliderBlue" style="width:50%;"></div>
+        </div>
+        <div class="slider-labels">
+          <span id="sliderLeftLabel">Red</span>
+          <span class="slider-center" id="sliderCenter">Even</span>
+          <span id="sliderRightLabel">Blue</span>
+        </div>
+      </div>
+
+      <div class="dots-row" id="dotsRow"></div>
     </section>
 
-    <!-- HOLE SCORING -->
     <section class="card">
       <div class="section-title">Hole-by-hole scoring</div>
-      <div class="small-hint">
-        Tap a button to set the result for that hole. Use <strong>Clear</strong> to remove a score.
+      <div id="holesContainer" class="holes-list"></div>
+      <div class="small-note">
+        Tap a button to set or clear the result for each hole:  
+        <strong>[Red pair]</strong>, <strong>½</strong>, <strong>[Blue pair]</strong>, or <strong>Clear</strong>.
       </div>
-      <div class="holes-list" id="holesContainer"></div>
     </section>
   </main>
 
@@ -502,6 +414,7 @@
       ref,
       onValue,
       update,
+      set,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -521,29 +434,29 @@
     const matchId = params.get("id") || "1";
 
     const settingsRef = ref(db, "settings");
-    const matchRef = ref(db, "matches/" + matchId);
     const playersRef = ref(db, "players");
+    const matchRef = ref(db, "matches/" + matchId);
 
     const matchTitleEl = document.getElementById("matchTitle");
     const matchTypeEl = document.getElementById("matchType");
-    const redPairPillEl = document.getElementById("redPairPill");
-    const bluePairPillEl = document.getElementById("bluePairPill");
+    const redTeamNameLabelEl = document.getElementById("redTeamNameLabel");
+    const blueTeamNameLabelEl = document.getElementById("blueTeamNameLabel");
+    const redPlayersEl = document.getElementById("redPlayers");
+    const bluePlayersEl = document.getElementById("bluePlayers");
+    const redMulligansEl = document.getElementById("redMulligans");
+    const blueMulligansEl = document.getElementById("blueMulligans");
     const currentHoleChipEl = document.getElementById("currentHoleChip");
     const sliderRedEl = document.getElementById("sliderRed");
     const sliderBlueEl = document.getElementById("sliderBlue");
     const sliderLeftLabelEl = document.getElementById("sliderLeftLabel");
     const sliderRightLabelEl = document.getElementById("sliderRightLabel");
     const sliderCenterEl = document.getElementById("sliderCenter");
-    const redTeamNameLabelEl = document.getElementById("redTeamNameLabel");
-    const blueTeamNameLabelEl = document.getElementById("blueTeamNameLabel");
-    const redPlayersEl = document.getElementById("redPlayers");
-    const bluePlayersEl = document.getElementById("bluePlayers");
     const dotsRowEl = document.getElementById("dotsRow");
     const holesContainer = document.getElementById("holesContainer");
 
     let settings = {};
-    let matchData = null;
     let players = {};
+    let matchData = null;
 
     const HOLES = [
       { number: 1, par: 5, yards: 474 },
@@ -568,10 +481,7 @@
 
     function getTeamNames() {
       const t = settings.teamNames || {};
-      return {
-        red: t.red || "Red",
-        blue: t.blue || "Blue",
-      };
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
     }
 
     function getLastName(fullName) {
@@ -585,8 +495,7 @@
         .map((pid) => players[pid]?.name)
         .filter(Boolean)
         .map(getLastName);
-      if (!names.length) return "";
-      return names.join(" / ");
+      return names.length ? names.join(" / ") : "";
     }
 
     function computeMatchTitle(m, id) {
@@ -662,20 +571,13 @@
     }
 
     function computeSlider(diff, done) {
-      let redPercent, bluePercent;
       const holeCount = 9;
+      let redPercent, bluePercent;
 
       if (done) {
-        if (diff > 0) {
-          redPercent = 100;
-          bluePercent = 0;
-        } else if (diff < 0) {
-          redPercent = 0;
-          bluePercent = 100;
-        } else {
-          redPercent = 50;
-          bluePercent = 50;
-        }
+        if (diff > 0) { redPercent = 100; bluePercent = 0; }
+        else if (diff < 0) { redPercent = 0; bluePercent = 100; }
+        else { redPercent = 50; bluePercent = 50; }
       } else {
         const adjust = diff * (50 / holeCount);
         redPercent = 50 + adjust;
@@ -707,18 +609,15 @@
 
         if (!res || res === "none") {
           cls = "empty";
-          label = "";
+        } else if (diff === 0) {
+          cls = "half";
+          label = "AS";
+        } else if (diff > 0) {
+          cls = "red";
+          label = `${diff}up`;
         } else {
-          if (diff === 0) {
-            cls = "half";
-            label = "AS";
-          } else if (diff > 0) {
-            cls = "red";
-            label = `${diff}up`;
-          } else {
-            cls = "blue";
-            label = `${Math.abs(diff)}up`;
-          }
+          cls = "blue";
+          label = `${Math.abs(diff)}up`;
         }
 
         dots.push(`<span class="dot ${cls}">${label}</span>`);
@@ -727,13 +626,52 @@
       return dots.join("");
     }
 
-    async function setHoleResult(holeIndex, result) {
-      if (!matchData) return;
-      const holes = Array.isArray(matchData.holes)
-        ? [...matchData.holes]
-        : Array(18).fill("none");
-      holes[holeIndex] = result;
-      await update(matchRef, { holes });
+    function renderMulliganToggles(container, playerIds) {
+      container.innerHTML = "";
+      const frag = document.createDocumentFragment();
+
+      playerIds.forEach((pid) => {
+        const p = players[pid];
+        if (!p) return;
+        const mUsed = !!p.mulliganUsed;
+        const rmUsed = !!p.reverseMulliganUsed;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "m-group";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "m-name";
+        nameSpan.textContent = getLastName(p.name || "Player");
+
+        const mBtn = document.createElement("button");
+        mBtn.type = "button";
+        mBtn.className = "pill-btn" + (mUsed ? " active" : "");
+        mBtn.textContent = "M";
+
+        const rmBtn = document.createElement("button");
+        rmBtn.type = "button";
+        rmBtn.className = "pill-btn" + (rmUsed ? " active" : "");
+        rmBtn.textContent = "RM";
+
+        mBtn.addEventListener("click", async () => {
+          await update(ref(db, "players/" + pid), {
+            mulliganUsed: !mUsed,
+          });
+        });
+
+        rmBtn.addEventListener("click", async () => {
+          await update(ref(db, "players/" + pid), {
+            reverseMulliganUsed: !rmUsed,
+          });
+        });
+
+        wrapper.appendChild(nameSpan);
+        wrapper.appendChild(mBtn);
+        wrapper.appendChild(rmBtn);
+        frag.appendChild(wrapper);
+      });
+
+      container.appendChild(frag);
     }
 
     function renderMatch() {
@@ -741,11 +679,8 @@
         matchTitleEl.textContent = `Match ${matchId}`;
         matchTypeEl.textContent = "No data";
         currentHoleChipEl.textContent = "No data";
-        sliderCenterEl.textContent = "No data";
-        redPlayersEl.textContent = "TBD";
-        bluePlayersEl.textContent = "TBD";
-        dotsRowEl.innerHTML = "";
         holesContainer.innerHTML = "";
+        dotsRowEl.innerHTML = "";
         return;
       }
 
@@ -773,17 +708,14 @@
         .map((pid) => players[pid]?.name)
         .filter(Boolean);
 
-      const redPairLabel = getPairLastNames(redSide.players || []) || "Red pair";
-      const bluePairLabel = getPairLastNames(blueSide.players || []) || "Blue pair";
-
-      redPairPillEl.textContent = redPairLabel;
-      bluePairPillEl.textContent = bluePairLabel;
-
       redPlayersEl.textContent = redFullNames.join(" & ") || "TBD";
       bluePlayersEl.textContent = blueFullNames.join(" & ") || "TBD";
 
       const displayName = computeMatchTitle(matchData, matchId);
       matchTitleEl.textContent = displayName;
+
+      renderMulliganToggles(redMulligansEl, redSide.players || []);
+      renderMulliganToggles(blueMulligansEl, blueSide.players || []);
 
       const state = computeMatchState(holes, type);
       const { diff, done, throughHole, margin, holesLeft } = state;
@@ -792,16 +724,22 @@
 
       sliderRedEl.style.width = `${slider.redPercent}%`;
       sliderBlueEl.style.width = `${slider.bluePercent}%`;
+      dotsRowEl.innerHTML = dotsHTML;
 
-      if (throughHole === null) {
+      const hasActivity = throughHole !== null;
+
+      if (!hasActivity) {
         currentHoleChipEl.textContent = "Not started";
       } else if (done) {
         currentHoleChipEl.textContent = "Finished";
       } else {
-        currentHoleChipEl.textContent = `Currently on hole ${throughHole + 1}`;
+        const currentHole = throughHole + 1;
+        currentHoleChipEl.textContent = `Currently on hole ${currentHole}`;
       }
 
-      // Center label in Ryder Cup style, using pair last names, NOT team names
+      const redPairLabel = getPairLastNames(redSide.players || []) || redTeamName;
+      const bluePairLabel = getPairLastNames(blueSide.players || []) || blueTeamName;
+
       if (diff === 0) {
         if (!throughHole) {
           sliderCenterEl.textContent = "All square";
@@ -811,14 +749,12 @@
           sliderCenterEl.textContent = `All square thru ${throughHole}`;
         }
       } else if (diff > 0) {
-        // Red leading: use red pair label
         if (done) {
           sliderCenterEl.textContent = `${redPairLabel} ${margin} & ${holesLeft}`;
         } else {
           sliderCenterEl.textContent = `${redPairLabel} ${Math.abs(diff)} up thru ${throughHole}`;
         }
       } else {
-        // Blue leading
         if (done) {
           sliderCenterEl.textContent = `${bluePairLabel} ${margin} & ${holesLeft}`;
         } else {
@@ -826,9 +762,7 @@
         }
       }
 
-      dotsRowEl.innerHTML = dotsHTML;
-
-      // Render holes & buttons
+      // Render holes with buttons
       holesContainer.innerHTML = "";
       const startIndex = type === "front" ? 0 : 9;
       const endIndex = type === "front" ? 9 : 18;
@@ -840,7 +774,6 @@
 
         const card = document.createElement("div");
         card.className = "hole-card";
-        card.setAttribute("data-hole-index", i);
 
         const header = document.createElement("div");
         header.className = "hole-header-line";
@@ -853,65 +786,74 @@
         info.className = "hole-info";
         info.textContent = `Par ${meta.par} • ${meta.yards} yds`;
 
-        const status = document.createElement("div");
-        status.className = "hole-status";
+        const btnRow = document.createElement("div");
+        btnRow.className = "hole-buttons";
 
-        if (!res || res === "none") {
-          status.textContent = "Not scored yet";
-          status.classList.add("half");
-        } else if (res === "half") {
-          status.textContent = "Hole halved";
-          status.classList.add("half");
-        } else if (res === "red") {
-          status.textContent = `${redPairLabel} win the hole`;
-          status.classList.add("red");
-        } else if (res === "blue") {
-          status.textContent = `${bluePairLabel} win the hole`;
-          status.classList.add("blue");
+        const redBtn = document.createElement("button");
+        redBtn.type = "button";
+        redBtn.className = "hole-btn";
+        redBtn.textContent = redPairLabel || "Red";
+
+        const halfBtn = document.createElement("button");
+        halfBtn.type = "button";
+        halfBtn.className = "hole-btn";
+        halfBtn.textContent = "½";
+
+        const blueBtn = document.createElement("button");
+        blueBtn.type = "button";
+        blueBtn.className = "hole-btn";
+        blueBtn.textContent = bluePairLabel || "Blue";
+
+        const clearBtn = document.createElement("button");
+        clearBtn.type = "button";
+        clearBtn.className = "hole-btn";
+        clearBtn.textContent = "Clear";
+
+        function applyStateClasses() {
+          redBtn.classList.remove("red-active");
+          blueBtn.classList.remove("blue-active");
+          halfBtn.classList.remove("half-active");
+
+          if (res === "red") redBtn.classList.add("red-active");
+          else if (res === "blue") blueBtn.classList.add("blue-active");
+          else if (res === "half") halfBtn.classList.add("half-active");
         }
 
-        const actions = document.createElement("div");
-        actions.className = "hole-actions";
+        async function setResult(newVal) {
+          const updated = Array.isArray(matchData.holes)
+            ? [...matchData.holes]
+            : Array(18).fill("none");
+          updated[i] = newVal;
+          await update(matchRef, { holes: updated });
+        }
 
-        const btnRed = document.createElement("button");
-        btnRed.type = "button";
-        btnRed.className = "hole-btn red";
-        btnRed.textContent = redPairLabel || "Red pair";
+        redBtn.addEventListener("click", () => {
+          const newVal = res === "red" ? "none" : "red";
+          setResult(newVal);
+        });
 
-        const btnHalf = document.createElement("button");
-        btnHalf.type = "button";
-        btnHalf.className = "hole-btn half";
-        btnHalf.textContent = "Halved";
+        blueBtn.addEventListener("click", () => {
+          const newVal = res === "blue" ? "none" : "blue";
+          setResult(newVal);
+        });
 
-        const btnBlue = document.createElement("button");
-        btnBlue.type = "button";
-        btnBlue.className = "hole-btn blue";
-        btnBlue.textContent = bluePairLabel || "Blue pair";
+        halfBtn.addEventListener("click", () => {
+          const newVal = res === "half" ? "none" : "half";
+          setResult(newVal);
+        });
 
-        const btnClear = document.createElement("button");
-        btnClear.type = "button";
-        btnClear.className = "hole-btn clear";
-        btnClear.textContent = "Clear";
+        clearBtn.addEventListener("click", () => setResult("none"));
 
-        if (res === "red") btnRed.classList.add("active");
-        if (res === "blue") btnBlue.classList.add("active");
-        if (res === "half") btnHalf.classList.add("active");
+        applyStateClasses();
 
-        btnRed.addEventListener("click", () => setHoleResult(i, "red"));
-        btnBlue.addEventListener("click", () => setHoleResult(i, "blue"));
-        btnHalf.addEventListener("click", () => setHoleResult(i, "half"));
-        btnClear.addEventListener("click", () => setHoleResult(i, "none"));
-
-        actions.appendChild(btnRed);
-        actions.appendChild(btnHalf);
-        actions.appendChild(btnBlue);
-        actions.appendChild(btnClear);
+        btnRow.appendChild(redBtn);
+        btnRow.appendChild(halfBtn);
+        btnRow.appendChild(blueBtn);
+        btnRow.appendChild(clearBtn);
 
         card.appendChild(header);
         card.appendChild(info);
-        card.appendChild(status);
-        card.appendChild(actions);
-
+        card.appendChild(btnRow);
         holesContainer.appendChild(card);
       }
     }
@@ -920,20 +862,9 @@
       renderMatch();
     }
 
-    onValue(settingsRef, (snapshot) => {
-      settings = snapshot.val() || {};
-      renderAll();
-    });
-
-    onValue(playersRef, (snapshot) => {
-      players = snapshot.val() || {};
-      renderAll();
-    });
-
-    onValue(matchRef, (snapshot) => {
-      matchData = snapshot.val() || null;
-      renderAll();
-    });
+    onValue(settingsRef, (s) => { settings = s.val() || {}; renderAll(); });
+    onValue(playersRef,  (s) => { players  = s.val() || {}; renderAll(); });
+    onValue(matchRef,    (s) => { matchData = s.val() || null; renderAll(); });
   </script>
 </body>
 </html>
