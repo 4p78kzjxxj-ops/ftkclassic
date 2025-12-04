@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --red: #b91c1c;
+      --blue: #1d4ed8;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0.75rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    header small {
+      color: var(--muted);
+      font-size: 0.8rem;
+      display: block;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      font-size: 0.8rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-btn.primary {
+      border-color: #1d4ed8;
+      color: #ffffff;
+      background: #2563eb;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    /* Team settings */
+
+    .team-settings {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.45rem;
+      border-radius: 0.45rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .btn {
+      font-size: 0.8rem;
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      border-color: #1d4ed8;
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .btn.danger {
+      border-color: #fecaca;
+      background: #fee2e2;
+      color: var(--red);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Players */
+
+    .players-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .players-table th,
+    .players-table td {
+      padding: 0.35rem 0.25rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .players-table th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .players-row-controls {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .players-footer {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Matches */
+
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .match-card {
+      border-radius: 0.8rem;
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.55rem 0.6rem;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+    }
+
+    .match-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .match-name {
+      font-weight: 600;
+    }
+
+    .match-type {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .team-col {
+      margin-top: 0.15rem;
+    }
+
+    .team-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .team-label.red {
+      color: var(--red);
+    }
+
+    .team-label.blue {
+      color: var(--blue);
+      text-align: right;
+    }
+
+    .player-selects {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-top: 0.15rem;
+    }
+
+    .match-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.2rem;
+    }
+
+    .match-link {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--accent);
+    }
+
+    .small-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .danger-zone {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>FTK Classic Admin</h1>
+      <small>Manage teams, players, matches & scores</small>
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-btn">Home</a>
+      <a href="spectator.html" class="nav-btn">Spectator view</a>
+      <a href="competitors.html" class="nav-btn primary">Competitors</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- TEAM SETTINGS -->
+    <section class="card">
+      <div class="section-title">Team names</div>
+      <div class="team-settings">
+        <div>
+          <label for="teamRedName">Red team name</label>
+          <input id="teamRedName" type="text" placeholder="Red" />
+        </div>
+        <div>
+          <label for="teamBlueName">Blue team name</label>
+          <input id="teamBlueName" type="text" placeholder="Blue" />
+        </div>
+      </div>
+      <button id="saveTeamNames" class="btn primary">Save team names</button>
+    </section>
+
+    <!-- PLAYERS -->
+    <section class="card">
+      <div class="section-title">Players</div>
+      <div style="overflow-x:auto;">
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th style="width:45%;">Name</th>
+              <th style="width:20%;">Team</th>
+              <th style="width:20%;">Handicap</th>
+              <th style="width:15%;"></th>
+            </tr>
+          </thead>
+          <tbody id="playersTableBody">
+            <!-- rows injected -->
+          </tbody>
+        </table>
+      </div>
+      <div class="players-footer">
+        <button id="addPlayerBtn" class="btn">Add player</button>
+        <span id="playersSummary">0 players</span>
+      </div>
+    </section>
+
+    <!-- MATCHES -->
+    <section class="card">
+      <div class="section-title">Matches (Front 9 & Back 9)</div>
+      <div id="matchesGrid" class="matches-grid"></div>
+
+      <div class="danger-zone">
+        <button id="resetAllScoresBtn" class="btn danger">
+          Reset all scores (all matches)
+        </button>
+        <span class="small-note">
+          Use the match link on each card to enter hole-by-hole scores.
+        </span>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      update,
+      set,
+      push
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+
+    const teamRedNameInput = document.getElementById("teamRedName");
+    const teamBlueNameInput = document.getElementById("teamBlueName");
+    const saveTeamNamesBtn = document.getElementById("saveTeamNames");
+
+    const playersTableBody = document.getElementById("playersTableBody");
+    const addPlayerBtn = document.getElementById("addPlayerBtn");
+    const playersSummaryEl = document.getElementById("playersSummary");
+
+    const matchesGrid = document.getElementById("matchesGrid");
+    const resetAllScoresBtn = document.getElementById("resetAllScoresBtn");
+
+    let settings = {};
+    let players = {};
+    let matches = {};
+
+    /*  Helpers  */
+
+    function renderTeamNames() {
+      const teamNames = settings.teamNames || {};
+      teamRedNameInput.value = teamNames.red || "Red";
+      teamBlueNameInput.value = teamNames.blue || "Blue";
+    }
+
+    function saveTeamNames() {
+      const redName = teamRedNameInput.value.trim() || "Red";
+      const blueName = teamBlueNameInput.value.trim() || "Blue";
+      update(settingsRef, {
+        teamNames: { red: redName, blue: blueName }
+      });
+    }
+
+    saveTeamNamesBtn.addEventListener("click", saveTeamNames);
+
+    /*  Players  */
+
+    function renderPlayers() {
+      const ids = Object.keys(players || {}).sort((a, b) =>
+        (players[a].name || "").localeCompare(players[b].name || "")
+      );
+
+      playersTableBody.innerHTML = "";
+      if (ids.length === 0) {
+        playersTableBody.innerHTML =
+          '<tr><td colspan="4" style="padding:0.5rem 0.25rem;color:#6b7280;font-size:0.8rem;">No players yet. Add players to build teams and matches.</td></tr>';
+        playersSummaryEl.textContent = "0 players";
+        return;
+      }
+
+      for (const id of ids) {
+        const p = players[id] || {};
+        const tr = document.createElement("tr");
+        tr.dataset.id = id;
+
+        const nameTd = document.createElement("td");
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = p.name || "";
+        nameInput.placeholder = "Player name";
+        nameTd.appendChild(nameInput);
+
+        const teamTd = document.createElement("td");
+        const teamSelect = document.createElement("select");
+        teamSelect.innerHTML = `
+          <option value="">—</option>
+          <option value="red">Red</option>
+          <option value="blue">Blue</option>
+        `;
+        teamSelect.value = (p.team || "").toLowerCase();
+        teamTd.appendChild(teamSelect);
+
+        const hcpTd = document.createElement("td");
+        const hcpInput = document.createElement("input");
+        hcpInput.type = "number";
+        hcpInput.step = "0.1";
+        hcpInput.min = "0";
+        hcpInput.placeholder = "-";
+        hcpInput.value =
+          p.handicap !== undefined && p.handicap !== null ? p.handicap : "";
+        hcpTd.appendChild(hcpInput);
+
+        const actionsTd = document.createElement("td");
+        const rowControls = document.createElement("div");
+        rowControls.className = "players-row-controls";
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "btn";
+        saveBtn.textContent = "Save";
+        saveBtn.addEventListener("click", () => {
+          const name = nameInput.value.trim();
+          const team = teamSelect.value || "";
+          const hcpRaw = hcpInput.value.trim();
+          const handicap =
+            hcpRaw === "" ? null : isNaN(parseFloat(hcpRaw)) ? null : parseFloat(hcpRaw);
+
+          update(ref(db, `players/${id}`), {
+            name,
+            team,
+            handicap
+          });
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "btn danger";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", () => {
+          if (!confirm(`Remove player "${p.name || ""}"?`)) return;
+          set(ref(db, `players/${id}`), null);
+        });
+
+        rowControls.appendChild(saveBtn);
+        rowControls.appendChild(delBtn);
+        actionsTd.appendChild(rowControls);
+
+        tr.appendChild(nameTd);
+        tr.appendChild(teamTd);
+        tr.appendChild(hcpTd);
+        tr.appendChild(actionsTd);
+
+        playersTableBody.appendChild(tr);
+      }
+
+      playersSummaryEl.textContent =
+        ids.length === 1 ? "1 player" : `${ids.length} players`;
+    }
+
+    addPlayerBtn.addEventListener("click", () => {
+      const newRef = push(playersRef);
+      set(newRef, {
+        name: "New player",
+        team: "",
+        handicap: null
+      });
+    });
+
+    /*  Matches  */
+
+    function renderMatches() {
+      matchesGrid.innerHTML = "";
+      const ids = Object.keys(matches || {}).sort(
+        (a, b) => Number(a) - Number(b)
+      );
+
+      if (ids.length === 0) {
+        matchesGrid.innerHTML =
+          '<div style="font-size:0.8rem;color:#6b7280;">No matches found. You can create them directly in the database under <code>matches</code> (1–16) with type <code>front</code>/<code>back</code>.</div>';
+        return;
+      }
+
+      const teamNames = settings.teamNames || {};
+      const redTeamName = teamNames.red || "Red";
+      const blueTeamName = teamNames.blue || "Blue";
+
+      const playerOptionsHtml =
+        '<option value="">—</option>' +
+        Object.keys(players || {})
+          .sort((a, b) =>
+            (players[a].name || "").localeCompare(players[b].name || "")
+          )
+          .map((pid) => {
+            const p = players[pid];
+            const label = p ? p.name : pid;
+            return `<option value="${pid}">${label}</option>`;
+          })
+          .join("");
+
+      for (const id of ids) {
+        const m = matches[id] || {};
+        const type = m.type || (Number(id) <= 8 ? "front" : "back");
+        const typeLabel = type === "front" ? "Front 9" : "Back 9";
+
+        const redPlayers = m.red?.players || [];
+        const bluePlayers = m.blue?.players || [];
+
+        const card = document.createElement("article");
+        card.className = "match-card";
+
+        const header = document.createElement("div");
+        header.className = "match-header-line";
+        header.innerHTML = `
+          <div class="match-name">Match ${id}</div>
+          <div class="match-type">${typeLabel}</div>
+        `;
+
+        const redCol = document.createElement("div");
+        redCol.className = "team-col";
+        redCol.innerHTML = `<div class="team-label red">${redTeamName}</div>`;
+
+        const redSelects = document.createElement("div");
+        redSelects.className = "player-selects";
+        for (let idx = 0; idx < 2; idx++) {
+          const sel = document.createElement("select");
+          sel.innerHTML = playerOptionsHtml;
+          sel.value = redPlayers[idx] || "";
+          sel.addEventListener("change", () => {
+            const updated = [...(m.red?.players || [])];
+            updated[idx] = sel.value || null;
+            const clean = updated.filter(Boolean);
+            update(ref(db, `matches/${id}/red`), { players: clean });
+          });
+          redSelects.appendChild(sel);
+        }
+        redCol.appendChild(redSelects);
+
+        const blueCol = document.createElement("div");
+        blueCol.className = "team-col";
+        blueCol.innerHTML = `<div class="team-label blue">${blueTeamName}</div>`;
+
+        const blueSelects = document.createElement("div");
+        blueSelects.className = "player-selects";
+        for (let idx = 0; idx < 2; idx++) {
+          const sel = document.createElement("select");
+          sel.innerHTML = playerOptionsHtml;
+          sel.value = bluePlayers[idx] || "";
+          sel.addEventListener("change", () => {
+            const updated = [...(m.blue?.players || [])];
+            updated[idx] = sel.value || null;
+            const clean = updated.filter(Boolean);
+            update(ref(db, `matches/${id}/blue`), { players: clean });
+          });
+          blueSelects.appendChild(sel);
+        }
+        blueCol.appendChild(blueSelects);
+
+        const footer = document.createElement("div");
+        footer.className = "match-footer";
+        footer.innerHTML = `
+          <a class="match-link" href="match.html?id=${id}">Open match admin</a>
+          <span class="small-note">${typeLabel}</span>
+        `;
+
+        card.appendChild(header);
+        card.appendChild(redCol);
+        card.appendChild(blueCol);
+        card.appendChild(footer);
+
+        matchesGrid.appendChild(card);
+      }
+    }
+
+    resetAllScoresBtn.addEventListener("click", () => {
+      if (!confirm("Reset all scores for ALL matches?")) return;
+      const ids = Object.keys(matches || {});
+      for (const id of ids) {
+        const holes = Array(18).fill("none");
+        update(ref(db, `matches/${id}`), { holes });
+      }
+    });
+
+    /* Rendering + listeners */
+
+    function renderAll() {
+      renderTeamNames();
+      renderPlayers();
+      renderMatches();
+    }
+
+    onValue(settingsRef, (snapshot) => {
+      settings = snapshot.val() || {};
+      renderAll();
+    });
+
+    onValue(playersRef, (snapshot) => {
+      players = snapshot.val() || {};
+      renderAll();
+    });
+
+    onValue(matchesRef, (snapshot) => {
+      matches = snapshot.val() || {};
+      renderAll();
+    });
+  </script>
+</body>
+</html>
