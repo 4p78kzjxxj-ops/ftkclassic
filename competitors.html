@@ -408,8 +408,26 @@
       return null;
     }
 
-    // Status string from THIS player's perspective
-    function getMatchStatusForPlayer(matchId, match, playerId) {
+    // Pair label (combined) for the side this player is on
+    function getPairLabel(match, playerId) {
+      const side = getPlayerSide(match, playerId);
+      if (!side) return "";
+      const sidePlayers = (side === "red"
+        ? match.red?.players
+        : match.blue?.players) || [];
+      const names = sidePlayers
+        .map((pid) => players[pid]?.name)
+        .filter(Boolean);
+      if (!names.length) return "";
+      const lastNames = names.map((full) => {
+        const parts = full.trim().split(/\s+/);
+        return parts[parts.length - 1];
+      });
+      return lastNames.join(" / ");
+    }
+
+    // Status string from THIS pair's perspective
+    function getMatchStatusForPair(matchId, match, playerId) {
       const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
       const side = getPlayerSide(match, playerId);
       if (!side) return "Not assigned";
@@ -424,20 +442,20 @@
         return "Not started";
       }
 
-      const playerDiff = side === "red" ? diff : -diff;
+      const pairDiff = side === "red" ? diff : -diff;
 
       if (done) {
-        if (playerDiff === 0) return "Halved";
-        const result = playerDiff > 0 ? "Won" : "Lost";
+        if (pairDiff === 0) return "Halved";
+        const result = pairDiff > 0 ? "Won" : "Lost";
         return `${result} ${margin}&${holesLeft}`;
       }
 
-      if (playerDiff === 0) {
+      if (pairDiff === 0) {
         return `Thru ${throughHole} • AS`;
-      } else if (playerDiff > 0) {
-        return `Thru ${throughHole} • ${playerDiff} up`;
+      } else if (pairDiff > 0) {
+        return `Thru ${throughHole} • ${pairDiff} up`;
       } else {
-        return `Thru ${throughHole} • ${Math.abs(playerDiff)} down`;
+        return `Thru ${throughHole} • ${Math.abs(pairDiff)} down`;
       }
     }
 
@@ -524,7 +542,6 @@
           const matchesForPlayer = (playerMatches[p.id] || []).slice();
           matchesForPlayer.sort((a, b) => Number(a) - Number(b));
 
-          // Determine if this player is "on course"
           let isOnCourse = false;
 
           const comp = document.createElement("div");
@@ -546,7 +563,7 @@
                   m.type || (Number(mid) <= 8 ? "front" : "back");
                 const holes = m.holes || [];
                 const state = computeMatchState(holes, type);
-                const status = getMatchStatusForPlayer(mid, m, p.id);
+                const status = getMatchStatusForPair(mid, m, p.id);
                 const chipClass = getMatchChipClass(mid, m);
 
                 // Mark player as on-course if this match is started and not done
@@ -564,9 +581,11 @@
                   currentHolePart = `currently on hole ${currentHole}`;
                 }
 
+                // Combined pair-level status:
+                // e.g. "Match 1 - currently on hole 7 - Thru 6 • 2 down"
                 const text = `Match ${mid} - ${currentHolePart} - ${status}`;
 
-                return `<a class="tag match ${chipClass}" href="match.html?id=${mid}">
+                return `<a class="tag match ${chipClass}" href="match_spectator.html?id=${mid}">
                           ${text}
                         </a>`;
               })
