@@ -355,8 +355,6 @@
     let players = {};
     let matches = {};
 
-    // ---- Helpers ----
-
     function getTeamNames() {
       const t = settings.teamNames || {};
       return {
@@ -421,49 +419,28 @@
       return { diff, done, throughHole, margin, holesLeft };
     }
 
-    function getPlayerSide(match, playerId) {
-      const redPlayers = match.red?.players || [];
-      const bluePlayers = match.blue?.players || [];
-      if (redPlayers.includes(playerId)) return "red";
-      if (bluePlayers.includes(playerId)) return "blue";
-      return null;
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
     }
 
-    // Pair label for the side this player is on
-    function getPairLabel(match, playerId) {
-      const side = getPlayerSide(match, playerId);
-      if (!side) return "";
-      const sidePlayers = (side === "red"
-        ? match.red?.players
-        : match.blue?.players) || [];
-      const names = sidePlayers
+    // Pair label in the SAME order as assigned in Firebase (Option B)
+    function getPairLabel(match, side) {
+      const playerIds = (match[side]?.players || []);
+      const names = playerIds
         .map((pid) => players[pid]?.name)
-        .filter(Boolean);
+        .filter(Boolean)
+        .map(getLastName);
       if (!names.length) return "";
-      const lastNames = names.map((full) => {
-        const parts = full.trim().split(/\s+/);
-        return parts[parts.length - 1];
-      });
-      return lastNames.join(" / ");
+      return names.join(" / ");
     }
 
-    // Status string from THIS pair's perspective
-    function getMatchStatusForPair(matchId, match, playerId) {
-      const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
-      const side = getPlayerSide(match, playerId);
-      if (!side) return "Not assigned";
-
-      const holes = match.holes || [];
-      const { diff, done, throughHole, margin, holesLeft } = computeMatchState(
-        holes,
-        type
-      );
-
-      if (throughHole === null) {
-        return "Not started";
-      }
-
+    function getStatusForSide(side, state) {
+      const { diff, done, throughHole, margin, holesLeft } = state;
       const pairDiff = side === "red" ? diff : -diff;
+
+      if (throughHole === null) return "Not started";
 
       if (done) {
         if (pairDiff === 0) return "Halved";
@@ -480,12 +457,10 @@
       }
     }
 
-    function getMatchChipClass(matchId, match) {
-      const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
-      const holes = match.holes || [];
-      const { diff } = computeMatchState(holes, type);
-      if (diff > 0) return "match-red";
-      if (diff < 0) return "match-blue";
+    function getMatchChipClassForSide(side, state) {
+      const pairDiff = side === "red" ? state.diff : -state.diff;
+      if (pairDiff > 0) return "match-red";
+      if (pairDiff < 0) return "match-blue";
       return "match-even";
     }
 
@@ -495,27 +470,10 @@
       blueTeamTitleEl.textContent = blueTeamName;
 
       const playerIds = Object.keys(players || {});
-
-      const redPlayers = [];
-      const bluePlayers = [];
+      const redPlayersAll = [];
+      const bluePlayersAll = [];
       let redTotalHcp = 0;
       let blueTotalHcp = 0;
-
-      const playerMatches = {};
-      const matchIds = Object.keys(matches || {});
-      for (const mid of matchIds) {
-        const m = matches[mid];
-        const red = m.red?.players || [];
-        const blue = m.blue?.players || [];
-        for (const pid of red) {
-          if (!playerMatches[pid]) playerMatches[pid] = [];
-          playerMatches[pid].push(mid);
-        }
-        for (const pid of blue) {
-          if (!playerMatches[pid]) playerMatches[pid] = [];
-          playerMatches[pid].push(mid);
-        }
-      }
 
       for (const pid of playerIds) {
         const p = players[pid];
@@ -528,26 +486,26 @@
             : parseFloat(hRaw);
 
         if (team === "red") {
-          redPlayers.push({ id: pid, ...p });
+          redPlayersAll.push({ id: pid, ...p });
           if (!isNaN(hcp)) redTotalHcp += hcp;
         } else if (team === "blue") {
-          bluePlayers.push({ id: pid, ...p });
+          bluePlayersAll.push({ id: pid, ...p });
           if (!isNaN(hcp)) blueTotalHcp += hcp;
         }
       }
 
-      redPlayers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-      bluePlayers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      redPlayersAll.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      bluePlayersAll.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
       const redSummary = (() => {
-        const count = redPlayers.length;
+        const count = redPlayersAll.length;
         const hcpTotal = redTotalHcp.toFixed(1);
         if (count === 0) return "0 players • Total HCP 0.0";
         return `${count} player${count === 1 ? "" : "s"} • Total HCP ${hcpTotal}`;
       })();
 
       const blueSummary = (() => {
-        const count = bluePlayers.length;
+        const count = bluePlayersAll.length;
         const hcpTotal = blueTotalHcp.toFixed(1);
         if (count === 0) return "0 players • Total HCP 0.0";
         return `${count} player${count === 1 ? "" : "s"} • Total HCP ${hcpTotal}`;
@@ -556,22 +514,113 @@
       redCountEl.textContent = redSummary;
       blueCountEl.textContent = blueSummary;
 
-      function renderTeam(listEl, teamPlayers, teamKey) {
+      // Build pairs from matches
+      const pairsByTeam = {
+        red: [],
+        blue: [],
+      };
+
+      const matchIds = Object.keys(matches || {});
+      for (const mid of matchIds) {
+        const m = matches[mid];
+        if (!m) continue;
+        const type = m.type || (Number(mid) <= 8 ? "front" : "back");
+        const state = computeMatchState(m.holes || [], type);
+
+        ["red", "blue"].forEach((side) => {
+          const playerIdsSide = (m[side]?.players || []).filter((pid) => players[pid]);
+          if (!playerIdsSide.length) return;
+
+          pairsByTeam[side].push({
+            matchId: mid,
+            side,
+            playerIds: playerIdsSide,
+            state,
+          });
+        });
+      }
+
+      // Helper to render a team’s list
+      function renderTeam(listEl, teamPlayersAll, teamKey) {
         listEl.innerHTML = "";
-        if (teamPlayers.length === 0) {
+
+        // Set of player ids that are part of any pair
+        const pairedIds = new Set();
+        pairsByTeam[teamKey].forEach((pair) => {
+          pair.playerIds.forEach((pid) => pairedIds.add(pid));
+        });
+
+        // First: render pairs (grouped)
+        const pairs = pairsByTeam[teamKey].slice();
+        if (pairs.length === 0 && teamPlayersAll.length === 0) {
           listEl.innerHTML = '<div class="empty-state">No players yet.</div>';
           return;
         }
 
-        for (const p of teamPlayers) {
-          const matchesForPlayer = (playerMatches[p.id] || []).slice();
-          matchesForPlayer.sort((a, b) => Number(a) - Number(b));
+        for (const pair of pairs) {
+          const { matchId, side, playerIds, state } = pair;
+          const label = getPairLabel(matches[matchId], side) || "Pair";
+          const chipClass = getMatchChipClassForSide(side, state);
+          const status = getStatusForSide(side, state);
 
-          let isOnCourse = false;
+          let currentHolePart = "";
+          if (state.throughHole === null) {
+            currentHolePart = "not started";
+          } else if (state.done) {
+            currentHolePart = "finished";
+          } else {
+            const currentHole = state.throughHole + 1;
+            currentHolePart = `currently on hole ${currentHole}`;
+          }
+
+          const text = `Match ${matchId} - ${currentHolePart} - ${status}`;
+
+          // Determine "On course"
+          const isOnCourse = !state.done && state.throughHole !== null;
+
+          // Handicap info for both players
+          const p1 = players[playerIds[0]] || {};
+          const p2 = players[playerIds[1]] || {};
+          const h1 = p1.handicap !== undefined && p1.handicap !== null && p1.handicap !== ""
+            ? p1.handicap
+            : "—";
+          const h2 = p2.handicap !== undefined && p2.handicap !== null && p2.handicap !== ""
+            ? p2.handicap
+            : "—";
+
+          const teamTag =
+            teamKey === "red"
+              ? `<span class="tag team-red">${redTeamName}</span>`
+              : `<span class="tag team-blue">${blueTeamName}</span>`;
 
           const comp = document.createElement("div");
           comp.className = "competitor";
 
+          comp.innerHTML = `
+            <div class="comp-top">
+              <div>
+                <div class="comp-name">${label}</div>
+                <div class="comp-hcp">Handicaps: ${h1} &amp; ${h2}</div>
+              </div>
+              <div class="comp-flags">
+                ${teamTag}
+                ${isOnCourse ? '<span class="on-course-badge">On course</span>' : ""}
+              </div>
+            </div>
+            <div class="comp-tags">
+              <a class="tag match ${chipClass}" href="match_spectator.html?id=${matchId}">
+                ${text}
+              </a>
+            </div>
+          `;
+
+          listEl.appendChild(comp);
+        }
+
+        // Then: render solo players not in any pair
+        const soloPlayers = teamPlayersAll.filter((p) => !pairedIds.has(p.id));
+
+        for (const p of soloPlayers) {
           const hcpText =
             p.handicap !== undefined && p.handicap !== null && p.handicap !== ""
               ? `Handicap: ${p.handicap}`
@@ -582,47 +631,8 @@
               ? `<span class="tag team-red">${redTeamName}</span>`
               : `<span class="tag team-blue">${blueTeamName}</span>`;
 
-          let matchesHTML = "";
-          if (matchesForPlayer.length > 0) {
-            matchesHTML = matchesForPlayer
-              .map((mid) => {
-                const m = matches[mid] || {};
-                const type =
-                  m.type || (Number(mid) <= 8 ? "front" : "back");
-                const holes = m.holes || [];
-                const state = computeMatchState(holes, type);
-                const status = getMatchStatusForPair(mid, m, p.id);
-                const chipClass = getMatchChipClass(mid, m);
-
-                if (state.throughHole !== null && !state.done) {
-                  isOnCourse = true;
-                }
-
-                let currentHolePart = "";
-                if (state.throughHole === null) {
-                  currentHolePart = "not started";
-                } else if (state.done) {
-                  currentHolePart = "finished";
-                } else {
-                  const currentHole = state.throughHole + 1;
-                  currentHolePart = `currently on hole ${currentHole}`;
-                }
-
-                const text = `Match ${mid} - ${currentHolePart} - ${status}`;
-
-                return `<a class="tag match ${chipClass}" href="match_spectator.html?id=${mid}">
-                          ${text}
-                        </a>`;
-              })
-              .join("");
-          } else {
-            matchesHTML =
-              '<span class="tag">No matches assigned</span>';
-          }
-
-          const onCourseBadge = isOnCourse
-            ? '<span class="on-course-badge">On course</span>'
-            : "";
+          const comp = document.createElement("div");
+          comp.className = "competitor";
 
           comp.innerHTML = `
             <div class="comp-top">
@@ -632,20 +642,23 @@
               </div>
               <div class="comp-flags">
                 ${teamTag}
-                ${onCourseBadge}
               </div>
             </div>
             <div class="comp-tags">
-              ${matchesHTML}
+              <span class="tag">No matches assigned</span>
             </div>
           `;
 
           listEl.appendChild(comp);
         }
+
+        if (!listEl.children.length) {
+          listEl.innerHTML = '<div class="empty-state">No players yet.</div>';
+        }
       }
 
-      renderTeam(redListEl, redPlayers, "red");
-      renderTeam(blueListEl, bluePlayers, "blue");
+      renderTeam(redListEl, redPlayersAll, "red");
+      renderTeam(blueListEl, bluePlayersAll, "blue");
     }
 
     onValue(settingsRef, (snapshot) => {

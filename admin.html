@@ -232,8 +232,6 @@
       letter-spacing: 0.06em;
     }
 
-    /* Players table */
-
     .players-list {
       margin-top: 0.4rem;
       border-radius: 0.7rem;
@@ -291,8 +289,6 @@
     .players-header div {
       font-weight: 600;
     }
-
-    /* Matches */
 
     .matches-grid {
       display: grid;
@@ -448,21 +444,18 @@
         Edit players below. Click <strong>Save</strong> on a row to update, or <strong>Delete</strong> to remove.
       </div>
 
-      <div class="players-list" id="playersList">
-        <!-- Header + rows inserted by JS -->
-      </div>
+      <div class="players-list" id="playersList"></div>
     </section>
 
     <!-- MATCHES -->
     <section class="card">
       <div class="section-title">Match pairings (16 matches)</div>
       <div class="small-hint">
-        1–8 are Front 9 matches • 9–16 are Back 9 matches. Assign Red and Blue pairs from the dropdowns.
+        1–8 are Front 9 matches • 9–16 are Back 9 matches.  
+        A player can only be used once per side on each 9.
       </div>
 
-      <div class="matches-grid" id="matchesGrid">
-        <!-- Matches inserted by JS -->
-      </div>
+      <div class="matches-grid" id="matchesGrid"></div>
 
       <div class="btn-row">
         <button class="btn btn-danger btn-sm" id="resetScoresBtn">Reset ALL match scores</button>
@@ -518,6 +511,7 @@
     let settings = {};
     let players = {};
     let matches = {};
+    let matchesLoaded = false;  // <-- important
 
     // ----- TEAM NAMES -----
 
@@ -604,7 +598,6 @@
 
       playersListEl.innerHTML = html;
 
-      // Attach row handlers
       const rows = playersListEl.querySelectorAll(".player-row");
       rows.forEach((row) => {
         const id = row.getAttribute("data-id");
@@ -659,7 +652,9 @@
     // ----- MATCHES -----
 
     function ensureMatchesStructure() {
-      // Ensure there are 16 matches with type and holes array
+      // Don't try to "fix" structure until we've actually loaded matches from Firebase
+      if (!matchesLoaded) return;
+
       const updated = { ...(matches || {}) };
       let changed = false;
 
@@ -701,6 +696,15 @@
     }
 
     function renderMatchesGrid() {
+      if (!matchesLoaded) {
+        matchesGridEl.innerHTML = `
+          <div style="font-size:0.8rem;color:#6b7280;text-align:center;padding:0.6rem;">
+            Loading matches…
+          </div>
+        `;
+        return;
+      }
+
       ensureMatchesStructure();
 
       const redPlayersList = Object.entries(players || {})
@@ -713,6 +717,28 @@
         .map(([id, p]) => ({ id, name: p.name || "Unnamed" }))
         .sort((a, b) => a.name.localeCompare(b.name));
 
+      // Build "used" sets for front/back, per team, across ALL matches
+      const usedRedFront = new Set();
+      const usedRedBack = new Set();
+      const usedBlueFront = new Set();
+      const usedBlueBack = new Set();
+
+      for (let i = 1; i <= 16; i++) {
+        const key = String(i);
+        const m = matches[key] || {};
+        const type = m.type || (i <= 8 ? "front" : "back");
+        const redSel = m.red?.players || [];
+        const blueSel = m.blue?.players || [];
+
+        if (type === "front") {
+          redSel.forEach((pid) => usedRedFront.add(pid));
+          blueSel.forEach((pid) => usedBlueFront.add(pid));
+        } else {
+          redSel.forEach((pid) => usedRedBack.add(pid));
+          blueSel.forEach((pid) => usedBlueBack.add(pid));
+        }
+      }
+
       let html = "";
 
       for (let i = 1; i <= 16; i++) {
@@ -722,6 +748,20 @@
         const typeLabel = type === "front" ? "Front 9" : "Back 9";
         const redSel = m.red?.players || [];
         const blueSel = m.blue?.players || [];
+
+        const redAvailable = redPlayersList.filter((p) => {
+          const inThis = redSel.includes(p.id);
+          if (inThis) return true;
+          if (type === "front") return !usedRedFront.has(p.id);
+          return !usedRedBack.has(p.id);
+        });
+
+        const blueAvailable = bluePlayersList.filter((p) => {
+          const inThis = blueSel.includes(p.id);
+          if (inThis) return true;
+          if (type === "front") return !usedBlueFront.has(p.id);
+          return !usedBlueBack.has(p.id);
+        });
 
         html += `
           <div class="match-card" data-id="${key}">
@@ -735,7 +775,7 @@
                 <div class="match-team-selects">
                   <select class="match-red-p1">
                     <option value="">Select player</option>
-                    ${redPlayersList.map(p => `
+                    ${redAvailable.map(p => `
                       <option value="${p.id}" ${redSel[0] === p.id ? "selected" : ""}>
                         ${p.name.replace(/"/g, "&quot;")}
                       </option>
@@ -743,7 +783,7 @@
                   </select>
                   <select class="match-red-p2">
                     <option value="">Select player</option>
-                    ${redPlayersList.map(p => `
+                    ${redAvailable.map(p => `
                       <option value="${p.id}" ${redSel[1] === p.id ? "selected" : ""}>
                         ${p.name.replace(/"/g, "&quot;")}
                       </option>
@@ -756,7 +796,7 @@
                 <div class="match-team-selects">
                   <select class="match-blue-p1">
                     <option value="">Select player</option>
-                    ${bluePlayersList.map(p => `
+                    ${blueAvailable.map(p => `
                       <option value="${p.id}" ${blueSel[0] === p.id ? "selected" : ""}>
                         ${p.name.replace(/"/g, "&quot;")}
                       </option>
@@ -764,7 +804,7 @@
                   </select>
                   <select class="match-blue-p2">
                     <option value="">Select player</option>
-                    ${bluePlayersList.map(p => `
+                    ${blueAvailable.map(p => `
                       <option value="${p.id}" ${blueSel[1] === p.id ? "selected" : ""}>
                         ${p.name.replace(/"/g, "&quot;")}
                       </option>
@@ -774,7 +814,8 @@
               </div>
             </div>
             <div class="small-hint">
-              Changes are saved automatically when you change a dropdown.
+              Changes are saved automatically when you change a dropdown.  
+              Players can only appear once per side on each 9.
             </div>
             <div class="btn-row">
               <button type="button" class="btn btn-sm reset-match-scores-btn">Reset scores for this match</button>
@@ -788,7 +829,6 @@
 
       matchesGridEl.innerHTML = html;
 
-      // Attach listeners
       const cards = matchesGridEl.querySelectorAll(".match-card");
       cards.forEach(card => {
         const id = card.getAttribute("data-id");
@@ -825,7 +865,6 @@
 
         resetMatchBtn.addEventListener("click", async () => {
           if (!confirm(`Reset all scores for match ${id}?`)) return;
-          const current = matches[id] || {};
           await update(ref(db, "matches/" + id), {
             holes: Array(18).fill("none"),
           });
@@ -862,6 +901,7 @@
 
     onValue(matchesRef, (snapshot) => {
       matches = snapshot.val() || {};
+      matchesLoaded = true;
       renderMatchesGrid();
     });
   </script>
