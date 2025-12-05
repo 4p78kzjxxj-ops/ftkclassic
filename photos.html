@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Photos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+
+    .site-title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .site-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      font-size: 0.8rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-btn.secondary {
+      background: #f3f4f6;
+    }
+
+    .viewer-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
+    }
+
+    .match-photos-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: baseline;
+      margin-bottom: 0.25rem;
+    }
+
+    .group-title {
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .group-subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    @media (min-width: 600px) {
+      .photos-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .photo-thumb {
+      border-radius: 0.7rem;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      background: #e5e7eb;
+      cursor: pointer;
+    }
+
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .photo-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .empty-state {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Tournament photos</div>
+        <div id="viewerCount" class="viewer-count">Viewing now: 0</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-btn secondary">Home</a>
+      <a href="spectator.html" class="nav-btn">Scores</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">Photos by match</div>
+      <div id="photosContainer">
+        <div class="empty-state">No photos yet. Once players start uploading, they’ll show up here.</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      onDisconnect,
+      serverTimestamp,
+      push,
+      set,
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const photosContainer = document.getElementById("photosContainer");
+    const viewerCountEl = document.getElementById("viewerCount");
+
+    const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+    const photosRef = ref(db, "photos");
+
+    let settings = {};
+    let players = {};
+    let matches = {};
+    let photos = {};
+
+    function setupPresence(db, pageKey, onCountChange) {
+      const connectionsRef = ref(db, `presence/${pageKey}`);
+      const connectedRef = ref(db, ".info/connected");
+
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === false) return;
+        const conRef = push(connectionsRef);
+        onDisconnect(conRef).remove().catch(() => {});
+        set(conRef, { connectedAt: serverTimestamp() }).catch(() => {});
+      });
+
+      onValue(
+        connectionsRef,
+        (snap) => {
+          const val = snap.val();
+          const count = val ? Object.keys(val).length : 0;
+          onCountChange(count);
+        },
+        () => onCountChange(0)
+      );
+    }
+
+    setupPresence(db, "photos", (count) => {
+      viewerCountEl.textContent =
+        count === 1 ? "Viewing now: 1 person" : `Viewing now: ${count} people`;
+    });
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function computeMatchTitle(matchId) {
+      const m = matches[matchId];
+      if (!m) return `Match ${matchId}`;
+
+      const redIds = m.red?.players || [];
+      const blueIds = m.blue?.players || [];
+      const redNames = redIds.map(id => players[id]?.name).filter(Boolean).map(getLastName);
+      const blueNames = blueIds.map(id => players[id]?.name).filter(Boolean).map(getLastName);
+
+      if (redNames.length && blueNames.length) {
+        return `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
+      }
+      return m.name || `Match ${matchId}`;
+    }
+
+    function computeMatchSubtitle(matchId) {
+      const m = matches[matchId];
+      if (!m) return "";
+      const type = m.type || (Number(matchId) <= 8 ? "front" : "back");
+      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
+      return `${typeLabel} • Match ${matchId}`;
+    }
+
+    function renderPhotos() {
+      const matchIds = Object.keys(photos || {});
+      if (!matchIds.length) {
+        photosContainer.innerHTML =
+          '<div class="empty-state">No photos yet. Once players start uploading, they’ll show up here.</div>';
+        return;
+      }
+
+      // sort matches numerically
+      matchIds.sort((a, b) => Number(a) - Number(b));
+
+      let html = "";
+      for (const mid of matchIds) {
+        const group = photos[mid];
+        if (!group) continue;
+
+        const entries = Object.entries(group)
+          .map(([id, p]) => ({ id, ...p }))
+          .filter(p => p.url)
+          .sort((a, b) => (a.uploadedAt || 0) - (b.uploadedAt || 0));
+
+        if (!entries.length) continue;
+
+        html += `
+          <div class="match-photos-group">
+            <div class="group-header">
+              <div>
+                <div class="group-title">${computeMatchTitle(mid)}</div>
+                <div class="group-subtitle">${computeMatchSubtitle(mid)}</div>
+              </div>
+              <div class="group-subtitle">${entries.length} photo${entries.length === 1 ? "" : "s"}</div>
+            </div>
+            <div class="photos-grid">
+              ${entries
+                .map(
+                  (p) => `
+                <div class="photo-thumb" data-url="${p.url}">
+                  <img src="${p.url}" alt="Match ${mid} photo" loading="lazy" />
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      if (!html) {
+        photosContainer.innerHTML =
+          '<div class="empty-state">No photos yet. Once players start uploading, they’ll show up here.</div>';
+      } else {
+        photosContainer.innerHTML = html;
+      }
+    }
+
+    photosContainer.addEventListener("click", (e) => {
+      const thumb = e.target.closest(".photo-thumb");
+      if (!thumb) return;
+      const url = thumb.getAttribute("data-url");
+      if (url) window.open(url, "_blank");
+    });
+
+    function renderAll() {
+      renderPhotos();
+    }
+
+    onValue(settingsRef, (s) => { settings = s.val() || {}; renderAll(); });
+    onValue(playersRef,  (s) => { players  = s.val() || {}; renderAll(); });
+    onValue(matchesRef,  (s) => { matches  = s.val() || {}; renderAll(); });
+    onValue(photosRef,   (s) => { photos   = s.val() || {}; renderAll(); });
+  </script>
+</body>
+</html>
