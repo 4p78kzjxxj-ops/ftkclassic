@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic 2025 – Admin</title>
+  <title>FTK Classic – Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
@@ -15,9 +15,6 @@
       --muted: #6b7280;
       --border: #d1d5db;
       --danger: #b91c1c;
-      --danger-soft: #fee2e2;
-      --accent: #1d4ed8;
-      --accent-soft: #dbeafe;
     }
 
     * {
@@ -36,7 +33,7 @@
 
     @media (min-width: 768px) {
       body {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
       }
     }
@@ -45,7 +42,7 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .site-header-left {
@@ -70,6 +67,12 @@
     .site-subtitle {
       font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    .viewer-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
     }
 
     .nav-links {
@@ -107,297 +110,217 @@
       border: 1px solid var(--border);
     }
 
-    .admin-banner {
-      background: #fef3c7;
-      border: 1px solid #facc15;
-      color: #92400e;
-      border-radius: 0.5rem;
-      padding: 0.35rem 0.6rem;
-      font-size: 0.8rem;
-      margin-bottom: 0.35rem;
-      text-align: center;
-    }
-
     .section-title {
       font-size: 0.9rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
 
-    .field-row {
+    .form-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-bottom: 0.4rem;
-      align-items: center;
     }
 
     .field {
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
-      flex: 1;
-      min-width: 120px;
+      min-width: 0;
     }
 
-    label {
+    .field label {
       font-size: 0.75rem;
       color: var(--muted);
     }
 
-    input[type="text"],
-    input[type="number"],
-    select {
-      border-radius: 0.5rem;
-      border: 1px solid var(--border);
+    .field input,
+    .field select {
       padding: 0.35rem 0.4rem;
-      font-size: 0.85rem;
-      background: #f9fafb;
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+      border-radius: 0.55rem;
+      border: 1px solid #d1d5db;
+      font-size: 0.8rem;
+      background: #ffffff;
     }
 
     .btn {
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
       padding: 0.35rem 0.8rem;
       font-size: 0.8rem;
-      background: #ffffff;
       cursor: pointer;
     }
 
     .btn-primary {
-      border-color: #1d4ed8;
-      background: linear-gradient(135deg, #1d4ed8, #2563eb);
-      color: #ffffff;
-      font-weight: 600;
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
     }
 
     .btn-danger {
-      border-color: #fecaca;
-      background: var(--danger-soft);
+      background: #fef2f2;
       color: var(--danger);
-      font-weight: 600;
+      border-color: #fecaca;
     }
 
     .btn-sm {
-      padding: 0.25rem 0.6rem;
+      padding: 0.2rem 0.5rem;
       font-size: 0.75rem;
     }
 
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.3rem;
-    }
-
-    .team-row {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .team-box {
-      flex: 1;
-      min-width: 130px;
-    }
-
-    .team-label-red {
+    .status-text {
       font-size: 0.75rem;
-      color: var(--red);
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.6rem;
+    }
+
+    @media (max-width: 700px) {
+      .two-col {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .team-block {
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+    }
+
+    .team-block-title {
+      font-size: 0.8rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      margin-bottom: 0.2rem;
     }
 
-    .team-label-blue {
-      font-size: 0.75rem;
-      color: var(--blue);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+    .team-block-title.red { color: var(--red); }
+    .team-block-title.blue { color: var(--blue); }
 
     .players-list {
-      margin-top: 0.4rem;
-      border-radius: 0.7rem;
-      border: 1px solid #e5e7eb;
-      overflow: hidden;
-      max-height: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      max-height: 260px;
       overflow-y: auto;
-      background: #f9fafb;
+      padding-right: 0.2rem;
     }
 
     .player-row {
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr) minmax(0, 0.7fr) minmax(0, 1fr) auto;
-      gap: 0.4rem;
+      grid-template-columns: minmax(0,2fr) minmax(0,1fr) auto;
+      gap: 0.3rem;
       align-items: center;
-      padding: 0.35rem 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .player-row:nth-child(odd) {
-      background: #f3f4f6;
-    }
-
-    .player-row:last-child {
-      border-bottom: none;
-    }
-
-    .player-row label {
-      font-size: 0.72rem;
-      color: var(--muted);
+      font-size: 0.78rem;
     }
 
     .player-row input,
     .player-row select {
-      width: 100%;
+      font-size: 0.76rem;
+      padding: 0.25rem 0.3rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
     }
 
-    .player-actions {
-      display: flex;
-      gap: 0.25rem;
-      justify-content: flex-end;
-    }
-
-    .players-header {
-      font-size: 0.75rem;
-      color: var(--muted);
-      padding: 0.2rem 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-      background: #e5e7eb;
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr) minmax(0, 0.7fr) minmax(0, 1fr) auto;
-      gap: 0.4rem;
-    }
-
-    .players-header div {
-      font-weight: 600;
-    }
-
-    .mulligan-badges {
+    .player-name-cell {
       display: flex;
       gap: 0.25rem;
       align-items: center;
-      justify-content: flex-start;
     }
 
-    .pill-btn {
+    .player-team-pill {
+      font-size: 0.65rem;
       border-radius: 999px;
-      border: 1px solid #d1d5db;
-      padding: 0.12rem 0.5rem;
-      font-size: 0.7rem;
-      background: #ffffff;
-      cursor: pointer;
-      line-height: 1.2;
-      white-space: nowrap;
+      padding: 0.05rem 0.4rem;
+      background: #f3f4f6;
+      color: #4b5563;
     }
 
-    .pill-btn.active {
-      background: #dcfce7;
-      border-color: #22c55e;
-      color: #166534;
-      font-weight: 600;
-    }
+    .player-team-pill.red { background: #fee2e2; color: #7f1d1d; }
+    .player-team-pill.blue { background: #dbeafe; color: #1e3a8a; }
 
     .matches-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 0.6rem;
-      margin-top: 0.4rem;
-    }
-
-    .match-card {
-      border-radius: 0.8rem;
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem 0.55rem;
-      background: #f9fafb;
-    }
-
-    .match-title-row {
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 0.3rem;
-    }
-
-    .match-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .match-type-label {
-      font-size: 0.72rem;
-      color: var(--muted);
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
     .match-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      background: #ffffff;
     }
 
-    .match-team {
+    .match-row-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.3rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.8rem;
+    }
+
+    .match-row-title {
+      font-weight: 600;
+    }
+
+    .match-row-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .match-row-body {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .match-side {
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
     }
 
-    .match-team-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .match-team-label.red {
-      color: var(--red);
-    }
-
-    .match-team-label.blue {
-      color: var(--blue);
-    }
-
-    .match-team-selects {
-      display: flex;
-      gap: 0.3rem;
-    }
-
-    .match-team-selects select {
-      flex: 1;
-    }
-
-    .small-hint {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 0.25rem;
-    }
-
-    .danger-zone {
-      margin-top: 0.35rem;
+    .match-side-label {
       font-size: 0.75rem;
       color: var(--muted);
     }
 
-    .danger-zone span {
+    .match-side-label.red { color: var(--red); }
+    .match-side-label.blue { color: var(--blue); }
+
+    .match-side select {
+      width: 100%;
+      padding: 0.3rem 0.35rem;
+      border-radius: 0.55rem;
+      border: 1px solid #d1d5db;
+      font-size: 0.78rem;
+      background: #ffffff;
+    }
+
+    .vs-label {
+      font-size: 0.78rem;
       font-weight: 600;
-      color: var(--danger);
+      color: #4b5563;
+      text-align: center;
+    }
+
+    .danger-note {
+      font-size: 0.74rem;
+      color: #991b1b;
+      margin-top: 0.2rem;
     }
   </style>
 </head>
@@ -407,87 +330,108 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Tournament Admin</div>
+        <div class="site-subtitle">Admin control panel</div>
+        <div id="viewerCount" class="viewer-count">Viewing now: 0 admins</div>
       </div>
     </div>
     <div class="nav-links">
-      <a href="spectator.html" class="nav-btn secondary">View scores</a>
-      <a href="index.html" class="nav-btn">Public home</a>
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="competitors.html" class="nav-btn secondary">Competitors</a>
+      <a href="photos.html" class="nav-btn">Photos</a>
     </div>
   </header>
-
-  <div class="admin-banner">
-    ADMIN MODE – Any changes here update live for all spectators.
-  </div>
 
   <main>
     <!-- TEAM SETTINGS -->
     <section class="card">
-      <div class="section-title">Team settings</div>
-      <div class="team-row">
-        <div class="team-box">
-          <div class="team-label-red">Red team name</div>
-          <input type="text" id="teamRedName" placeholder="Red Team" />
+      <div class="section-title">Teams & settings</div>
+      <div class="form-row">
+        <div class="field">
+          <label for="redTeamName">Red team name</label>
+          <input id="redTeamName" type="text" placeholder="Red Team" />
         </div>
-        <div class="team-box">
-          <div class="team-label-blue">Blue team name</div>
-          <input type="text" id="teamBlueName" placeholder="Blue Team" />
+        <div class="field">
+          <label for="blueTeamName">Blue team name</label>
+          <input id="blueTeamName" type="text" placeholder="Blue Team" />
+        </div>
+        <div class="field" style="align-self:flex-end;">
+          <button id="saveTeamsBtn" type="button" class="btn btn-primary">
+            Save team names
+          </button>
         </div>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary btn-sm" id="saveTeamNamesBtn">Save team names</button>
-      </div>
+      <div id="teamsStatus" class="status-text"></div>
     </section>
 
     <!-- PLAYERS -->
     <section class="card">
       <div class="section-title">Players & handicaps</div>
-
-      <div class="field-row">
-        <div class="field">
+      <div class="form-row">
+        <div class="field" style="flex:2;">
           <label for="newPlayerName">Player name</label>
-          <input type="text" id="newPlayerName" placeholder="First Last" />
+          <input id="newPlayerName" type="text" placeholder="First Last" />
         </div>
-        <div class="field">
+        <div class="field" style="width:110px;">
           <label for="newPlayerTeam">Team</label>
           <select id="newPlayerTeam">
             <option value="red">Red</option>
             <option value="blue">Blue</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field" style="width:110px;">
           <label for="newPlayerHcp">Handicap</label>
-          <input type="number" step="0.1" id="newPlayerHcp" placeholder="0.0" />
+          <input id="newPlayerHcp" type="number" step="0.1" placeholder="0.0" />
+        </div>
+        <div class="field" style="align-self:flex-end;">
+          <button id="addPlayerBtn" type="button" class="btn btn-primary">
+            Add player
+          </button>
         </div>
       </div>
-
-      <div class="btn-row">
-        <button class="btn btn-primary btn-sm" id="addPlayerBtn">Add player</button>
+      <div class="two-col">
+        <div class="team-block">
+          <div class="team-block-title red" id="redTeamLabel">Red team</div>
+          <div id="redPlayersList" class="players-list"></div>
+        </div>
+        <div class="team-block">
+          <div class="team-block-title blue" id="blueTeamLabel">Blue team</div>
+          <div id="bluePlayersList" class="players-list"></div>
+        </div>
       </div>
-
-      <div class="small-hint">
-        Edit players below. Toggle <strong>M</strong> and <strong>RM</strong> to mark mulligan usage, or click <strong>Save</strong> on a row to update name/team/handicap.
-      </div>
-
-      <div class="players-list" id="playersList"></div>
+      <div id="playersStatus" class="status-text"></div>
     </section>
 
     <!-- MATCHES -->
     <section class="card">
-      <div class="section-title">Match pairings (16 matches)</div>
-      <div class="small-hint">
-        1–8 are Front 9 matches • 9–16 are Back 9 matches.  
-        A player can only be used once per side on each 9.
+      <div class="section-title">Matches – Front 9 (1–8)</div>
+      <div id="frontMatchesContainer" class="matches-grid"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Matches – Back 9 (9–16)</div>
+      <div id="backMatchesContainer" class="matches-grid"></div>
+    </section>
+
+    <!-- GLOBAL ADMIN TOOLS -->
+    <section class="card">
+      <div class="section-title">Admin tools</div>
+      <button id="resetScoresBtn" type="button" class="btn">
+        Reset ALL match scores (holes)
+      </button>
+      <div class="status-text">
+        This will set all 18 holes for all 16 matches back to "no result".
       </div>
 
-      <div class="matches-grid" id="matchesGrid"></div>
+      <hr style="margin:0.75rem 0; border:none; border-top:1px dashed #e5e7eb;" />
 
-      <div class="btn-row">
-        <button class="btn btn-danger btn-sm" id="resetScoresBtn">Reset ALL match scores</button>
+      <button id="deletePhotosBtn" type="button" class="btn btn-danger">
+        🗑️ Delete ALL photos
+      </button>
+      <div class="danger-note">
+        Requires password. This permanently deletes all photos from Storage and the photos node in the database.
       </div>
-      <div class="danger-zone">
-        <span>Warning:</span> Resetting scores will clear all hole results for all 16 matches.
-      </div>
+
+      <div id="adminToolsStatus" class="status-text"></div>
     </section>
   </main>
 
@@ -500,8 +444,16 @@
       set,
       update,
       push,
-      remove,
+      serverTimestamp,
+      onDisconnect,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    import {
+      getStorage,
+      ref as storageRef,
+      listAll,
+      deleteObject,
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -515,445 +467,470 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const storage = getStorage(app);
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
 
-    const teamRedNameInput = document.getElementById("teamRedName");
-    const teamBlueNameInput = document.getElementById("teamBlueName");
-    const saveTeamNamesBtn = document.getElementById("saveTeamNamesBtn");
+    // DOM
+    const viewerCountEl = document.getElementById("viewerCount");
+
+    const redTeamNameInput = document.getElementById("redTeamName");
+    const blueTeamNameInput = document.getElementById("blueTeamName");
+    const saveTeamsBtn = document.getElementById("saveTeamsBtn");
+    const teamsStatusEl = document.getElementById("teamsStatus");
 
     const newPlayerNameInput = document.getElementById("newPlayerName");
     const newPlayerTeamSelect = document.getElementById("newPlayerTeam");
     const newPlayerHcpInput = document.getElementById("newPlayerHcp");
     const addPlayerBtn = document.getElementById("addPlayerBtn");
-    const playersListEl = document.getElementById("playersList");
+    const redPlayersList = document.getElementById("redPlayersList");
+    const bluePlayersList = document.getElementById("bluePlayersList");
+    const playersStatusEl = document.getElementById("playersStatus");
+    const redTeamLabel = document.getElementById("redTeamLabel");
+    const blueTeamLabel = document.getElementById("blueTeamLabel");
 
-    const matchesGridEl = document.getElementById("matchesGrid");
+    const frontMatchesContainer = document.getElementById("frontMatchesContainer");
+    const backMatchesContainer = document.getElementById("backMatchesContainer");
+
     const resetScoresBtn = document.getElementById("resetScoresBtn");
+    const deletePhotosBtn = document.getElementById("deletePhotosBtn");
+    const adminToolsStatus = document.getElementById("adminToolsStatus");
 
     let settings = {};
     let players = {};
     let matches = {};
-    let matchesLoaded = false;
 
-    // ----- TEAM NAMES -----
+    // Presence
+    function setupPresence(pageKey) {
+      const connectionsRef = ref(db, `presence/${pageKey}`);
+      const connectedRef = ref(db, ".info/connected");
 
-    function applyTeamNamesUI() {
-      const t = settings.teamNames || {};
-      if (teamRedNameInput.value === "") {
-        teamRedNameInput.value = t.red || "Red";
-      }
-      if (teamBlueNameInput.value === "") {
-        teamBlueNameInput.value = t.blue || "Blue";
-      }
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === false) return;
+        const conRef = push(connectionsRef);
+        onDisconnect(conRef).remove().catch(() => {});
+        set(conRef, { connectedAt: serverTimestamp() }).catch(() => {});
+      });
+
+      onValue(
+        connectionsRef,
+        (snap) => {
+          const val = snap.val();
+          const count = val ? Object.keys(val).length : 0;
+          viewerCountEl.textContent =
+            count === 1 ? "Viewing now: 1 admin" : `Viewing now: ${count} admins`;
+        },
+        () => {
+          viewerCountEl.textContent = "Viewing now: 0 admins";
+        }
+      );
     }
 
-    saveTeamNamesBtn.addEventListener("click", async () => {
-      const redName = teamRedNameInput.value.trim() || "Red";
-      const blueName = teamBlueNameInput.value.trim() || "Blue";
-      await update(settingsRef, {
-        teamNames: {
-          red: redName,
-          blue: blueName,
-        },
+    setupPresence("admin_main");
+
+    // Helpers
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function computeUsedPlayers() {
+      const usedFront = new Set();
+      const usedBack = new Set();
+
+      Object.entries(matches || {}).forEach(([mid, m]) => {
+        const idNum = Number(mid);
+        const type = m.type || (idNum <= 8 ? "front" : "back");
+        const all = [
+          ...(m.red?.players || []),
+          ...(m.blue?.players || []),
+        ].filter(Boolean);
+
+        if (type === "front") {
+          all.forEach((pid) => usedFront.add(pid));
+        } else {
+          all.forEach((pid) => usedBack.add(pid));
+        }
       });
-      alert("Team names updated.");
+
+      return { usedFront, usedBack };
+    }
+
+    // Settings
+    function renderSettings() {
+      const { red, blue } = getTeamNames();
+      if (!redTeamNameInput.value) redTeamNameInput.value = red;
+      if (!blueTeamNameInput.value) blueTeamNameInput.value = blue;
+      redTeamLabel.textContent = red + " team";
+      blueTeamLabel.textContent = blue + " team";
+    }
+
+    saveTeamsBtn.addEventListener("click", async () => {
+      const red = redTeamNameInput.value.trim() || "Red";
+      const blue = blueTeamNameInput.value.trim() || "Blue";
+      try {
+        await update(settingsRef, {
+          teamNames: { red, blue },
+        });
+        teamsStatusEl.textContent = "Team names saved.";
+        setTimeout(() => (teamsStatusEl.textContent = ""), 3000);
+      } catch (err) {
+        console.error(err);
+        teamsStatusEl.textContent = "Failed to save team names.";
+      }
     });
 
-    // ----- PLAYERS -----
+    // Players
+    function renderPlayers() {
+      const { red: redTeamName, blue: blueTeamName } = getTeamNames();
+      redTeamLabel.textContent = redTeamName + " team";
+      blueTeamLabel.textContent = blueTeamName + " team";
 
-    function renderPlayersList() {
-      const ids = Object.keys(players || {});
-      if (!ids.length) {
-        playersListEl.innerHTML = `
-          <div style="font-size:0.8rem;color:#6b7280;text-align:center;padding:0.6rem;">
-            No players yet. Add players above.
-          </div>
-        `;
-        return;
-      }
+      const redList = [];
+      const blueList = [];
 
-      ids.sort((a, b) => {
-        const pa = players[a];
-        const pb = players[b];
-        return (pa.name || "").localeCompare(pb.name || "");
-      });
+      Object.entries(players || {})
+        .sort(([, a], [, b]) => (a.name || "").localeCompare(b.name || ""))
+        .forEach(([id, p]) => {
+          const team = p.team || "red";
+          const hcp = p.handicap ?? "";
+          const last = getLastName(p.name || "");
 
-      let html = `
-        <div class="players-header">
-          <div>Name</div>
-          <div>Team</div>
-          <div>Handicap</div>
-          <div>Mulligans</div>
-          <div style="text-align:right;">Actions</div>
-        </div>
-      `;
-
-      for (const id of ids) {
-        const p = players[id];
-        const name = p.name || "";
-        const team = (p.team || "red").toLowerCase();
-        const hcp = p.handicap !== undefined && p.handicap !== null ? p.handicap : "";
-        const mUsed = !!p.mulliganUsed;
-        const rmUsed = !!p.reverseMulliganUsed;
-
-        html += `
-          <div class="player-row" data-id="${id}">
-            <div>
-              <label>Name</label>
-              <input type="text" value="${name.replace(/"/g, "&quot;")}" class="player-name-input" />
-            </div>
-            <div>
-              <label>Team</label>
-              <select class="player-team-select">
-                <option value="red" ${team === "red" ? "selected" : ""}>Red</option>
-                <option value="blue" ${team === "blue" ? "selected" : ""}>Blue</option>
-              </select>
-            </div>
-            <div>
-              <label>HCP</label>
-              <input type="number" step="0.1" value="${hcp}" class="player-hcp-input" />
-            </div>
-            <div>
-              <label>M / RM</label>
-              <div class="mulligan-badges">
-                <button type="button" class="pill-btn mulligan-toggle ${mUsed ? "active" : ""}">M</button>
-                <button type="button" class="pill-btn reverse-toggle ${rmUsed ? "active" : ""}">RM</button>
+          const rowHtml = `
+            <div class="player-row" data-player-id="${id}">
+              <div class="player-name-cell">
+                <input type="text" class="player-name-input" value="${p.name || ""}" />
+                <span class="player-team-pill ${team === "red" ? "red" : "blue"}">
+                  ${team === "red" ? "R" : "B"}
+                </span>
               </div>
+              <input type="number" step="0.1" class="player-hcp-input" value="${hcp}" placeholder="0.0" />
+              <button type="button" class="btn btn-sm" data-action="deletePlayer">
+                ✕
+              </button>
             </div>
-            <div class="player-actions">
-              <button type="button" class="btn btn-sm player-save-btn">Save</button>
-              <button type="button" class="btn btn-sm btn-danger player-delete-btn">Delete</button>
-            </div>
-          </div>
-        `;
-      }
+          `;
 
-      playersListEl.innerHTML = html;
-
-      const rows = playersListEl.querySelectorAll(".player-row");
-      rows.forEach((row) => {
-        const id = row.getAttribute("data-id");
-        const nameInput = row.querySelector(".player-name-input");
-        const teamSelect = row.querySelector(".player-team-select");
-        const hcpInput = row.querySelector(".player-hcp-input");
-        const saveBtn = row.querySelector(".player-save-btn");
-        const delBtn = row.querySelector(".player-delete-btn");
-        const mulliganBtn = row.querySelector(".mulligan-toggle");
-        const reverseBtn = row.querySelector(".reverse-toggle");
-
-        saveBtn.addEventListener("click", async () => {
-          const updatedName = nameInput.value.trim();
-          const updatedTeam = teamSelect.value;
-          const updatedHcpRaw = hcpInput.value.trim();
-          const updatedHcp = updatedHcpRaw === "" ? "" : parseFloat(updatedHcpRaw);
-
-          await update(ref(db, "players/" + id), {
-            name: updatedName,
-            team: updatedTeam,
-            handicap: updatedHcp,
-          });
-          alert("Player updated.");
+          if (team === "red") redList.push(rowHtml);
+          else blueList.push(rowHtml);
         });
 
-        delBtn.addEventListener("click", async () => {
-          if (!confirm("Delete this player? They will be removed from any matches.")) return;
-          await remove(ref(db, "players/" + id));
-        });
-
-        mulliganBtn.addEventListener("click", async () => {
-          const current = !!(players[id]?.mulliganUsed);
-          await update(ref(db, "players/" + id), {
-            mulliganUsed: !current,
-          });
-        });
-
-        reverseBtn.addEventListener("click", async () => {
-          const current = !!(players[id]?.reverseMulliganUsed);
-          await update(ref(db, "players/" + id), {
-            reverseMulliganUsed: !current,
-          });
-        });
-      });
+      redPlayersList.innerHTML = redList.join("") || '<div style="font-size:0.78rem;color:#9ca3af;">No red players yet.</div>';
+      bluePlayersList.innerHTML = blueList.join("") || '<div style="font-size:0.78rem;color:#9ca3af;">No blue players yet.</div>';
     }
 
     addPlayerBtn.addEventListener("click", async () => {
       const name = newPlayerNameInput.value.trim();
-      const team = newPlayerTeamSelect.value;
-      const hRaw = newPlayerHcpInput.value.trim();
+      const team = newPlayerTeamSelect.value || "red";
+      const hcp = parseFloat(newPlayerHcpInput.value || "0") || 0;
+
       if (!name) {
-        alert("Please enter a player name.");
+        playersStatusEl.textContent = "Enter a player name.";
         return;
       }
-      const hVal = hRaw === "" ? "" : parseFloat(hRaw);
 
-      const newRef = push(playersRef);
-      await set(newRef, {
-        name,
-        team,
-        handicap: hVal,
-        mulliganUsed: false,
-        reverseMulliganUsed: false,
-      });
-
-      newPlayerNameInput.value = "";
-      newPlayerHcpInput.value = "";
+      try {
+        const playerRef = push(playersRef);
+        await set(playerRef, {
+          name,
+          team,
+          handicap: hcp,
+          mulliganUsed: false,
+          reverseMulliganUsed: false,
+        });
+        newPlayerNameInput.value = "";
+        newPlayerHcpInput.value = "";
+        playersStatusEl.textContent = "Player added.";
+        setTimeout(() => (playersStatusEl.textContent = ""), 2500);
+      } catch (err) {
+        console.error(err);
+        playersStatusEl.textContent = "Failed to add player.";
+      }
     });
 
-    // ----- MATCHES -----
+    function handlePlayerListClick(e) {
+      const btn = e.target.closest("button[data-action]");
+      const row = e.target.closest(".player-row");
+      if (!row) return;
+      const playerId = row.getAttribute("data-player-id");
+      if (!playerId) return;
 
-    function ensureMatchesStructure() {
-      if (!matchesLoaded) return;
-
-      const updated = { ...(matches || {}) };
-      let changed = false;
-
-      for (let i = 1; i <= 16; i++) {
-        const key = String(i);
-        if (!updated[key]) {
-          updated[key] = {
-            type: i <= 8 ? "front" : "back",
-            red: { players: [] },
-            blue: { players: [] },
-            holes: Array(18).fill("none"),
-          };
-          changed = true;
-        } else {
-          if (!updated[key].holes || !Array.isArray(updated[key].holes)) {
-            updated[key].holes = Array(18).fill("none");
-            changed = true;
-          }
-          if (!updated[key].red) {
-            updated[key].red = { players: [] };
-            changed = true;
-          }
-          if (!updated[key].blue) {
-            updated[key].blue = { players: [] };
-            changed = true;
-          }
-          if (!updated[key].type) {
-            updated[key].type = i <= 8 ? "front" : "back";
-            changed = true;
-          }
-        }
-      }
-
-      if (changed) {
-        set(matchesRef, updated);
-      }
-
-      matches = updated;
-    }
-
-    function renderMatchesGrid() {
-      if (!matchesLoaded) {
-        matchesGridEl.innerHTML = `
-          <div style="font-size:0.8rem;color:#6b7280;text-align:center;padding:0.6rem;">
-            Loading matches…
-          </div>
-        `;
+      if (btn && btn.dataset.action === "deletePlayer") {
+        if (!confirm("Remove this player from the tournament?")) return;
+        set(ref(db, `players/${playerId}`), null).catch(console.error);
         return;
       }
 
-      ensureMatchesStructure();
+      const nameInput = row.querySelector(".player-name-input");
+      const hcpInput = row.querySelector(".player-hcp-input");
+      if (!nameInput || !hcpInput) return;
 
-      const redPlayersList = Object.entries(players || {})
-        .filter(([, p]) => (p.team || "").toLowerCase() === "red")
-        .map(([id, p]) => ({ id, name: p.name || "Unnamed" }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+      const newName = nameInput.value.trim();
+      const newHcp = parseFloat(hcpInput.value || "0") || 0;
 
-      const bluePlayersList = Object.entries(players || {})
-        .filter(([, p]) => (p.team || "").toLowerCase() === "blue")
-        .map(([id, p]) => ({ id, name: p.name || "Unnamed" }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-      const usedRedFront = new Set();
-      const usedRedBack = new Set();
-      const usedBlueFront = new Set();
-      const usedBlueBack = new Set();
-
-      for (let i = 1; i <= 16; i++) {
-        const key = String(i);
-        const m = matches[key] || {};
-        const type = m.type || (i <= 8 ? "front" : "back");
-        const redSel = m.red?.players || [];
-        const blueSel = m.blue?.players || [];
-
-        if (type === "front") {
-          redSel.forEach((pid) => usedRedFront.add(pid));
-          blueSel.forEach((pid) => usedBlueFront.add(pid));
-        } else {
-          redSel.forEach((pid) => usedRedBack.add(pid));
-          blueSel.forEach((pid) => usedBlueBack.add(pid));
-        }
-      }
-
-      let html = "";
-
-      for (let i = 1; i <= 16; i++) {
-        const key = String(i);
-        const m = matches[key] || {};
-        const type = m.type || (i <= 8 ? "front" : "back");
-        const typeLabel = type === "front" ? "Front 9" : "Back 9";
-        const redSel = m.red?.players || [];
-        const blueSel = m.blue?.players || [];
-
-        const redAvailable = redPlayersList.filter((p) => {
-          const inThis = redSel.includes(p.id);
-          if (inThis) return true;
-          if (type === "front") return !usedRedFront.has(p.id);
-          return !usedRedBack.has(p.id);
-        });
-
-        const blueAvailable = bluePlayersList.filter((p) => {
-          const inThis = blueSel.includes(p.id);
-          if (inThis) return true;
-          if (type === "front") return !usedBlueFront.has(p.id);
-          return !usedBlueBack.has(p.id);
-        });
-
-        html += `
-          <div class="match-card" data-id="${key}">
-            <div class="match-title-row">
-              <div class="match-title">Match ${key}</div>
-              <div class="match-type-label">${typeLabel}</div>
-            </div>
-            <div class="match-row">
-              <div class="match-team">
-                <div class="match-team-label red">Red pair</div>
-                <div class="match-team-selects">
-                  <select class="match-red-p1">
-                    <option value="">Select player</option>
-                    ${redAvailable.map(p => `
-                      <option value="${p.id}" ${redSel[0] === p.id ? "selected" : ""}>
-                        ${p.name.replace(/"/g, "&quot;")}
-                      </option>
-                    `).join("")}
-                  </select>
-                  <select class="match-red-p2">
-                    <option value="">Select player</option>
-                    ${redAvailable.map(p => `
-                      <option value="${p.id}" ${redSel[1] === p.id ? "selected" : ""}>
-                        ${p.name.replace(/"/g, "&quot;")}
-                      </option>
-                    `).join("")}
-                  </select>
-                </div>
-              </div>
-              <div class="match-team">
-                <div class="match-team-label blue">Blue pair</div>
-                <div class="match-team-selects">
-                  <select class="match-blue-p1">
-                    <option value="">Select player</option>
-                    ${blueAvailable.map(p => `
-                      <option value="${p.id}" ${blueSel[0] === p.id ? "selected" : ""}>
-                        ${p.name.replace(/"/g, "&quot;")}
-                      </option>
-                    `).join("")}
-                  </select>
-                  <select class="match-blue-p2">
-                    <option value="">Select player</option>
-                    ${blueAvailable.map(p => `
-                      <option value="${p.id}" ${blueSel[1] === p.id ? "selected" : ""}>
-                        ${p.name.replace(/"/g, "&quot;")}
-                      </option>
-                    `).join("")}
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="small-hint">
-              Changes are saved automatically when you change a dropdown.  
-              Players can only appear once per side on each 9.
-            </div>
-            <div class="btn-row">
-              <button type="button" class="btn btn-sm reset-match-scores-btn">Reset scores for this match</button>
-              <button type="button" class="btn btn-sm" onclick="window.location.href='match.html?id=${key}'">
-                Open scoring page
-              </button>
-            </div>
-          </div>
-        `;
-      }
-
-      matchesGridEl.innerHTML = html;
-
-      const cards = matchesGridEl.querySelectorAll(".match-card");
-      cards.forEach(card => {
-        const id = card.getAttribute("data-id");
-        const redP1 = card.querySelector(".match-red-p1");
-        const redP2 = card.querySelector(".match-red-p2");
-        const blueP1 = card.querySelector(".match-blue-p1");
-        const blueP2 = card.querySelector(".match-blue-p2");
-        const resetMatchBtn = card.querySelector(".reset-match-scores-btn");
-
-        async function savePairings() {
-          const r1 = redP1.value || null;
-          const r2 = redP2.value || null;
-          const b1 = blueP1.value || null;
-          const b2 = blueP2.value || null;
-
-          const redPlayers = [r1, r2].filter(Boolean);
-          const bluePlayers = [b1, b2].filter(Boolean);
-
-          const current = matches[id] || {};
-          const newData = {
-            type: current.type || (Number(id) <= 8 ? "front" : "back"),
-            holes: current.holes || Array(18).fill("none"),
-            red: { players: redPlayers },
-            blue: { players: bluePlayers },
-          };
-
-          await set(ref(db, "matches/" + id), newData);
-        }
-
-        redP1.addEventListener("change", savePairings);
-        redP2.addEventListener("change", savePairings);
-        blueP1.addEventListener("change", savePairings);
-        blueP2.addEventListener("change", savePairings);
-
-        resetMatchBtn.addEventListener("click", async () => {
-          if (!confirm(`Reset all scores for match ${id}?`)) return;
-          await update(ref(db, "matches/" + id), {
-            holes: Array(18).fill("none"),
-          });
-          alert(`Scores reset for match ${id}.`);
-        });
-      });
+      update(ref(db, `players/${playerId}`), {
+        name: newName,
+        handicap: newHcp,
+      }).catch(console.error);
     }
 
+    redPlayersList.addEventListener("change", handlePlayerListClick);
+    bluePlayersList.addEventListener("change", handlePlayerListClick);
+    redPlayersList.addEventListener("click", handlePlayerListClick);
+    bluePlayersList.addEventListener("click", handlePlayerListClick);
+
+    // Matches
+    function buildPlayerOptions(team, selectedId, groupType, usedFront, usedBack, currentMatchId) {
+      const usedSet = groupType === "front" ? usedFront : usedBack;
+      const opts = ['<option value="">—</option>'];
+
+      Object.entries(players || {})
+        .filter(([, p]) => (p.team || "red") === team)
+        .sort(([, a], [, b]) => (a.name || "").localeCompare(b.name || ""))
+        .forEach(([id, p]) => {
+          const disabled = usedSet.has(id) && id !== selectedId;
+          const label = p.name || "Player";
+          opts.push(
+            `<option value="${id}" ${id === selectedId ? "selected" : ""} ${disabled ? "disabled" : ""}>${label}</option>`
+          );
+        });
+
+      return opts.join("");
+    }
+
+    function renderMatches() {
+      const { red: redTeamName, blue: blueTeamName } = getTeamNames();
+      const { usedFront, usedBack } = computeUsedPlayers();
+
+      const renderGroup = (isFront) => {
+        const container = isFront ? frontMatchesContainer : backMatchesContainer;
+        const startId = isFront ? 1 : 9;
+        const endId = isFront ? 8 : 16;
+        const html = [];
+
+        for (let id = startId; id <= endId; id++) {
+          const m = matches[id] || {};
+          const type = m.type || (id <= 8 ? "front" : "back");
+          const redPlayers = m.red?.players || [];
+          const bluePlayers = m.blue?.players || [];
+
+          const matchTitle = `Match ${id}`;
+          const subLabel = type === "front" ? "Front 9" : "Back 9";
+
+          const redOpt1 = buildPlayerOptions(
+            "red",
+            redPlayers[0] || "",
+            type,
+            usedFront,
+            usedBack,
+            id
+          );
+          const redOpt2 = buildPlayerOptions(
+            "red",
+            redPlayers[1] || "",
+            type,
+            usedFront,
+            usedBack,
+            id
+          );
+          const blueOpt1 = buildPlayerOptions(
+            "blue",
+            bluePlayers[0] || "",
+            type,
+            usedFront,
+            usedBack,
+            id
+          );
+          const blueOpt2 = buildPlayerOptions(
+            "blue",
+            bluePlayers[1] || "",
+            type,
+            usedFront,
+            usedBack,
+            id
+          );
+
+          html.push(`
+            <div class="match-row" data-match-id="${id}">
+              <div class="match-row-header">
+                <div class="match-row-title">${matchTitle}</div>
+                <div class="match-row-sub">${subLabel}</div>
+              </div>
+              <div class="match-row-body">
+                <div class="match-side">
+                  <div class="match-side-label red">${redTeamName}</div>
+                  <select data-side="red" data-slot="0">${redOpt1}</select>
+                  <select data-side="red" data-slot="1">${redOpt2}</select>
+                </div>
+                <div class="vs-label">vs</div>
+                <div class="match-side">
+                  <div class="match-side-label blue">${blueTeamName}</div>
+                  <select data-side="blue" data-slot="0">${blueOpt1}</select>
+                  <select data-side="blue" data-slot="1">${blueOpt2}</select>
+                </div>
+              </div>
+            </div>
+          `);
+        }
+
+        container.innerHTML =
+          html.join("") ||
+          '<div style="font-size:0.78rem;color:#9ca3af;">No matches defined.</div>';
+      };
+
+      renderGroup(true);
+      renderGroup(false);
+    }
+
+    async function updateMatchAssignment(matchId, side, slot, playerId) {
+      const idNum = Number(matchId);
+      const type = idNum <= 8 ? "front" : "back";
+      const m = matches[matchId] || {};
+      const redArr = Array.isArray(m.red?.players) ? [...m.red.players] : [];
+      const blueArr = Array.isArray(m.blue?.players) ? [...m.blue.players] : [];
+
+      const idx = Number(slot);
+      if (idx < 0 || idx > 1) return;
+
+      if (side === "red") {
+        while (redArr.length < 2) redArr.push("");
+        redArr[idx] = playerId || "";
+      } else {
+        while (blueArr.length < 2) blueArr.push("");
+        blueArr[idx] = playerId || "";
+      }
+
+      try {
+        await update(ref(db, `matches/${matchId}`), {
+          type,
+          red: { players: redArr },
+          blue: { players: blueArr },
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    frontMatchesContainer.addEventListener("change", (e) => {
+      const select = e.target.closest("select[data-side]");
+      if (!select) return;
+      const matchRow = select.closest(".match-row");
+      if (!matchRow) return;
+      const matchId = matchRow.getAttribute("data-match-id");
+      const side = select.getAttribute("data-side");
+      const slot = select.getAttribute("data-slot");
+      const playerId = select.value || "";
+      updateMatchAssignment(matchId, side, slot, playerId);
+    });
+
+    backMatchesContainer.addEventListener("change", (e) => {
+      const select = e.target.closest("select[data-side]");
+      if (!select) return;
+      const matchRow = select.closest(".match-row");
+      if (!matchRow) return;
+      const matchId = matchRow.getAttribute("data-match-id");
+      const side = select.getAttribute("data-side");
+      const slot = select.getAttribute("data-slot");
+      const playerId = select.value || "";
+      updateMatchAssignment(matchId, side, slot, playerId);
+    });
+
+    // Reset scores
     resetScoresBtn.addEventListener("click", async () => {
-      if (!confirm("Reset ALL match scores for all 16 matches?")) return;
-      const updates = {};
-      for (let i = 1; i <= 16; i++) {
-        updates[String(i)] = {
-          ...(matches[String(i)] || {}),
-          holes: Array(18).fill("none"),
-        };
+      const confirmed = confirm(
+        "Reset ALL scores for ALL matches? This sets all 18 holes to 'no result' for matches 1–16."
+      );
+      if (!confirmed) return;
+
+      try {
+        adminToolsStatus.textContent = "Resetting scores…";
+
+        const updates = {};
+        for (let i = 1; i <= 16; i++) {
+          const holes = new Array(18).fill("none");
+          updates[`matches/${i}/holes`] = holes;
+        }
+
+        await update(ref(db), updates);
+
+        adminToolsStatus.textContent = "All scores reset.";
+        setTimeout(() => (adminToolsStatus.textContent = ""), 4000);
+      } catch (err) {
+        console.error(err);
+        adminToolsStatus.textContent =
+          "Failed to reset scores: " + (err?.code || err?.message || "unknown error");
       }
-      await set(matchesRef, updates);
-      alert("All match scores reset.");
     });
 
-    // ----- REALTIME LISTENERS -----
+    // Delete ALL photos (Storage + DB)
+    async function deleteAllPhotosInStorage() {
+      const rootRef = storageRef(storage, "matchPhotos");
 
-    onValue(settingsRef, (snapshot) => {
-      settings = snapshot.val() || {};
-      applyTeamNamesUI();
+      async function deleteFolder(folderRef) {
+        const res = await listAll(folderRef);
+
+        // delete files in this folder
+        await Promise.all(res.items.map((itemRef) => deleteObject(itemRef)));
+
+        // recurse into subfolders
+        await Promise.all(res.prefixes.map((subRef) => deleteFolder(subRef)));
+      }
+
+      await deleteFolder(rootRef);
+    }
+
+    deletePhotosBtn.addEventListener("click", async () => {
+      const pwd = prompt("Enter admin password to delete ALL photos:");
+      if (pwd === null) return;
+      if (pwd !== "admin123") {
+        alert("Incorrect password.");
+        return;
+      }
+
+      const really = confirm(
+        "This will permanently delete ALL tournament photos from Storage and the 'photos' node in the database. Are you sure?"
+      );
+      if (!really) return;
+
+      try {
+        adminToolsStatus.textContent = "Deleting all photos…";
+
+        await deleteAllPhotosInStorage();
+        await set(ref(db, "photos"), null);
+
+        adminToolsStatus.textContent = "All photos deleted.";
+        setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
+      } catch (err) {
+        console.error(err);
+        adminToolsStatus.textContent =
+          "Failed to delete photos: " + (err?.code || err?.message || "unknown error");
+      }
     });
 
-    onValue(playersRef, (snapshot) => {
-      players = snapshot.val() || {};
-      renderPlayersList();
-      renderMatchesGrid();
+    // Live subscriptions
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      renderSettings();
+      renderMatches();
     });
 
-    onValue(matchesRef, (snapshot) => {
-      matches = snapshot.val() || {};
-      matchesLoaded = true;
-      renderMatchesGrid();
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      renderPlayers();
+      renderMatches();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      renderMatches();
     });
   </script>
 </body>
