@@ -125,11 +125,6 @@
       box-shadow: 0 8px 18px rgba(37,99,235,0.55);
     }
 
-    .hero-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 5px 12px rgba(37,99,235,0.45);
-    }
-
     .hero-btn-secondary {
       display: block;
       width: 100%;
@@ -144,14 +139,87 @@
       margin-bottom: 0.5rem;
     }
 
+    .hero-links-row {
+      margin-top: 0.6rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-links-row a {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+
     .hero-footer {
       margin-top: 0.7rem;
       font-size: 0.75rem;
       color: var(--muted);
     }
+
+    /* Modal styles */
+    #modalOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #modalBox {
+      background: white;
+      padding: 1.2rem;
+      border-radius: 0.8rem;
+      width: 85%;
+      max-width: 340px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      text-align: center;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    #modalBox input {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      margin-bottom: 0.8rem;
+      text-align: center;
+    }
+
+    #modalBox button {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+
+    #modalSubmit {
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      font-weight: 600;
+    }
+
+    #modalCancel {
+      background: #f3f4f6;
+      border: 1px solid #ccc;
+      color: #374151;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
+
   <header class="site-header">
     <div class="site-header-left">
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
@@ -165,17 +233,102 @@
   <main>
     <section class="hero-card">
       <img src="IMG_7296.jpg" alt="FTK Classic" class="hero-logo" />
-      <div class="hero-title">Welcome to the FTK Classic</div>
-      <div class="hero-subtitle">Follow every match in real time. Designed for easy viewing on the course.</div>
 
-      <a href="spectator.html" class="hero-btn">Click to view scores</a>
-      <a href="competitors.html" class="hero-btn-secondary">View competitors</a>
-      <a href="photos.html" class="hero-btn-secondary">View photos</a>
+      <div class="hero-title">Welcome to the FTK Classic</div>
+      <div class="hero-subtitle">
+        Follow every match in real time. Designed for easy viewing on the course.
+      </div>
+
+      <!-- Identity buttons -->
+      <button id="spectatorBtn" class="hero-btn" type="button">I'm a spectator</button>
+      <button id="playerBtn" class="hero-btn-secondary" type="button">I'm a player</button>
+
+      <div class="hero-links-row">
+        <a href="competitors.html">Competitors</a>
+        <a href="photos.html">Photos</a>
+        <a href="past_winners.html">Past winners</a>
+        <a href="#" id="adminLink">Admin</a>
+      </div>
 
       <div class="hero-footer">
         Live scores update automatically from the scorers’ devices.
       </div>
     </section>
   </main>
+
+  <!-- MATCH CODE MODAL -->
+  <div id="modalOverlay">
+    <div id="modalBox">
+      <h3 style="font-size: 1rem; margin-bottom: 0.6rem; font-weight: 700;">Enter Match Code</h3>
+
+      <input id="modalCodeInput" type="text" placeholder="Match code…" />
+
+      <button id="modalSubmit">Continue</button>
+      <button id="modalCancel">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // Show modal
+    function openMatchModal() {
+      document.getElementById("modalOverlay").style.display = "flex";
+      document.getElementById("modalCodeInput").value = "";
+      document.getElementById("modalCodeInput").focus();
+    }
+
+    // Hide modal
+    function closeMatchModal() {
+      document.getElementById("modalOverlay").style.display = "none";
+    }
+
+    // Code → Match mapping
+    const codeMap = {
+      "3601": 1, "3602": 2, "3603": 3, "3604": 4,
+      "3605": 5, "3606": 6, "3607": 7, "3608": 8,
+      "3609": 9, "3610": 10, "3611": 11, "3612": 12,
+      "3613": 13, "3614": 14, "3615": 15, "3616": 16
+    };
+
+    // "I'm a spectator" → spectator page
+    document.getElementById('spectatorBtn').addEventListener('click', function () {
+      window.location.href = 'spectator.html';
+    });
+
+    // "I'm a player" → open match code modal
+    document.getElementById('playerBtn').addEventListener('click', openMatchModal);
+
+    // ADMIN link → password prompt
+    document.getElementById('adminLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      const pwd = prompt('Enter admin password:');
+      if (pwd === 'admin123') {
+        window.location.href = 'admin.html';
+      } else if (pwd !== null) {
+        alert('Incorrect password.');
+      }
+    });
+
+    // MODAL BUTTONS
+    document.getElementById('modalCancel').addEventListener('click', closeMatchModal);
+
+    document.getElementById('modalSubmit').addEventListener('click', function () {
+      const code = document.getElementById('modalCodeInput').value.trim();
+
+      if (codeMap[code]) {
+        window.location.href = `match.html?match=${codeMap[code]}`;
+      } else {
+        alert("Invalid code.");
+        closeMatchModal();
+      }
+    });
+
+    // ENTER KEY SUBMITS
+    document.getElementById('modalCodeInput').addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        document.getElementById('modalSubmit').click();
+      }
+    });
+  </script>
+
 </body>
 </html>
