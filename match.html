@@ -463,7 +463,6 @@
 
     .team-name.blue {
       color: var(--blue);
-      /* removed text-align:right so name sits naturally above players */
     }
 
     .player-name {
@@ -1218,4 +1217,407 @@
       const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || teamNames.blue;
 
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
-      the match scoring and UI.
+      const matchLabel = `Match ${matchId}`;
+      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
+
+      matchTitleEl.textContent = `${redLasts} vs ${blueLasts}`;
+      matchSubtitleEl.textContent = `${typeLabel} · ${matchLabel}`;
+
+      const { leader, diff, centerText, statusTag, totalHoles } = computeScoreSummary();
+
+      scoreRedLabel.textContent = redLasts;
+      scoreBlueLabel.textContent = blueLasts;
+      scoreCenterLabel.textContent = centerText;
+      matchTagEl.textContent = statusTag;
+
+      let pctOffset = 0.5;
+      if (diff !== 0) {
+        const maxShift = 0.35;
+        const shift = Math.min(maxShift, Math.abs(diff) / totalHoles * 1.6);
+        pctOffset = diff > 0 ? 0.5 - shift : 0.5 + shift;
+      }
+      scoreSliderFill.style.transform = `translateX(${(pctOffset - 0.5) * 100}%)`;
+      scoreSliderFill.classList.remove("red-lead", "blue-lead");
+      if (leader === "red") {
+        scoreSliderFill.classList.add("red-lead");
+      } else if (leader === "blue") {
+        scoreSliderFill.classList.add("blue-lead");
+      }
+
+      const pills = computeHolePills();
+      scorePillsContainer.innerHTML = pills
+        .map(p => {
+          const cls = `score-pill ${
+            p.tone === "red"
+              ? "red"
+              : p.tone === "blue"
+              ? "blue"
+              : p.tone === "half"
+              ? "half"
+              : "empty"
+          }`;
+          const label = p.label || p.holeNum;
+          return `<div class="${cls}" title="Hole ${p.holeNum}">${label}</div>`;
+        })
+        .join("");
+
+      const mRed = red
+        .map(p => {
+          const mid = p.id || p.playerId || "";
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+          return playerMulliganRow(mid, p.name, "red", mUsed, rmUsed);
+        })
+        .join("");
+
+      const mBlue = blue
+        .map(p => {
+          const mid = p.id || p.playerId || "";
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+          return playerMulliganRow(mid, p.name, "blue", mUsed, rmUsed);
+        })
+        .join("");
+
+      playersRow.innerHTML = `
+        <div class="team-col">
+          <div class="team-name red">${teamNames.red}</div>
+          ${mRed || '<div class="player-name">–</div>'}
+        </div>
+        <div class="team-col">
+          <div class="team-name blue">${teamNames.blue}</div>
+          ${mBlue || '<div class="player-name">–</div>'}
+        </div>
+      `;
+
+      Array.from(document.querySelectorAll("[data-mulligan-toggle]")).forEach(el => {
+        el.addEventListener("click", () => {
+          const playerId = el.getAttribute("data-player-id");
+          const type = el.getAttribute("data-type");
+          toggleMulligan(playerId, type);
+        });
+      });
+    }
+
+    function renderHoles() {
+      if (!matchData || !matchId) return;
+
+      const holes = matchData.holes || Array(18).fill("none");
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const segment = type === "back" ? "Back 9" : "Front 9";
+
+      holesSectionTitle.textContent = `Hole-by-hole (${segment})`;
+
+      const { red, blue } = getMatchPlayersFor(matchData);
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
+
+      let html = "";
+      for (let idx = start; idx < end; idx++) {
+        const config = holeConfigs[idx];
+        const value = holes[idx] || "none";
+        const holeNum = config?.num ?? (idx + 1);
+        const par = config?.par ?? "–";
+        const yards = config?.yards ?? "–";
+
+        // choose row shading class based on winner
+        let rowClass = "hole-row";
+        if (value === "red") rowClass += " hole-row-red";
+        else if (value === "blue") rowClass += " hole-row-blue";
+        else if (value === "half") rowClass += " hole-row-half";
+
+        html += `
+          <div class="${rowClass}">
+            <div class="hole-header-line">
+              <div class="hole-label">Hole ${holeNum}</div>
+              <div class="hole-meta">Par ${par} · ${yards} yds</div>
+            </div>
+            <div class="hole-buttons">
+              <div class="pill-btn ${value === "red" ? "red-active" : ""}"
+                   data-hole="${idx}" data-result="red">
+                ${redLasts}
+              </div>
+              <div class="pill-btn ${value === "half" ? "half-active" : ""}"
+                   data-hole="${idx}" data-result="half">
+                ½
+              </div>
+              <div class="pill-btn ${value === "blue" ? "blue-active" : ""}"
+                   data-hole="${idx}" data-result="blue">
+                ${blueLasts}
+              </div>
+              <div class="pill-btn clear ${value === "none" ? "half-active" : ""}"
+                   data-hole="${idx}" data-result="none">
+                Clear
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      holesContainer.innerHTML = html;
+
+      Array.from(document.querySelectorAll(".pill-btn")).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-hole"));
+          const result = btn.getAttribute("data-result");
+          setHoleResult(idx, result);
+        });
+      });
+    }
+
+    function setHoleResult(holeIndex, result) {
+      if (!matchData || !matchId) return;
+
+      const oldValue = matchData.holes?.[holeIndex] || "none";
+      if (oldValue === result) {
+        return;
+      }
+
+      const holes = (matchData.holes || Array(18).fill("none")).slice();
+      holes[holeIndex] = result;
+
+      matchData.holes = holes;
+
+      update(ref(db, `matches/${matchId}`), {
+        holes,
+        updatedAt: Date.now(),
+      }).catch(console.error);
+
+      if (result === "red" || result === "blue") {
+        const holeNumber = holeConfigs[holeIndex]?.num ?? (holeIndex + 1);
+        handleHoleWin(result, holeNumber);
+      }
+
+      try {
+        if (navigator.vibrate) {
+          navigator.vibrate([15, 40, 20]);
+        }
+      } catch (e) {}
+
+      renderMain();
+    }
+
+    // returns downloadURL on success
+    async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
+      try {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        // back camera hint (not selfie)
+        input.capture = "environment";
+
+        const file = await new Promise((resolve, reject) => {
+          input.onchange = () => resolve(input.files[0]);
+          input.onerror = reject;
+          input.click();
+        });
+
+        if (!file) return null;
+
+        const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const storagePath = `matchPhotos/${matchId}/${imageId}`;
+        const storageRef = sRef(storage, storagePath);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        const photosRef = ref(db, "photos");
+        const photoMeta = {
+          matchId,
+          holeNumber: holeNumber || null,
+          createdAt: Date.now(),
+          url: downloadURL,
+          type: options.group ? "group" : "regular",
+        };
+        await set(push(photosRef), photoMeta);
+
+        if (options.group) {
+          await update(ref(db, `matches/${matchId}`), {
+            groupPhotoUrl: downloadURL,
+            groupPhotoTakenAt: Date.now(),
+          });
+        }
+
+        return downloadURL;
+      } catch (err) {
+        console.error("Photo upload failed", err);
+        alert("Photo upload failed: " + (err && err.message ? err.message : "Please try again."));
+        return null;
+      }
+    }
+
+    function handleHoleWin(team, holeNumber) {
+      const { red, blue } = getMatchPlayersFor(matchData || {});
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
+      const teamLabel = team === "red" ? redLasts : blueLasts;
+
+      showWinToast(teamLabel, holeNumber, () => {
+        captureAndUploadPhoto(matchId, holeNumber);
+      });
+    }
+
+    function showWinToast(teamLabel, holeNumber, onTakePhoto) {
+      toastContainer.innerHTML = "";
+      toastContainer.classList.add("active");
+
+      const toast = document.createElement("div");
+      toast.className = "toast";
+
+      toast.innerHTML = `
+        <div class="toast-icon">🏆</div>
+        <div class="toast-content">
+          <div class="toast-title">Nice win!</div>
+          <div class="toast-body">
+            ${teamLabel} wins Hole ${holeNumber}. Want to grab a quick photo?
+          </div>
+        </div>
+        <div class="toast-actions">
+          <button class="toast-btn primary">Take photo</button>
+          <button class="toast-btn secondary">Dismiss</button>
+        </div>
+      `;
+
+      const primaryBtn = toast.querySelector(".toast-btn.primary");
+      const secondaryBtn = toast.querySelector(".toast-btn.secondary");
+
+      const removeToast = () => {
+        toastContainer.classList.remove("active");
+        toastContainer.innerHTML = "";
+      };
+
+      primaryBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeToast();
+        if (typeof onTakePhoto === "function") {
+          onTakePhoto();
+        }
+      });
+
+      secondaryBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeToast();
+      });
+
+      toastContainer.onclick = (e) => {
+        if (e.target === toastContainer) {
+          removeToast();
+        }
+      };
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        if (toastContainer.classList.contains("active")) {
+          removeToast();
+        }
+      }, 7000);
+    }
+
+    // Manual photo (non-group, no hole prompt)
+    function manualPhotoUpload() {
+      if (!matchId) return;
+      captureAndUploadPhoto(matchId, null);
+    }
+
+    // Group photo for the match – only if none exists
+    async function matchGroupPhotoUpload() {
+      if (!matchId) return;
+
+      if (matchData && matchData.groupPhotoUrl) {
+        alert("There is already a group photo for this match. Clear it first to take another.");
+        return;
+      }
+
+      const url = await captureAndUploadPhoto(matchId, null, { group: true });
+      if (url) {
+        if (!matchData) {
+          matchData = {
+            type: Number(matchId) > 8 ? "back" : "front",
+            holes: Array(18).fill("none"),
+          };
+        }
+        matchData.groupPhotoUrl = url;
+        matchData.groupPhotoTakenAt = Date.now();
+        renderMain(); // hide big box, show clear button
+      }
+    }
+
+    // Clear group photo with confirmation, then allow a new one
+    async function clearMatchPhoto() {
+      if (!matchId) return;
+
+      const confirmed = window.confirm(
+        "Are you sure you want to clear the group photo for this match?"
+      );
+      if (!confirmed) return;
+
+      try {
+        await update(ref(db, `matches/${matchId}`), {
+          groupPhotoUrl: null,
+          groupPhotoTakenAt: null
+        });
+
+        if (matchData) {
+          matchData.groupPhotoUrl = null;
+          matchData.groupPhotoTakenAt = null;
+        }
+
+        renderMain(); // show big box again
+      } catch (err) {
+        console.error("Failed to clear match photo", err);
+        alert("Could not clear the match photo. Try again.");
+      }
+    }
+
+    function renderMain() {
+      const hasMatchParam = !!matchId;
+
+      if (!settingsLoaded || !playersLoaded || !matchesLoaded) {
+        return;
+      }
+
+      if (!hasMatchParam) {
+        headerSubtitleEl.textContent = "Match admin – select a match";
+        matchListCard.style.display = "block";
+        scoreWrapper.style.display = "none";
+        holesCard.style.display = "none";
+        renderMatchList();
+      } else {
+        headerSubtitleEl.textContent = "Match scoring (admin)";
+        matchListCard.style.display = "none";
+        scoreWrapper.style.display = "block";
+        holesCard.style.display = "block";
+
+        if (!matchData) {
+          matchData = {
+            type: Number(matchId) > 8 ? "back" : "front",
+            holes: Array(18).fill("none"),
+          };
+        }
+        if (!matchData.holes) {
+          matchData.holes = Array(18).fill("none");
+        }
+
+        renderScoreBubble();
+        renderHoles();
+
+        if (cameraButton) {
+          cameraButton.onclick = manualPhotoUpload;
+        }
+
+        if (groupPhotoBigButton && clearMatchPhotoButton && groupPhotoArea) {
+          const hasGroupPhoto = !!(matchData && matchData.groupPhotoUrl);
+
+          groupPhotoArea.style.display = hasGroupPhoto ? "none" : "block";
+          clearMatchPhotoButton.style.display = hasGroupPhoto ? "inline-flex" : "none";
+
+          groupPhotoBigButton.onclick = matchGroupPhotoUpload;
+          clearMatchPhotoButton.onclick = clearMatchPhoto;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
