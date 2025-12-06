@@ -512,7 +512,6 @@
       transition: background-color 0.2s ease;
     }
 
-    /* Shading for hole based on winner */
     .hole-row-red {
       background: var(--red-soft);
     }
@@ -769,6 +768,10 @@
     <section id="holesCard" class="card holes-card">
       <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
       <div id="holesContainer"></div>
+      <div class="subtext">
+        Tap the last-names / Halved / last-names / Clear buttons to set or clear each hole.
+        Pills at the top show the match standing after each hole (1 up, AS, 2 up, …).
+      </div>
     </section>
   </main>
 
@@ -1222,24 +1225,54 @@
       matchTitleEl.textContent = redLasts + " vs " + blueLasts;
       matchSubtitleEl.textContent = typeLabel + " · " + matchLabel;
 
-      const { leader, diff, centerText, statusTag, totalHoles } = computeScoreSummary();
+      const { leader, diff, centerText, statusTag } = computeScoreSummary();
 
       scoreRedLabel.textContent = redLasts;
       scoreBlueLabel.textContent = blueLasts;
       scoreCenterLabel.textContent = centerText;
       matchTagEl.textContent = statusTag;
 
-      const maxShift = 20;
-      let centerPct = 50;
+      // --- Race to 5 slider logic ---
+      const holes = matchData.holes || Array(18).fill("none");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
 
-      if (diff !== 0 && totalHoles > 0) {
-        const relative = Math.min(1, Math.abs(diff) / totalHoles);
-        const shift = relative * maxShift;
-        centerPct = diff > 0 ? 50 + shift : 50 - shift;
+      let redWins = 0;
+      let blueWins = 0;
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        if (h === "blue") blueWins++;
       }
 
-      const redColor = leader === "red" ? "var(--red)" : "var(--red-soft)";
-      const blueColor = leader === "blue" ? "var(--blue)" : "var(--blue-soft)";
+      const targetWins = 5;
+      const leaderWins = Math.max(redWins, blueWins);
+
+      let centerPct = 50; // percentage of bar that is red (0..100)
+
+      if (redWins === blueWins) {
+        // Tied = perfect 50/50
+        centerPct = 50;
+      } else if (leaderWins >= targetWins) {
+        // First to 5 => full bar for winner
+        centerPct = diff > 0 ? 100 : 0; // 100% red or 0% red (100% blue)
+      } else if (diff !== 0) {
+        // Use the margin to tilt the bar, up to ~80% at 4 "points"
+        const margin = Math.min(targetWins, Math.abs(diff)); // 0..5
+        const maxShift = 40; // how far from 50% we can slide
+        const shift = maxShift * (margin / targetWins); // 0..40
+
+        centerPct = diff > 0 ? 50 + shift : 50 - shift;
+        // Example: diff = -4 => centerPct = 50 - (40 * 4/5) = 18 ≈ 20
+        // That makes ~80% of the bar blue.
+      }
+
+      const redColor = leader === "red" || (leaderWins >= targetWins && diff > 0)
+        ? "var(--red)"
+        : "var(--red-soft)";
+      const blueColor = leader === "blue" || (leaderWins >= targetWins && diff < 0)
+        ? "var(--blue)"
+        : "var(--blue-soft)";
 
       scoreSliderFill.style.background =
         "linear-gradient(to right, " +
