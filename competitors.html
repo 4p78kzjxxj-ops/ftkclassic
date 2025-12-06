@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic 2025 – Competitors</title>
+  <title>FTK Classic – Competitors</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
-      --red: #b91c1c;
-      --blue: #1d4ed8;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
+      --red: #b91c1c;
+      --blue: #1d4ed8;
       --live: #22c55e;
     }
 
@@ -42,7 +42,7 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .site-header-left {
@@ -69,6 +69,12 @@
       color: var(--muted);
     }
 
+    .viewer-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
     .nav-links {
       margin-left: auto;
       display: flex;
@@ -88,12 +94,6 @@
 
     .nav-btn.secondary {
       background: #f3f4f6;
-    }
-
-    .viewer-count {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
     }
 
     main {
@@ -116,121 +116,135 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
 
-    .team-summary-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
     .team-summary {
-      flex: 1;
-      min-width: 0;
-      border-radius: 0.8rem;
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem 0.55rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .team-summary-item {
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
       background: #f9fafb;
+      border: 1px solid #e5e7eb;
     }
 
-    .team-summary-name {
-      font-size: 0.88rem;
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-    }
-
-    .team-summary-name.red { color: var(--red); }
-    .team-summary-name.blue { color: var(--blue); }
-
-    .team-summary-line {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .team-summary-value {
-      font-weight: 600;
-      color: #111827;
-    }
+    .team-summary-item.red { color: var(--red); }
+    .team-summary-item.blue { color: var(--blue); }
 
     .matches-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.55rem;
     }
 
     .match-card {
       border-radius: 0.9rem;
       border: 1px solid #e5e7eb;
-      padding: 0.5rem 0.55rem;
       background: #ffffff;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
-      position: relative;
+      padding: 0.55rem 0.55rem 0.6rem;
     }
 
-    .match-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-    }
-
-    .match-card.red-live   { background: #fef2f2; border-color: #fecaca; box-shadow: 0 0 0 1px rgba(248,113,113,0.4); }
-    .match-card.blue-live  { background: #eff6ff; border-color: #bfdbfe; box-shadow: 0 0 0 1px rgba(59,130,246,0.4); }
-    .match-card.red-final  { background: #fef2f2; border-color: #fecaca; }
-    .match-card.blue-final { background: #eff6ff; border-color: #bfdbfe; }
-    .match-card.even-live  { background: #f3f4f6; border-color: #d1d5db; box-shadow: 0 0 0 1px rgba(148,163,184,0.4); }
-    .match-card.even-final { background: #f9fafb; border-color: #e5e7eb; }
-    .match-card.not-started{ background: #ffffff; border-style: dashed; }
-
-    .match-header-row {
+    .match-card-header {
       display: flex;
       justify-content: space-between;
       gap: 0.4rem;
-      align-items: center;
-      margin-bottom: 0.15rem;
+      margin-bottom: 0.3rem;
     }
 
-    .match-title {
+    .match-card-title {
       font-size: 0.88rem;
       font-weight: 600;
     }
 
-    .match-subtitle {
-      font-size: 0.76rem;
+    .match-card-sub {
+      font-size: 0.78rem;
       color: var(--muted);
+      text-align: right;
     }
 
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
+    .match-card-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr) minmax(0, 1.2fr);
+      gap: 0.4rem;
       align-items: center;
-      margin-top: 0.15rem;
-      font-size: 0.75rem;
-      color: var(--muted);
-      flex-wrap: wrap;
     }
 
-    .status-text {
+    @media (max-width: 700px) {
+      .match-card-body {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .match-center {
+        order: 3;
+      }
+    }
+
+    .match-side {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .side-label {
       font-size: 0.76rem;
+      font-weight: 600;
+      margin-bottom: 0.05rem;
     }
 
-    .pill-live {
+    .side-label.red { color: var(--red); }
+    .side-label.blue { color: var(--blue); }
+
+    .side-player-lines {
+      font-size: 0.8rem;
+    }
+
+    .side-player-lines div {
+      line-height: 1.2;
+    }
+
+    .side-player-lines span.hcp {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .match-center {
+      text-align: center;
+      font-size: 0.78rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    .status-pill {
+      padding: 0.16rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.74rem;
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid #bbf7d0;
+      min-height: 1.5rem;
+    }
+
+    .status-pill.live {
+      border-color: #bbf7d0;
       background: #dcfce7;
       color: #166534;
-      font-size: 0.72rem;
-      font-weight: 600;
-      white-space: nowrap;
+    }
+
+    .status-pill.final {
+      border-color: #d1d5db;
+      background: #e5e7eb;
+      color: #374151;
     }
 
     .live-dot {
@@ -248,79 +262,20 @@
       100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0); }
     }
 
-    .links-row {
-      display: flex;
-      gap: 0.4rem;
-      margin-top: 0.2rem;
-      flex-wrap: wrap;
+    .status-text {
+      font-size: 0.76rem;
+      color: #4b5563;
+    }
+
+    .match-link {
+      margin-top: 0.15rem;
       font-size: 0.75rem;
-    }
-
-    .link-pill {
-      padding: 0.15rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      background: #ffffff;
-      color: #111827;
       text-decoration: none;
-    }
-
-    .link-pill.secondary {
-      background: #f3f4f6;
-    }
-
-    /* Per-side stacked players with M/RM */
-
-    .match-players-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-top: 0.2rem;
-      font-size: 0.7rem;
-    }
-
-    .m-players-side {
-      display: flex;
-      flex-direction: column;
-      gap: 0.12rem;
-    }
-
-    .m-players-side-right {
-      align-items: flex-end;
-    }
-
-    .m-player {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.12rem;
-    }
-
-    .m-player-name {
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .m-pill {
+      padding: 0.2rem 0.7rem;
       border-radius: 999px;
       border: 1px solid #d1d5db;
-      padding: 0.05rem 0.32rem;
-      font-size: 0.63rem;
-      line-height: 1.2;
-      white-space: nowrap;
-    }
-
-    .m-pill.available {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
-      font-weight: 600;
-    }
-
-    .m-pill.used {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #7f1d1d;
-      font-weight: 600;
+      background: #f9fafb;
+      color: #111827;
     }
 
     .empty-state {
@@ -337,38 +292,30 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Competitors & match status</div>
+        <div class="site-subtitle">Competitors (read-only)</div>
         <div id="viewerCount" class="viewer-count">Viewing now: 0</div>
       </div>
     </div>
     <div class="nav-links">
       <a href="index.html" class="nav-btn secondary">Home</a>
-      <a href="spectator.html" class="nav-btn">Scores</a>
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="photos.html" class="nav-btn secondary">Photos</a>
+      <a href="admin.html" class="nav-btn">Admin</a>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <div class="section-title">Teams & handicaps</div>
-      <div class="team-summary-row">
-        <div class="team-summary">
-          <div class="team-summary-name red" id="redTeamName">Red</div>
-          <div class="team-summary-line">
-            Total handicap: <span class="team-summary-value" id="redTotalHcp">0</span>
-          </div>
+      <div class="section-title">Competitors & matches</div>
+      <div class="team-summary">
+        <div id="teamRedSummary" class="team-summary-item red">
+          Red team handicap: —
         </div>
-        <div class="team-summary">
-          <div class="team-summary-name blue" id="blueTeamName">Blue</div>
-          <div class="team-summary-line">
-            Total handicap: <span class="team-summary-value" id="blueTotalHcp">0</span>
-          </div>
+        <div id="teamBlueSummary" class="team-summary-item blue">
+          Blue team handicap: —
         </div>
       </div>
-    </section>
-
-    <section class="card">
-      <div class="section-title">Matches & competitors</div>
-      <div id="matchesContainer" class="matches-list">
+      <div id="matchesList" class="matches-list">
         <div class="empty-state">Loading competitors…</div>
       </div>
     </section>
@@ -380,10 +327,10 @@
       getDatabase,
       ref,
       onValue,
-      onDisconnect,
-      serverTimestamp,
       push,
       set,
+      serverTimestamp,
+      onDisconnect,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -404,18 +351,16 @@
     const matchesRef = ref(db, "matches");
 
     const viewerCountEl = document.getElementById("viewerCount");
-    const redTeamNameEl = document.getElementById("redTeamName");
-    const blueTeamNameEl = document.getElementById("blueTeamName");
-    const redTotalHcpEl = document.getElementById("redTotalHcp");
-    const blueTotalHcpEl = document.getElementById("blueTotalHcp");
-    const matchesContainer = document.getElementById("matchesContainer");
+    const teamRedSummaryEl = document.getElementById("teamRedSummary");
+    const teamBlueSummaryEl = document.getElementById("teamBlueSummary");
+    const matchesListEl = document.getElementById("matchesList");
 
     let settings = {};
     let players = {};
     let matches = {};
 
-    function setupPresence(db, pageKey, onCountChange) {
-      const connectionsRef = ref(db, `presence/${pageKey}`);
+    function setupPresence() {
+      const connectionsRef = ref(db, "presence/competitors");
       const connectedRef = ref(db, ".info/connected");
 
       onValue(connectedRef, (snap) => {
@@ -430,16 +375,14 @@
         (snap) => {
           const val = snap.val();
           const count = val ? Object.keys(val).length : 0;
-          onCountChange(count);
+          viewerCountEl.textContent =
+            count === 1 ? "Viewing now: 1 viewer" : `Viewing now: ${count} viewers`;
         },
-        () => onCountChange(0)
+        () => (viewerCountEl.textContent = "Viewing now: 0 viewers")
       );
     }
 
-    setupPresence(db, "competitors", (count) => {
-      viewerCountEl.textContent =
-        count === 1 ? "Viewing now: 1 person" : `Viewing now: ${count} people`;
-    });
+    setupPresence();
 
     function getTeamNames() {
       const t = settings.teamNames || {};
@@ -452,34 +395,15 @@
       return parts[parts.length - 1];
     }
 
-    function computeTotals() {
-      let redTotal = 0;
-      let blueTotal = 0;
-
-      Object.entries(players || {}).forEach(([id, p]) => {
-        const h = Number(p.handicap || 0) || 0;
-        if (p.team === "red") redTotal += h;
-        else if (p.team === "blue") blueTotal += h;
-      });
-
-      const { red: redName, blue: blueName } = getTeamNames();
-      redTeamNameEl.textContent = redName;
-      blueTeamNameEl.textContent = blueName;
-      redTotalHcpEl.textContent = redTotal.toFixed(1).replace(/\.0$/, "");
-      blueTotalHcpEl.textContent = blueTotal.toFixed(1).replace(/\.0$/, "");
-    }
-
     function computeMatchState(holes, type) {
       const arr = Array.isArray(holes) ? holes : [];
       const holeCount = 9;
-      const start = type === "front" ? 0 : 9;
-      const end = type === "front" ? 9 : 18;
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
 
       const playedIndices = [];
       for (let i = start; i < end; i++) {
-        if (arr[i] && arr[i] !== "none") {
-          playedIndices.push(i);
-        }
+        if (arr[i] && arr[i] !== "none") playedIndices.push(i);
       }
 
       if (playedIndices.length === 0) {
@@ -510,7 +434,6 @@
         ? closingIndex
         : playedIndices[playedIndices.length - 1];
       const throughHole = throughIndex + 1;
-
       const margin = Math.abs(diff);
       const holesLeft = done
         ? holeCount - (closingSeqIndex + 1)
@@ -519,158 +442,190 @@
       return { diff, done, throughHole, margin, holesLeft };
     }
 
-    function computeMatchTitle(m, id) {
+    function renderTeamSummaries() {
+      const { red: redName, blue: blueName } = getTeamNames();
+      let redTotal = 0;
+      let blueTotal = 0;
+
+      Object.values(players || {}).forEach((p) => {
+        const h = Number(p.handicap || 0) || 0;
+        if ((p.team || "red") === "red") redTotal += h;
+        else blueTotal += h;
+      });
+
+      teamRedSummaryEl.textContent = `${redName} team handicap: ${redTotal}`;
+      teamBlueSummaryEl.textContent = `${blueName} team handicap: ${blueTotal}`;
+    }
+
+    function computeSideLabels(m) {
       const redIds = m.red?.players || [];
       const blueIds = m.blue?.players || [];
       const redNames = redIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
       const blueNames = blueIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
-
-      if (redNames.length && blueNames.length) {
-        return `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
-      }
-      return m.name || `Match ${id}`;
+      const { red: redTeam, blue: blueTeam } = getTeamNames();
+      return {
+        red: redNames.length ? redNames.join(" / ") : redTeam,
+        blue: blueNames.length ? blueNames.join(" / ") : blueTeam,
+        redFull: redIds.map((pid) => players[pid]).filter(Boolean),
+        blueFull: blueIds.map((pid) => players[pid]).filter(Boolean),
+      };
     }
 
-    function buildPlayersMulliganHTML(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
+    function makeMatchStatusText(id, m) {
+      const type = m.type || (Number(id) <= 8 ? "front" : "back");
+      const { diff, done, throughHole, margin, holesLeft } = computeMatchState(m.holes || [], type);
+      const labels = computeSideLabels(m);
+      const startHole = type === "back" ? 10 : 1;
+      const currentHole = throughHole ? Math.min(18, throughHole + 1) : startHole;
 
-      if (!redIds.length && !blueIds.length) return "";
+      if (!throughHole) {
+        return {
+          pill: "Not started",
+          pillClass: "status-pill",
+          text: `Match ${id} • Not started`,
+        };
+      }
 
-      const renderPlayer = (pid) => {
-        const p = players[pid];
-        if (!p) return "";
-        const ln = getLastName(p.name || "Player");
-        const mUsed = !!p.mulliganUsed;
-        const rmUsed = !!p.reverseMulliganUsed;
+      if (done) {
+        if (diff === 0) {
+          return {
+            pill: "Final",
+            pillClass: "status-pill final",
+            text: `Match ${id} • Final – Halved`,
+          };
+        }
+        if (diff > 0) {
+          return {
+            pill: "Final",
+            pillClass: "status-pill final",
+            text: `Match ${id} • Final – ${labels.red} wins ${margin}&${holesLeft}`,
+          };
+        }
+        return {
+          pill: "Final",
+          pillClass: "status-pill final",
+          text: `Match ${id} • Final – ${labels.blue} wins ${margin}&${holesLeft}`,
+        };
+      }
 
-        return `
-          <span class="m-player">
-            <span class="m-player-name">${ln}</span>
-            <span class="m-pill ${mUsed ? "used" : "available"}">M</span>
-            <span class="m-pill ${rmUsed ? "used" : "available"}">RM</span>
-          </span>
-        `;
+      // LIVE
+      let line = `Match ${id} • On hole ${currentHole} – `;
+      if (diff === 0) {
+        line += `AS thru ${throughHole}`;
+      } else if (diff > 0) {
+        line += `${labels.red} ${Math.abs(diff)} up thru ${throughHole}`;
+      } else {
+        line += `${labels.blue} ${Math.abs(diff)} up thru ${throughHole}`;
+      }
+
+      return {
+        pill: "On course",
+        pillClass: "status-pill live",
+        text: line,
       };
-
-      return `
-        <div class="match-players-row">
-          <div class="m-players-side">
-            ${redIds.map(renderPlayer).join("")}
-          </div>
-          <div class="m-players-side m-players-side-right">
-            ${blueIds.map(renderPlayer).join("")}
-          </div>
-        </div>
-      `;
     }
 
     function renderMatches() {
-      const ids = Object.keys(matches || {}).sort((a, b) => Number(a) - Number(b));
+      const { red: redTeamName, blue: blueTeamName } = getTeamNames();
+      const ids = Object.keys(matches || {})
+        .map((id) => Number(id))
+        .filter((n) => !Number.isNaN(n))
+        .sort((a, b) => a - b);
+
       if (!ids.length) {
-        matchesContainer.innerHTML = '<div class="empty-state">No matches assigned yet.</div>';
+        matchesListEl.innerHTML =
+          '<div class="empty-state">No matches defined yet.</div>';
         return;
       }
 
-      let html = "";
+      const html = ids
+        .map((id) => {
+          const m = matches[id] || {};
+          const labels = computeSideLabels(m);
+          const status = makeMatchStatusText(id, m);
 
-      for (const id of ids) {
-        const m = matches[id];
-        if (!m) continue;
+          const redLines = labels.redFull.length
+            ? labels.redFull
+                .map(
+                  (p) =>
+                    `<div>${p.name || "Player"} <span class="hcp">(HCP ${p.handicap ?? 0})</span></div>`
+                )
+                .join("")
+            : `<div>No players</div>`;
 
-        const type = m.type || (Number(id) <= 8 ? "front" : "back");
-        const typeLabel = type === "front" ? "Front 9" : "Back 9";
-        const holes = m.holes || [];
+          const blueLines = labels.blueFull.length
+            ? labels.blueFull
+                .map(
+                  (p) =>
+                    `<div>${p.name || "Player"} <span class="hcp">(HCP ${p.handicap ?? 0})</span></div>`
+                )
+                .join("")
+            : `<div>No players</div>`;
 
-        const state = computeMatchState(holes, type);
-        const { diff, done, throughHole, margin, holesLeft } = state;
-
-        const title = computeMatchTitle(m, id);
-
-        let cardClass = "match-card ";
-        if (throughHole === null && !done && diff === 0)      cardClass += "not-started";
-        else if (done && diff === 0)                          cardClass += "even-final";
-        else if (!done && diff === 0)                         cardClass += "even-live";
-        else if (diff > 0 && done)                            cardClass += "red-final";
-        else if (diff < 0 && done)                            cardClass += "blue-final";
-        else if (diff > 0 && !done)                           cardClass += "red-live";
-        else if (diff < 0 && !done)                           cardClass += "blue-live";
-
-        const hasActivity = throughHole !== null;
-        let statusText = `Match ${id} • ${typeLabel}`;
-        let matchStatusDetail = "";
-
-        if (!hasActivity) {
-          matchStatusDetail = "Not started";
-        } else if (done) {
-          if (diff === 0) {
-            matchStatusDetail = "Final • Halved";
-          } else if (diff > 0) {
-            matchStatusDetail = `Final • Red wins ${margin}&${holesLeft}`;
-          } else {
-            matchStatusDetail = `Final • Blue wins ${margin}&${holesLeft}`;
-          }
-        } else {
-          const thru = throughHole || "";
-          const leadSide = diff > 0 ? "Red" : diff < 0 ? "Blue" : "AS";
-          const leadText =
-            diff === 0
-              ? "AS"
-              : `${Math.abs(diff)} down`;
-          // From perspective of red side: diff>0 => red up, diff<0 => red down
-          const perspective = diff === 0
-            ? "AS"
-            : diff > 0
-              ? `${Math.abs(diff)} up`
-              : `${Math.abs(diff)} down`;
-
-          matchStatusDetail =
-            thru
-              ? `Currently on hole ${thru + 1} • Thru ${thru} • ${perspective}`
-              : "On course";
-        }
-
-        const onCourse = hasActivity && !done;
-
-        const playersMulliganHTML = buildPlayersMulliganHTML(m);
-
-        html += `
-          <div class="${cardClass}">
-            <div class="match-header-row">
-              <div>
-                <div class="match-title">${title}</div>
-                <div class="match-subtitle">${statusText}</div>
+          return `
+            <div class="match-card">
+              <div class="match-card-header">
+                <div class="match-card-title">Match ${id}</div>
+                <div class="match-card-sub">
+                  ${id <= 8 ? "Front 9" : "Back 9"}
+                </div>
               </div>
-              ${onCourse
-                ? `<div class="pill-live">
-                     <span class="live-dot"></span>
-                     <span>On Course</span>
-                   </div>`
-                : ""}
-            </div>
-            ${playersMulliganHTML}
-            <div class="status-row">
-              <div class="status-text">${matchStatusDetail}</div>
-              <div class="links-row">
-                <a class="link-pill secondary" href="match_spectator.html?id=${id}">View match</a>
-                <a class="link-pill" href="match.html?id=${id}">Admin score</a>
+              <div class="match-card-body">
+                <div class="match-side">
+                  <div class="side-label red">${redTeamName}</div>
+                  <div class="side-player-lines">
+                    ${redLines}
+                  </div>
+                </div>
+                <div class="match-center">
+                  <div class="${status.pillClass}">
+                    ${
+                      status.pillClass.includes("live")
+                        ? '<span class="live-dot"></span>'
+                        : ""
+                    }
+                    <span>${status.pill}</span>
+                  </div>
+                  <div class="status-text">${status.text}</div>
+                  <a
+                    class="match-link"
+                    href="match_spectator.html?id=${id}"
+                  >
+                    View match
+                  </a>
+                </div>
+                <div class="match-side">
+                  <div class="side-label blue">${blueTeamName}</div>
+                  <div class="side-player-lines">
+                    ${blueLines}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-      }
+          `;
+        })
+        .join("");
 
-      matchesContainer.innerHTML = html;
+      matchesListEl.innerHTML = html;
     }
 
-    function renderAll() {
-      computeTotals();
+    // Live subscriptions
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      renderTeamSummaries();
       renderMatches();
-    }
+    });
 
-    onValue(settingsRef, (s) => { settings = s.val() || {}; renderAll(); });
-    onValue(playersRef,  (s) => { players  = s.val() || {}; renderAll(); });
-    onValue(matchesRef,  (s) => { matches  = s.val() || {}; renderAll(); });
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      renderTeamSummaries();
+      renderMatches();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      renderMatches();
+    });
   </script>
 </body>
 </html>

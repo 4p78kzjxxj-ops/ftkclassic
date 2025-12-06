@@ -7,11 +7,14 @@
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
+      --red: #b91c1c;
+      --blue: #1d4ed8;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
     }
 
     * {
@@ -39,7 +42,7 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     .site-header-left {
@@ -87,12 +90,6 @@
       background: #f3f4f6;
     }
 
-    .viewer-count {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-    }
-
     main {
       display: flex;
       flex-direction: column;
@@ -105,6 +102,7 @@
       border-radius: 0.9rem;
       padding: 0.75rem;
       border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
     }
 
     .section-title {
@@ -113,72 +111,133 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
 
-    .match-photos-group {
-      margin-bottom: 0.75rem;
+    .empty-state {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0.75rem 0.5rem;
     }
 
-    .group-header {
+    .match-group {
+      margin-bottom: 1rem;
+    }
+
+    .match-heading {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
       display: flex;
       justify-content: space-between;
       gap: 0.5rem;
-      align-items: baseline;
-      margin-bottom: 0.25rem;
+      flex-wrap: wrap;
     }
 
-    .group-title {
-      font-size: 0.86rem;
-      font-weight: 600;
+    .match-heading-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
     }
 
-    .group-subtitle {
-      font-size: 0.72rem;
+    .match-heading-title {
+      font-size: 0.9rem;
+    }
+
+    .match-heading-sub {
+      font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    .match-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      align-self: flex-start;
+      white-space: nowrap;
     }
 
     .photos-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
 
-    @media (min-width: 600px) {
+    @media (min-width: 640px) {
       .photos-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
-    .photo-thumb {
+    .photo-card {
+      background: #f9fafb;
       border-radius: 0.7rem;
-      overflow: hidden;
       border: 1px solid #e5e7eb;
-      background: #e5e7eb;
-      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
-    .photo-thumb img {
+    .photo-thumb-wrapper {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: #e5e7eb;
+    }
+
+    .photo-thumb {
       width: 100%;
       height: 100%;
-      display: block;
       object-fit: cover;
+      display: block;
     }
 
     .photo-meta {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
+      padding: 0.25rem 0.45rem 0.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
     }
 
-    .empty-state {
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-      padding: 0.75rem 0.5rem;
+    .photo-hole {
+      font-size: 0.78rem;
+      font-weight: 600;
     }
+
+    .photo-hole span {
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .photo-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .photo-timestamp {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .photo-hashtag {
+      font-size: 0.7rem;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .photo-match-label {
+      font-size: 0.7rem;
+      color: #4b5563;
+    }
+
   </style>
 </head>
 <body>
@@ -188,20 +247,19 @@
       <div>
         <div class="site-title">FTK Classic</div>
         <div class="site-subtitle">Tournament photos</div>
-        <div id="viewerCount" class="viewer-count">Viewing now: 0</div>
       </div>
     </div>
     <div class="nav-links">
       <a href="index.html" class="nav-btn secondary">Home</a>
-      <a href="spectator.html" class="nav-btn">Scores</a>
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <div class="section-title">Photos by match</div>
+      <div class="section-title">Gallery</div>
       <div id="photosContainer">
-        <div class="empty-state">No photos yet. Once players start uploading, they’ll show up here.</div>
+        <div class="empty-state">Loading photos…</div>
       </div>
     </section>
   </main>
@@ -212,10 +270,6 @@
       getDatabase,
       ref,
       onValue,
-      onDisconnect,
-      serverTimestamp,
-      push,
-      set,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -231,45 +285,24 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const photosContainer = document.getElementById("photosContainer");
-    const viewerCountEl = document.getElementById("viewerCount");
-
-    const settingsRef = ref(db, "settings");
-    const playersRef = ref(db, "players");
-    const matchesRef = ref(db, "matches");
     const photosRef = ref(db, "photos");
+    const matchesRef = ref(db, "matches");
+    const settingsRef = ref(db, "settings");
 
-    let settings = {};
-    let players = {};
+    const photosContainer = document.getElementById("photosContainer");
+
     let matches = {};
+    let settings = {};
     let photos = {};
 
-    function setupPresence(db, pageKey, onCountChange) {
-      const connectionsRef = ref(db, `presence/${pageKey}`);
-      const connectedRef = ref(db, ".info/connected");
+    let matchesLoaded = false;
+    let settingsLoaded = false;
+    let photosLoaded = false;
 
-      onValue(connectedRef, (snap) => {
-        if (snap.val() === false) return;
-        const conRef = push(connectionsRef);
-        onDisconnect(conRef).remove().catch(() => {});
-        set(conRef, { connectedAt: serverTimestamp() }).catch(() => {});
-      });
-
-      onValue(
-        connectionsRef,
-        (snap) => {
-          const val = snap.val();
-          const count = val ? Object.keys(val).length : 0;
-          onCountChange(count);
-        },
-        () => onCountChange(0)
-      );
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
     }
-
-    setupPresence(db, "photos", (count) => {
-      viewerCountEl.textContent =
-        count === 1 ? "Viewing now: 1 person" : `Viewing now: ${count} people`;
-    });
 
     function getLastName(fullName) {
       if (!fullName) return "";
@@ -277,99 +310,146 @@
       return parts[parts.length - 1];
     }
 
-    function computeMatchTitle(matchId) {
-      const m = matches[matchId];
-      if (!m) return `Match ${matchId}`;
+    function describeMatch(matchId, matchData) {
+      if (!matchData) return `Match ${matchId}`;
+      const idNum = Number(matchId);
+      const type = matchData.type || (idNum <= 8 ? "front" : "back");
+      const typeLabel = type === "back" ? "Back 9" : "Front 9";
 
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
-      const redNames = redIds.map(id => players[id]?.name).filter(Boolean).map(getLastName);
-      const blueNames = blueIds.map(id => players[id]?.name).filter(Boolean).map(getLastName);
+      const redNames = (matchData.red?.players || [])
+        .map(pid => matchData.playerDetails?.[pid]?.name || "")
+        .filter(Boolean)
+        .map(getLastName);
+      const blueNames = (matchData.blue?.players || [])
+        .map(pid => matchData.playerDetails?.[pid]?.name || "")
+        .filter(Boolean)
+        .map(getLastName);
 
+      let title = `Match ${matchId}`;
       if (redNames.length && blueNames.length) {
-        return `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
+        title = `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
       }
-      return m.name || `Match ${matchId}`;
+
+      return {
+        title,
+        subtitle: `${typeLabel} • Match ${matchId}`
+      };
     }
 
-    function computeMatchSubtitle(matchId) {
-      const m = matches[matchId];
-      if (!m) return "";
-      const type = m.type || (Number(matchId) <= 8 ? "front" : "back");
-      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
-      return `${typeLabel} • Match ${matchId}`;
+    function formatTime(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        if (Number.isNaN(d.getTime())) return "";
+        const opts = { hour: "numeric", minute: "2-digit" };
+        return d.toLocaleTimeString([], opts);
+      } catch {
+        return "";
+      }
     }
 
-    function renderPhotos() {
-      const matchIds = Object.keys(photos || {});
-      if (!matchIds.length) {
-        photosContainer.innerHTML =
-          '<div class="empty-state">No photos yet. Once players start uploading, they’ll show up here.</div>';
+    function render() {
+      if (!matchesLoaded || !settingsLoaded || !photosLoaded) {
         return;
       }
 
-      // sort matches numerically
-      matchIds.sort((a, b) => Number(a) - Number(b));
+      const photoEntries = Object.entries(photos || {});
+      if (!photoEntries.length) {
+        photosContainer.innerHTML = '<div class="empty-state">No photos yet. Be the first to upload from a match!</div>';
+        return;
+      }
+
+      // Group photos by matchId
+      const groups = {};
+      for (const [id, p] of photoEntries) {
+        const matchId = p.matchId || "unknown";
+        if (!groups[matchId]) groups[matchId] = [];
+        groups[matchId].push({ id, ...p });
+      }
+
+      // Sort matches numerically, unknown at end
+      const matchIds = Object.keys(groups).sort((a, b) => {
+        const na = Number(a), nb = Number(b);
+        if (Number.isNaN(na) && Number.isNaN(nb)) return a.localeCompare(b);
+        if (Number.isNaN(na)) return 1;
+        if (Number.isNaN(nb)) return -1;
+        return na - nb;
+      });
+
+      const { red: redTeam, blue: blueTeam } = getTeamNames();
 
       let html = "";
+
       for (const mid of matchIds) {
-        const group = photos[mid];
-        if (!group) continue;
+        const matchData = matches[mid];
+        const desc = describeMatch(mid, matchData);
+        const list = groups[mid];
 
-        const entries = Object.entries(group)
-          .map(([id, p]) => ({ id, ...p }))
-          .filter(p => p.url)
-          .sort((a, b) => (a.uploadedAt || 0) - (b.uploadedAt || 0));
+        // newest first
+        list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-        if (!entries.length) continue;
-
-        html += `
-          <div class="match-photos-group">
-            <div class="group-header">
-              <div>
-                <div class="group-title">${computeMatchTitle(mid)}</div>
-                <div class="group-subtitle">${computeMatchSubtitle(mid)}</div>
-              </div>
-              <div class="group-subtitle">${entries.length} photo${entries.length === 1 ? "" : "s"}</div>
+        html += `<div class="match-group">
+          <div class="match-heading">
+            <div class="match-heading-main">
+              <div class="match-heading-title">${desc.title}</div>
+              <div class="match-heading-sub">${desc.subtitle}</div>
             </div>
-            <div class="photos-grid">
-              ${entries
-                .map(
-                  (p) => `
-                <div class="photo-thumb" data-url="${p.url}">
-                  <img src="${p.url}" alt="Match ${mid} photo" loading="lazy" />
-                </div>
-              `
-                )
-                .join("")}
-            </div>
+            <div class="match-tag">${list.length} photo${list.length === 1 ? "" : "s"}</div>
           </div>
+          <div class="photos-grid">
         `;
+
+        for (const p of list) {
+          const url = p.url || "";
+          const hole = p.holeNumber ?? p.hole ?? null;   // support both keys
+          const holeLabel = hole ? `Hole ${hole}` : "Hole —";
+          const timeLabel = formatTime(p.createdAt);
+          const tag = "#ftkclassic";
+
+          html += `
+            <div class="photo-card">
+              <div class="photo-thumb-wrapper">
+                ${url
+                  ? `<img src="${url}" alt="${tag}" class="photo-thumb" loading="lazy" />`
+                  : ""}
+              </div>
+              <div class="photo-meta">
+                <div class="photo-hole">${holeLabel} <span>${timeLabel ? "• " + timeLabel : ""}</span></div>
+                <div class="photo-bottom-row">
+                  <div class="photo-match-label">${p.caption || ""}</div>
+                  <div class="photo-hashtag">${tag}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        html += `</div></div>`;
       }
 
-      if (!html) {
-        photosContainer.innerHTML =
-          '<div class="empty-state">No photos yet. Once players start uploading, they’ll show up here.</div>';
-      } else {
-        photosContainer.innerHTML = html;
-      }
+      photosContainer.innerHTML = html;
     }
 
-    photosContainer.addEventListener("click", (e) => {
-      const thumb = e.target.closest(".photo-thumb");
-      if (!thumb) return;
-      const url = thumb.getAttribute("data-url");
-      if (url) window.open(url, "_blank");
+    // Load settings, matches, photos
+
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      settingsLoaded = true;
+      render();
     });
 
-    function renderAll() {
-      renderPhotos();
-    }
+    // Matches: we may not have player names under each match; if not, we still show generic label.
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      matchesLoaded = true;
+      render();
+    });
 
-    onValue(settingsRef, (s) => { settings = s.val() || {}; renderAll(); });
-    onValue(playersRef,  (s) => { players  = s.val() || {}; renderAll(); });
-    onValue(matchesRef,  (s) => { matches  = s.val() || {}; renderAll(); });
-    onValue(photosRef,   (s) => { photos   = s.val() || {}; renderAll(); });
+    onValue(photosRef, (snap) => {
+      photos = snap.val() || {};
+      photosLoaded = true;
+      render();
+    });
   </script>
 </body>
 </html>
