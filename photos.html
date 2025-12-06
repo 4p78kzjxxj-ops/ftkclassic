@@ -14,35 +14,41 @@
       --border: #d1d5db;
       --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
+
     body {
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       padding: 0.75rem;
     }
+
     @media (min-width: 768px) {
       body {
         max-width: 900px;
         margin: 0 auto;
       }
     }
+
     .site-header {
       display: flex;
       align-items: center;
       gap: 0.6rem;
       margin-bottom: 0.5rem;
     }
+
     .site-header-left {
       display: flex;
       align-items: center;
       gap: 0.6rem;
     }
+
     .site-logo {
       height: 32px;
       width: auto;
@@ -50,20 +56,24 @@
       object-fit: cover;
       background: #e5e7eb;
     }
+
     .site-title {
       font-size: 1rem;
       font-weight: 700;
     }
+
     .site-subtitle {
       font-size: 0.75rem;
       color: var(--muted);
     }
+
     .nav-links {
       margin-left: auto;
       display: flex;
       gap: 0.4rem;
       flex-wrap: wrap;
     }
+
     .nav-btn {
       font-size: 0.8rem;
       border-radius: 999px;
@@ -73,15 +83,18 @@
       text-decoration: none;
       color: var(--text);
     }
+
     .nav-btn.secondary {
       background: #f3f4f6;
     }
+
     main {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       padding-bottom: 2rem;
     }
+
     .card {
       background: var(--card);
       border-radius: 0.9rem;
@@ -89,6 +102,7 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow-soft);
     }
+
     .section-title {
       font-size: 0.9rem;
       font-weight: 600;
@@ -99,24 +113,64 @@
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
+
     .empty-state {
       font-size: 0.85rem;
       color: var(--muted);
       text-align: center;
       padding: 0.75rem 0.5rem;
     }
+
+    .match-group-card {
+      background: #f9fafb;
+      border-radius: 0.9rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.6rem 0.6rem 0.7rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .match-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .match-group-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .match-group-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .match-group-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
+    /* 3-across thumbnails on mobile, 4-across larger */
     .photos-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.4rem;
     }
+
     @media (min-width: 768px) {
       .photos-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
+
     .photo-card {
-      background: #f9fafb;
+      background: #ffffff;
       border-radius: 0.6rem;
       border: 1px solid #e5e7eb;
       overflow: hidden;
@@ -124,54 +178,64 @@
       flex-direction: column;
       gap: 0.2rem;
     }
+
     .photo-thumb-wrapper {
       width: 100%;
       aspect-ratio: 4 / 5;
       overflow: hidden;
       background: #e5e7eb;
     }
+
     .photo-thumb {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
+
     .photo-meta {
       padding: 0.25rem 0.4rem 0.35rem;
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
     }
+
     .photo-top-row {
       display: flex;
       justify-content: space-between;
       gap: 0.3rem;
       align-items: baseline;
     }
+
     .photo-hole {
       font-size: 0.78rem;
       font-weight: 600;
     }
+
     .photo-hole span {
       font-weight: 500;
       color: var(--muted);
     }
+
     .photo-match {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--muted);
       text-align: right;
       white-space: nowrap;
     }
+
     .photo-bottom-row {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
       gap: 0.4rem;
     }
+
     .photo-timestamp {
       font-size: 0.7rem;
       color: var(--muted);
     }
+
     .photo-hashtag {
       font-size: 0.7rem;
       color: #4b5563;
@@ -225,17 +289,44 @@
     const db = getDatabase(app);
 
     const photosRef = ref(db, "photos");
+    const matchesRef = ref(db, "matches");
+    const playersRef = ref(db, "players");
+    const settingsRef = ref(db, "settings");
+
     const photosContainer = document.getElementById("photosContainer");
 
     let photos = {};
-    let photosLoaded = false;
+    let matches = {};
+    let players = {};
+    let settings = {};
 
+    let photosLoaded = false;
+    let matchesLoaded = false;
+    let playersLoaded = false;
+    let settingsLoaded = false;
+
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    // Flatten photos whether structure is:
+    // photos/{photoId} OR photos/{matchId}/{photoId}
     function flattenPhotos(obj, parentMatchId = null, out = []) {
       if (!obj || typeof obj !== "object") return out;
+
       for (const [key, value] of Object.entries(obj)) {
         if (!value || typeof value !== "object") continue;
+
         const hasUrl =
           "url" in value || "downloadURL" in value || "imageUrl" in value;
+
         if (hasUrl) {
           const photo = { id: key, ...value };
           if (!photo.matchId && parentMatchId) {
@@ -243,6 +334,7 @@
           }
           out.push(photo);
         } else {
+          // assume this level is a matchId and recurse
           flattenPhotos(value, key, out);
         }
       }
@@ -266,8 +358,46 @@
       }
     }
 
+    function buildMatchDescription(matchId) {
+      const m = matches[matchId];
+      const teamNames = getTeamNames();
+      const idNum = Number(matchId);
+      const type = m ? (m.type || (idNum <= 8 ? "front" : "back")) : (idNum <= 8 ? "front" : "front");
+      const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+      if (!m) {
+        return {
+          vsTitle: `Match ${matchId || "?"}`,
+          subLabel: `${typeLabel} • Match ${matchId || "?"}`,
+        };
+      }
+
+      const details = m.playerDetails || {};
+      const redIds = m.red?.players || [];
+      const blueIds = m.blue?.players || [];
+
+      const redNames = redIds
+        .map(pid => details[pid]?.name || players[pid]?.name || "")
+        .filter(Boolean)
+        .map(getLastName);
+      const blueNames = blueIds
+        .map(pid => details[pid]?.name || players[pid]?.name || "")
+        .filter(Boolean)
+        .map(getLastName);
+
+      const redLabel = redNames.length ? redNames.join(" / ") : teamNames.red;
+      const blueLabel = blueNames.length ? blueNames.join(" / ") : teamNames.blue;
+
+      const vsTitle = `${redLabel} vs ${blueLabel}`;
+      const subLabel = `${typeLabel} • Match ${matchId}`;
+
+      return { vsTitle, subLabel };
+    }
+
     function render() {
-      if (!photosLoaded) return;
+      if (!photosLoaded || !matchesLoaded || !playersLoaded || !settingsLoaded) {
+        return;
+      }
 
       const flat = flattenPhotos(photos);
       if (!flat.length) {
@@ -276,49 +406,109 @@
         return;
       }
 
+      // newest first
       flat.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      // Group by vs-title (player pairing)
+      const groups = {};
+      for (const p of flat) {
+        const matchId = p.matchId || "unknown";
+        const desc = buildMatchDescription(matchId);
+        const key = desc.vsTitle;
+
+        if (!groups[key]) {
+          groups[key] = {
+            vsTitle: desc.vsTitle,
+            subLabel: desc.subLabel,
+            photos: [],
+          };
+        }
+        groups[key].photos.push({ ...p, matchId });
+      }
+
+      // Order groups by most recent photo in each
+      const groupList = Object.values(groups).sort((a, b) => {
+        const aLatest = Math.max(...a.photos.map(p => p.createdAt || 0));
+        const bLatest = Math.max(...b.photos.map(p => p.createdAt || 0));
+        return bLatest - aLatest;
+      });
 
       const tag = "#ftkclassic";
 
-      const html =
-        '<div class="photos-grid">' +
-        flat
-          .map((p) => {
-            const url = p.url || p.downloadURL || p.imageUrl || "";
-            const holeNumber = p.holeNumber ?? null;
-            const holeLabel = holeNumber ? `Hole ${holeNumber}` : "Hole —";
-            const dtLabel = formatDateTime(p.createdAt);
-            const matchLabel = p.matchId ? `Match ${p.matchId}` : "";
+      let html = "";
+      for (const group of groupList) {
+        // sort photos newest first inside group
+        group.photos.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-            return `
-              <div class="photo-card">
-                <div class="photo-thumb-wrapper">
-                  ${
-                    url
-                      ? `<img src="${url}" alt="${tag}" class="photo-thumb" loading="lazy" />`
-                      : ""
-                  }
+        const countLabel = `${group.photos.length} photo${group.photos.length === 1 ? "" : "s"}`;
+
+        html += `
+          <div class="match-group-card">
+            <div class="match-group-header">
+              <div>
+                <div class="match-group-title">${group.vsTitle}</div>
+                <div class="match-group-subtitle">${group.subLabel}</div>
+              </div>
+              <div class="match-group-tag">${countLabel}</div>
+            </div>
+            <div class="photos-grid">
+        `;
+
+        for (const p of group.photos) {
+          const url = p.url || p.downloadURL || p.imageUrl || "";
+          const holeNumber = p.holeNumber ?? p.hole ?? null;
+          const holeLabel = holeNumber ? `Hole ${holeNumber}` : "Hole —";
+          const dtLabel = formatDateTime(p.createdAt);
+          const matchId = p.matchId || "";
+          const mDesc = buildMatchDescription(matchId);
+          const matchSmall = matchId ? mDesc.subLabel : "";
+
+          html += `
+            <div class="photo-card">
+              <div class="photo-thumb-wrapper">
+                ${
+                  url
+                    ? `<img src="${url}" alt="${tag}" class="photo-thumb" loading="lazy" />`
+                    : ""
+                }
+              </div>
+              <div class="photo-meta">
+                <div class="photo-top-row">
+                  <div class="photo-hole">${holeLabel} <span>${dtLabel ? "• " + dtLabel : ""}</span></div>
+                  <div class="photo-match">${matchSmall}</div>
                 </div>
-                <div class="photo-meta">
-                  <div class="photo-top-row">
-                    <div class="photo-hole">${holeLabel} <span>${
-              dtLabel ? "• " + dtLabel : ""
-            }</span></div>
-                    <div class="photo-match">${matchLabel}</div>
-                  </div>
-                  <div class="photo-bottom-row">
-                    <div class="photo-timestamp"></div>
-                    <div class="photo-hashtag">${tag}</div>
-                  </div>
+                <div class="photo-bottom-row">
+                  <div class="photo-timestamp"></div>
+                  <div class="photo-hashtag">${tag}</div>
                 </div>
               </div>
-            `;
-          })
-          .join("") +
-        "</div>";
+            </div>
+          `;
+        }
+
+        html += `</div></div>`;
+      }
 
       photosContainer.innerHTML = html;
     }
+
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      settingsLoaded = true;
+      render();
+    });
+
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      playersLoaded = true;
+      render();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      matchesLoaded = true;
+      render();
+    });
 
     onValue(photosRef, (snap) => {
       photos = snap.val() || {};

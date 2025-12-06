@@ -126,11 +126,83 @@
       padding-bottom: 0.25rem;
     }
 
-    /* Sticky score bubble */
+    /* Match list view */
+
+    #matchListCard {
+      display: none; /* toggled via JS */
+    }
+
+    .match-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .match-list-item {
+      border-radius: 0.8rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.55rem 0.6rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .match-list-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .match-list-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+
+    .match-list-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .match-list-status {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
+    .match-list-status.live {
+      border-color: #22c55e;
+      background: #ecfdf3;
+      color: #15803d;
+    }
+
+    .match-list-status.final {
+      border-color: #4b5563;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    .match-list-status.upcoming {
+      border-color: #e5e7eb;
+      background: #f9fafb;
+      color: #6b7280;
+    }
+
+    .match-list-chevron {
+      font-size: 1.1rem;
+      color: #9ca3af;
+    }
+
+    /* Sticky score bubble (admin view) */
+
     .score-wrapper {
       position: sticky;
       top: 0.25rem;
       z-index: 40;
+      display: none; /* toggled via JS */
     }
 
     .score-bubble {
@@ -149,12 +221,12 @@
       margin-bottom: 0.35rem;
     }
 
-    .match-title {
+    .match-title-text {
       font-size: 0.98rem;
       font-weight: 700;
     }
 
-    .match-subtitle {
+    .match-subtitle-text {
       font-size: 0.75rem;
       color: var(--muted);
     }
@@ -202,10 +274,11 @@
       top: 0;
       bottom: 0;
       left: 0;
-      width: 50%;
+      width: 100%;
       background: linear-gradient(to right, var(--red-soft), var(--blue-soft));
-      transition: width 0.25s ease, transform 0.25s ease, background 0.25s ease;
+      transition: transform 0.25s ease, background 0.25s ease;
       transform-origin: center;
+      transform: translateX(0);
     }
 
     .score-slider-fill.red-lead {
@@ -216,7 +289,8 @@
       background: linear-gradient(to right, var(--blue-soft), var(--blue));
     }
 
-    /* Pills for each hole – at top */
+    /* Pills for each hole at top */
+
     .pill-row {
       display: flex;
       flex-wrap: nowrap;
@@ -269,7 +343,8 @@
       opacity: 0.3;
     }
 
-    /* Players section */
+    /* Players / mulligans */
+
     .players-row {
       display: flex;
       justify-content: space-between;
@@ -334,9 +409,11 @@
       color: #991b1b;
     }
 
-    /* Hole list */
+    /* Hole list (admin view) */
+
     .holes-card {
       margin-top: 0.2rem;
+      display: none; /* toggled via JS */
     }
 
     .hole-row {
@@ -410,6 +487,7 @@
     }
 
     /* Toast / "Nice win" */
+
     #toastContainer {
       position: fixed;
       bottom: 1rem;
@@ -502,22 +580,32 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Match scoring (admin)</div>
+        <div class="site-subtitle">Match admin – select a match</div>
       </div>
     </div>
     <div class="nav-links">
-      <a href="spectator.html" class="nav-btn secondary">All scores</a>
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
       <a href="competitors.html" class="nav-btn secondary">Competitors</a>
+      <a href="match.html" class="nav-btn secondary">All matches</a>
     </div>
   </header>
 
   <main>
-    <section class="score-wrapper">
+    <!-- LIST VIEW: shown when NO match query param -->
+    <section id="matchListCard" class="card">
+      <div class="section-title">Matches</div>
+      <div id="matchListContainer" class="match-list-container">
+        <!-- match rows injected here -->
+      </div>
+    </section>
+
+    <!-- ADMIN VIEW: shown when match query param exists -->
+    <section id="scoreWrapper" class="score-wrapper">
       <div class="score-bubble">
         <div class="match-header-line">
           <div>
-            <div class="match-title" id="matchTitle">Match</div>
-            <div class="match-subtitle" id="matchSubtitle">Front 9</div>
+            <div class="match-title-text" id="matchTitle">Match</div>
+            <div class="match-subtitle-text" id="matchSubtitle">Front 9</div>
           </div>
           <div class="match-tag" id="matchTag">On course</div>
         </div>
@@ -541,7 +629,7 @@
       </div>
     </section>
 
-    <section class="card holes-card">
+    <section id="holesCard" class="card holes-card">
       <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
       <div id="holesContainer"></div>
       <div class="subtext">
@@ -585,11 +673,18 @@
     const storage = getStorage(app);
 
     const params = new URLSearchParams(window.location.search);
-    const matchId = params.get("match") || params.get("id") || "1";
+    let matchId = params.get("match") || params.get("id") || null;
 
-    const matchRef = ref(db, `matches/${matchId}`);
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+
+    const matchListCard = document.getElementById("matchListCard");
+    const matchListContainer = document.getElementById("matchListContainer");
+    const scoreWrapper = document.getElementById("scoreWrapper");
+    const holesCard = document.getElementById("holesCard");
+
+    const headerSubtitleEl = document.querySelector(".site-subtitle");
 
     const matchTitleEl = document.getElementById("matchTitle");
     const matchSubtitleEl = document.getElementById("matchSubtitle");
@@ -627,31 +722,40 @@
     ];
 
     let settings = {};
-    let matchData = null;
     let players = {};
+    let matchesAll = {};
+    let matchData = null;
+
+    let settingsLoaded = false;
+    let playersLoaded = false;
+    let matchesLoaded = false;
 
     onValue(settingsRef, (snap) => {
       settings = snap.val() || {};
-      renderEverything();
+      settingsLoaded = true;
+      renderMain();
     });
 
     onValue(playersRef, (snap) => {
       players = snap.val() || {};
-      renderEverything();
+      playersLoaded = true;
+      renderMain();
     });
 
-    onValue(matchRef, (snap) => {
-      matchData = snap.val();
-      if (!matchData) {
-        matchData = {
+    onValue(matchesRef, (snap) => {
+      matchesAll = snap.val() || {};
+      matchesLoaded = true;
+
+      if (matchId) {
+        matchData = matchesAll[matchId] || {
           type: Number(matchId) > 8 ? "back" : "front",
           holes: Array(18).fill("none"),
         };
+        if (!matchData.holes) {
+          matchData.holes = Array(18).fill("none");
+        }
       }
-      if (!matchData.holes) {
-        matchData.holes = Array(18).fill("none");
-      }
-      renderEverything();
+      renderMain();
     });
 
     function getTeamNames() {
@@ -668,12 +772,12 @@
       return parts[parts.length - 1];
     }
 
-    function getMatchPlayers() {
-      if (!matchData) return { red: [], blue: [] };
+    function getMatchPlayersFor(matchObj) {
+      if (!matchObj) return { red: [], blue: [] };
 
-      const details = matchData.playerDetails || {};
-      const redIds = matchData.red?.players || [];
-      const blueIds = matchData.blue?.players || [];
+      const details = matchObj.playerDetails || {};
+      const redIds = matchObj.red?.players || [];
+      const blueIds = matchObj.blue?.players || [];
 
       const redPlayers = redIds.map(id => details[id] || players[id] || { id, name: "Red Player" });
       const bluePlayers = blueIds.map(id => details[id] || players[id] || { id, name: "Blue Player" });
@@ -681,23 +785,127 @@
       return { red: redPlayers, blue: bluePlayers };
     }
 
+    /* ---------- MATCH LIST VIEW ---------- */
+
+    function summarizeMatchForList(m, mid) {
+      const type = m?.type || (Number(mid) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const holes = m?.holes || Array(18).fill("none");
+
+      let redWins = 0;
+      let blueWins = 0;
+      let halves = 0;
+
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      const total = end - start;
+      const holesPlayed = redWins + blueWins + halves;
+      const holesRemaining = total - holesPlayed;
+      const diff = redWins - blueWins;
+
+      let status = m?.status || "upcoming";
+      let summary = "Ready to start";
+
+      if (holesPlayed === 0) {
+        status = "upcoming";
+        summary = "Ready to start";
+      } else if (holesRemaining === 0) {
+        status = "final";
+        if (diff === 0) summary = "Halved";
+        else if (diff > 0) summary = `Red wins ${Math.abs(diff)} up`;
+        else summary = `Blue wins ${Math.abs(diff)} up`;
+      } else {
+        status = "live";
+        if (diff === 0) summary = "All square";
+        else if (diff > 0) summary = `Red ${Math.abs(diff)} up`;
+        else summary = `Blue ${Math.abs(diff)} up`;
+      }
+
+      return { status, summary, type };
+    }
+
+    function renderMatchList() {
+      if (!matchesLoaded || !playersLoaded || !settingsLoaded) return;
+
+      const teamNames = getTeamNames();
+      let html = "";
+
+      for (let i = 1; i <= 16; i++) {
+        const mid = String(i);
+        const m = matchesAll[mid] || null;
+        const { status, summary, type } = summarizeMatchForList(m, mid);
+        const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+        const { red, blue } = getMatchPlayersFor(m || {});
+
+        const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+        const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+        const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+        const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+        const vsTitle = `${redLabel} vs ${blueLabel}`;
+        const subtitle = `${typeLabel} · Match ${mid}`;
+
+        let statusClass = "upcoming";
+        if (status === "live") statusClass = "live";
+        if (status === "final") statusClass = "final";
+
+        html += `
+          <a class="match-list-item" href="match.html?match=${mid}">
+            <div class="match-list-main">
+              <div class="match-list-title">${vsTitle}</div>
+              <div class="match-list-subtitle">${subtitle} · ${summary}</div>
+            </div>
+            <div class="match-list-status ${statusClass}">
+              ${status === "final" ? "Final" : status === "live" ? "Live" : "Upcoming"}
+            </div>
+            <div class="match-list-chevron">›</div>
+          </a>
+        `;
+      }
+
+      matchListContainer.innerHTML = html;
+    }
+
+    /* ---------- ADMIN VIEW SCORE SUMMARY / PILLS ---------- */
+
     function computeScoreSummary() {
-      const holes = matchData?.holes || Array(18).fill("none");
-      const type = matchData?.type || (Number(matchId) > 8 ? "back" : "front");
+      if (!matchData || !matchId) {
+        return {
+          leader: null,
+          diff: 0,
+          centerText: "Ready to start",
+          statusTag: "Not started",
+          totalHoles: 9,
+          holesPlayed: 0,
+        };
+      }
+
+      const holes = matchData.holes || Array(18).fill("none");
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
 
       let redWins = 0;
       let blueWins = 0;
+      let halves = 0;
 
       for (let i = start; i < end; i++) {
         const h = holes[i];
         if (h === "red") redWins++;
         if (h === "blue") blueWins++;
+        if (h === "half") halves++;
       }
 
       const totalHoles = end - start;
-      const holesPlayed = redWins + blueWins + Array.from({length: totalHoles}, (_, idx) => holes[start + idx]).filter(v => v === "half").length;
+      const holesPlayed = redWins + blueWins + halves;
       const holesRemaining = totalHoles - holesPlayed;
       const diff = redWins - blueWins;
 
@@ -743,18 +951,28 @@
         }
       }
 
-      // Update match status field in DB if needed
-      const desiredStatus = statusTag === "Final" ? "final" : (holesPlayed === 0 ? "upcoming" : "live");
-      if (matchData && matchData.status !== desiredStatus) {
-        update(matchRef, { status: desiredStatus });
+      // Keep match.status in sync
+      const desiredStatus =
+        statusTag === "Final"
+          ? "final"
+          : holesPlayed === 0
+          ? "upcoming"
+          : "live";
+
+      if (matchData && matchId && matchData.status !== desiredStatus) {
+        update(ref(db, `matches/${matchId}`), { status: desiredStatus }).catch(
+          console.error
+        );
       }
 
       return { leader, diff, centerText, statusTag, totalHoles, holesPlayed };
     }
 
     function computeHolePills() {
-      const holes = matchData?.holes || Array(18).fill("none");
-      const type = matchData?.type || (Number(matchId) > 8 ? "back" : "front");
+      if (!matchData || !matchId) return [];
+
+      const holes = matchData.holes || Array(18).fill("none");
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
 
@@ -798,10 +1016,49 @@
       return pills;
     }
 
-    function renderScoreBubble() {
-      if (!matchData) return;
+    function playerMulliganRow(playerId, name, side, mUsed, rmUsed) {
+      const last = getLastName(name || "");
+      const label = last || name || "Player";
+      return `
+        <div class="player-line">
+          <div class="player-name">${label}</div>
+          <div class="player-mulligans">
+            <div class="m-pill ${mUsed ? "m-off" : "m-on"}"
+                 data-mulligan-toggle
+                 data-player-id="${playerId}"
+                 data-type="m">
+              M
+            </div>
+            <div class="m-pill ${rmUsed ? "m-off" : "m-on"}"
+                 data-mulligan-toggle
+                 data-player-id="${playerId}"
+                 data-type="rm">
+              RM
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
-      const { red, blue } = getMatchPlayers();
+    function toggleMulligan(playerId, type) {
+      if (!playerId || !matchId) return;
+      const field = type === "rm" ? "reverseMulliganUsed" : "mulliganUsed";
+
+      const details = matchData.playerDetails || {};
+      const existing = details[playerId] || players[playerId] || {};
+      const newVal = !existing[field];
+
+      const updates = {};
+      updates[`players/${playerId}/${field}`] = newVal;
+      updates[`matches/${matchId}/playerDetails/${playerId}/${field}`] = newVal;
+
+      update(ref(db), updates).catch(console.error);
+    }
+
+    function renderScoreBubble() {
+      if (!matchData || !matchId) return;
+
+      const { red, blue } = getMatchPlayersFor(matchData);
       const teamNames = getTeamNames();
 
       const redLasts = red.map(p => getLastName(p.name)).join(" / ") || teamNames.red;
@@ -828,7 +1085,6 @@
         const shift = Math.min(maxShift, Math.abs(diff) / totalHoles * 1.6);
         pctOffset = diff > 0 ? 0.5 - shift : 0.5 + shift;
       }
-      const width = 100;
       scoreSliderFill.style.transform = `translateX(${(pctOffset - 0.5) * 100}%)`;
       scoreSliderFill.classList.remove("red-lead", "blue-lead");
       if (leader === "red") {
@@ -837,7 +1093,7 @@
         scoreSliderFill.classList.add("blue-lead");
       }
 
-      // Pills for each hole – one row, inside score bubble
+      // Pills row
       const pills = computeHolePills();
       scorePillsContainer.innerHTML = pills
         .map(p => {
@@ -895,47 +1151,8 @@
       });
     }
 
-    function playerMulliganRow(playerId, name, side, mUsed, rmUsed) {
-      const last = getLastName(name || "");
-      const label = last || name || "Player";
-      return `
-        <div class="player-line">
-          <div class="player-name">${label}</div>
-          <div class="player-mulligans">
-            <div class="m-pill ${mUsed ? "m-off" : "m-on"}"
-                 data-mulligan-toggle
-                 data-player-id="${playerId}"
-                 data-type="m">
-              M
-            </div>
-            <div class="m-pill ${rmUsed ? "m-off" : "m-on"}"
-                 data-mulligan-toggle
-                 data-player-id="${playerId}"
-                 data-type="rm">
-              RM
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function toggleMulligan(playerId, type) {
-      if (!playerId) return;
-      const field = type === "rm" ? "reverseMulliganUsed" : "mulliganUsed";
-
-      const details = matchData.playerDetails || {};
-      const existing = details[playerId] || players[playerId] || {};
-      const newVal = !existing[field];
-
-      const updates = {};
-      updates[`players/${playerId}/${field}`] = newVal;
-      updates[`matches/${matchId}/playerDetails/${playerId}/${field}`] = newVal;
-
-      update(ref(db), updates).catch(console.error);
-    }
-
     function renderHoles() {
-      if (!matchData) return;
+      if (!matchData || !matchId) return;
 
       const holes = matchData.holes || Array(18).fill("none");
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
@@ -945,7 +1162,7 @@
 
       holesSectionTitle.textContent = `Hole-by-hole (${segment})`;
 
-      const { red, blue } = getMatchPlayers();
+      const { red, blue } = getMatchPlayersFor(matchData);
       const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
       const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
 
@@ -998,7 +1215,7 @@
     }
 
     function setHoleResult(holeIndex, result) {
-      if (!matchData) return;
+      if (!matchData || !matchId) return;
 
       const oldValue = matchData.holes?.[holeIndex] || "none";
       if (oldValue === result) {
@@ -1011,7 +1228,7 @@
 
       matchData.holes = holes;
 
-      update(matchRef, {
+      update(ref(db, `matches/${matchId}`), {
         holes,
         updatedAt: Date.now(),
       }).catch(console.error);
@@ -1031,18 +1248,7 @@
         // ignore if unsupported
       }
 
-      renderEverything();
-    }
-
-    function handleHoleWin(team, holeNumber) {
-      const { red, blue } = getMatchPlayers();
-      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
-      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
-      const teamLabel = team === "red" ? redLasts : blueLasts;
-
-      showWinToast(teamLabel, holeNumber, () => {
-        captureAndUploadPhoto(matchId, holeNumber);
-      });
+      renderMain();
     }
 
     async function captureAndUploadPhoto(matchId, holeNumber) {
@@ -1079,6 +1285,17 @@
       }
     }
 
+    function handleHoleWin(team, holeNumber) {
+      const { red, blue } = getMatchPlayersFor(matchData || {});
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
+      const teamLabel = team === "red" ? redLasts : blueLasts;
+
+      showWinToast(teamLabel, holeNumber, () => {
+        captureAndUploadPhoto(matchId, holeNumber);
+      });
+    }
+
     function showWinToast(teamLabel, holeNumber, onTakePhoto) {
       const toast = document.createElement("div");
       toast.className = "toast";
@@ -1095,7 +1312,7 @@
           <button class="toast-btn primary">Take photo</button>
           <button class="toast-btn secondary">Dismiss</button>
         </div>
-      `;
+     `;
 
       const primaryBtn = toast.querySelector(".toast-btn.primary");
       const secondaryBtn = toast.querySelector(".toast-btn.secondary");
@@ -1119,10 +1336,42 @@
       setTimeout(removeToast, 6000);
     }
 
-    function renderEverything() {
-      if (!matchData) return;
-      renderScoreBubble();
-      renderHoles();
+    /* ---------- MAIN RENDER SWITCH ---------- */
+
+    function renderMain() {
+      const hasMatchParam = !!matchId;
+
+      if (!settingsLoaded || !playersLoaded || !matchesLoaded) {
+        return;
+      }
+
+      if (!hasMatchParam) {
+        // LIST MODE
+        headerSubtitleEl.textContent = "Match admin – select a match";
+        matchListCard.style.display = "block";
+        scoreWrapper.style.display = "none";
+        holesCard.style.display = "none";
+        renderMatchList();
+      } else {
+        // ADMIN MODE
+        headerSubtitleEl.textContent = "Match scoring (admin)";
+        matchListCard.style.display = "none";
+        scoreWrapper.style.display = "block";
+        holesCard.style.display = "block";
+
+        if (!matchData) {
+          matchData = {
+            type: Number(matchId) > 8 ? "back" : "front",
+            holes: Array(18).fill("none"),
+          };
+        }
+        if (!matchData.holes) {
+          matchData.holes = Array(18).fill("none");
+        }
+
+        renderScoreBubble();
+        renderHoles();
+      }
     }
   </script>
 </body>
