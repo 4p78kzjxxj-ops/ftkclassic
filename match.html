@@ -2,20 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic – Admin Match</title>
+  <title>FTK Classic – Match Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
       --red: #b91c1c;
+      --red-soft: #fee2e2;
       --blue: #1d4ed8;
+      --blue-soft: #dbeafe;
+      --half: #6b7280;
+      --half-soft: #e5e7eb;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
-      --live: #22c55e;
-      --pill-bg: #f9fafb;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --toast-bg: #111827;
     }
 
     * {
@@ -39,11 +43,16 @@
       }
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     .site-header {
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     .site-header-left {
@@ -91,12 +100,6 @@
       background: #f3f4f6;
     }
 
-    .viewer-count {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-    }
-
     main {
       display: flex;
       flex-direction: column;
@@ -109,10 +112,11 @@
       border-radius: 0.9rem;
       padding: 0.75rem;
       border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
     }
 
     .section-title {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -122,409 +126,374 @@
       padding-bottom: 0.25rem;
     }
 
-    .match-header {
+    /* Sticky score bubble */
+    .score-wrapper {
+      position: sticky;
+      top: 0.25rem;
+      z-index: 40;
+    }
+
+    .score-bubble {
+      border-radius: 1rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.6rem 0.7rem 0.55rem;
+      box-shadow: 0 12px 25px rgba(15,23,42,0.18);
+    }
+
+    .match-header-line {
       display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+      margin-bottom: 0.35rem;
     }
 
     .match-title {
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 700;
     }
 
     .match-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--muted);
     }
 
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-top: 0.25rem;
-    }
-
-    .status-label {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .status-pill {
-      padding: 0.15rem 0.7rem;
+    .match-tag {
+      font-size: 0.72rem;
+      padding: 0.1rem 0.55rem;
       border-radius: 999px;
-      font-size: 0.78rem;
       border: 1px solid #e5e7eb;
       background: #f3f4f6;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
       white-space: nowrap;
     }
 
-    .status-pill.live {
-      border-color: #bbf7d0;
-      background: #dcfce7;
-      color: #166534;
+    .score-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
     }
 
-    .status-pill.final {
-      border-color: #d1d5db;
-      background: #e5e7eb;
-      color: #374151;
+    .score-line span {
+      flex: 1;
     }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--live);
-      box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
-      animation: pulse 1.4s infinite;
+    .score-line span:nth-child(2) {
+      text-align: center;
     }
 
-    @keyframes pulse {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
-      70%{ transform: scale(1.9); box-shadow: 0 0 0 8px rgba(34,197,94,0); }
-      100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    .score-line span:last-child {
+      text-align: right;
     }
 
-    .score-bar {
-      margin-top: 0.45rem;
-      margin-bottom: 0.15rem;
+    .score-slider {
       position: relative;
-      width: 100%;
-      height: 16px;
+      height: 10px;
       border-radius: 999px;
       background: #e5e7eb;
       overflow: hidden;
+      margin-bottom: 0.35rem;
     }
 
-    .score-red,
-    .score-blue {
+    .score-slider-fill {
       position: absolute;
       top: 0;
       bottom: 0;
+      left: 0;
+      width: 50%;
+      background: linear-gradient(to right, var(--red-soft), var(--blue-soft));
+      transition: width 0.25s ease, transform 0.25s ease, background 0.25s ease;
+      transform-origin: center;
     }
-    .score-red { left: 0; background: #fecaca; }
-    .score-blue { right: 0; background: #bfdbfe; }
 
-    .score-bar-labels {
+    .score-slider-fill.red-lead {
+      background: linear-gradient(to right, var(--red), var(--red-soft));
+    }
+
+    .score-slider-fill.blue-lead {
+      background: linear-gradient(to right, var(--blue-soft), var(--blue));
+    }
+
+    /* Pills for each hole – at top */
+    .pill-row {
       display: flex;
-      justify-content: space-between;
-      font-size: 0.7rem;
-      color: #4b5563;
-      margin-top: 0.1rem;
+      flex-wrap: nowrap;
+      gap: 0.25rem;
+      overflow-x: auto;
+      padding-top: 0.15rem;
+      padding-bottom: 0.1rem;
     }
 
-    .camera-row {
-      margin: 0.4rem 0 0.2rem;
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      align-items: center;
+    .pill-row::-webkit-scrollbar {
+      height: 4px;
     }
 
-    .camera-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.32rem 0.75rem;
+    .pill-row::-webkit-scrollbar-thumb {
+      background: #d1d5db;
       border-radius: 999px;
-      border: 1px solid #d1d5db;
+    }
+
+    .score-pill {
+      flex: 0 0 auto;
+      font-size: 0.7rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
       background: #f9fafb;
-      font-size: 0.78rem;
-      cursor: pointer;
+      color: #4b5563;
+      min-width: 32px;
+      text-align: center;
     }
 
-    .camera-status {
-      font-size: 0.72rem;
-      color: #6b7280;
-      min-height: 1em;
+    .score-pill.red {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: var(--red);
     }
 
+    .score-pill.blue {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+      color: var(--blue);
+    }
+
+    .score-pill.half {
+      background: var(--half-soft);
+      border-color: #d4d4d8;
+      color: var(--half);
+    }
+
+    .score-pill.empty {
+      opacity: 0.3;
+    }
+
+    /* Players section */
     .players-row {
       display: flex;
       justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-top: 0.25rem;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
-    .players-side {
+    .team-col {
       flex: 1;
-      min-width: 0;
-    }
-
-    .players-side-title {
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-    }
-
-    .players-side-title.red { color: var(--red); }
-    .players-side-title.blue { color: var(--blue); }
-
-    .player-line {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.4rem;
       font-size: 0.8rem;
-      padding: 0.15rem 0;
+    }
+
+    .team-name {
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+
+    .team-name.red {
+      color: var(--red);
+    }
+
+    .team-name.blue {
+      color: var(--blue);
+      text-align: right;
     }
 
     .player-name {
-      font-weight: 500;
+      font-size: 0.8rem;
+    }
+
+    .player-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.1rem;
     }
 
     .player-mulligans {
       display: flex;
-      gap: 0.25rem;
+      gap: 0.2rem;
     }
 
-    .mulligan-toggle {
-      min-width: 28px;
+    .m-pill {
+      font-size: 0.65rem;
       padding: 0.05rem 0.35rem;
       border-radius: 999px;
-      border: 1px solid #d1d5db;
-      background: #dcfce7;
-      color: #166534;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-align: center;
+      border: 1px solid #e5e7eb;
       cursor: pointer;
+      user-select: none;
     }
 
-    .mulligan-toggle.used {
+    .m-pill.m-on {
+      background: #bbf7d0;
+      border-color: #4ade80;
+      color: #166534;
+    }
+
+    .m-pill.m-off {
       background: #fee2e2;
       border-color: #fecaca;
-      color: #7f1d1d;
+      color: #991b1b;
     }
 
-    .holes-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+    /* Hole list */
+    .holes-card {
+      margin-top: 0.2rem;
     }
 
-    .hole-card {
-      border-radius: 0.85rem;
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem 0.55rem;
-      background: #ffffff;
+    .hole-row {
+      border-top: 1px solid #e5e7eb;
+      padding: 0.4rem 0.1rem 0.45rem;
     }
 
-    .hole-header-row {
+    .hole-header-line {
       display: flex;
       justify-content: space-between;
-      gap: 0.4rem;
-      align-items: baseline;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
-    .hole-title {
-      font-size: 0.82rem;
+    .hole-label {
+      font-size: 0.85rem;
       font-weight: 600;
     }
 
     .hole-meta {
-      font-size: 0.74rem;
+      font-size: 0.75rem;
       color: var(--muted);
     }
 
-    .hole-buttons-row {
+    .hole-buttons {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.3rem;
-      margin-top: 0.3rem;
+      gap: 0.25rem;
     }
 
-    .hole-btn {
-      padding: 0.32rem 0.3rem;
+    .pill-btn {
+      font-size: 0.78rem;
+      padding: 0.3rem 0.25rem;
       border-radius: 999px;
-      border: 1px solid #d1d5db;
-      background: var(--pill-bg);
-      font-size: 0.75rem;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
       text-align: center;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .pill-btn.red-active {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: var(--red);
+    }
+
+    .pill-btn.blue-active {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+      color: var(--blue);
+    }
+
+    .pill-btn.half-active {
+      background: var(--half-soft);
+      border-color: #d4d4d8;
+      color: var(--half);
+    }
+
+    .pill-btn.clear {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .subtext {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Toast / "Nice win" */
+    #toastContainer {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: var(--toast-bg);
+      color: #f9fafb;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-width: 260px;
+      max-width: 360px;
+      animation: toast-in 0.25s ease-out;
+    }
+
+    .toast-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(248,250,252,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+
+    .toast-body {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .toast-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .toast-btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      border: none;
       cursor: pointer;
       white-space: nowrap;
     }
 
-    .hole-btn.red {
-      border-color: #fecaca;
-      color: #7f1d1d;
-    }
-
-    .hole-btn.blue {
-      border-color: #bfdbfe;
-      color: #1e3a8a;
-    }
-
-    .hole-btn.active.red {
-      background: #fee2e2;
-    }
-
-    .hole-btn.active.blue {
-      background: #dbeafe;
-    }
-
-    .hole-btn.active.half {
-      background: #e5e7eb;
+    .toast-btn.primary {
+      background: #fbbf24;
       color: #111827;
     }
 
-    .hole-btn.clear-btn {
-      border-style: dashed;
-      color: #6b7280;
+    .toast-btn.secondary {
+      background: transparent;
+      border: 1px solid rgba(249,250,251,0.3);
+      color: #e5e7eb;
     }
 
-    .dots-row {
-      display: flex;
-      gap: 0.25rem;
-      flex-wrap: wrap;
-      margin-top: 0.35rem;
+    @keyframes toast-in {
+      from { opacity: 0; transform: translate(-50%, 12px); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
     }
 
-    .dot {
-      min-width: 26px;
-      height: 18px;
-      padding: 0 6px;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      font-weight: 600;
-      box-sizing: border-box;
-    }
-
-    .dot.red   { background: #fee2e2; border-color: #fca5a5; color: #7f1d1d; }
-    .dot.blue  { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
-    .dot.half  { background: #9ca3af; border-color: #9ca3af; color: #ffffff; }
-    .dot.empty { background: #e5e7eb; color: transparent; opacity: 0.4; }
-
-    .empty-state {
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-      padding: 0.75rem 0.5rem;
-    }
-
-    /* Toast + modal */
-
-    .toast-win {
-      position: fixed;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%) translateY(110%);
-      background: #111827;
-      color: #f9fafb;
-      padding: 0.5rem 1.1rem;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      box-shadow: 0 10px 25px rgba(15,23,42,0.45);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 3000;
-    }
-
-    .toast-win.show {
-      animation: toast-slide 1.8s ease-out forwards;
-    }
-
-    @keyframes toast-slide {
-      0% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(110%);
-      }
-      14% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0%);
-      }
-      70% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0%);
-      }
-      100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(110%);
-      }
-    }
-
-    .toast-win-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      background: #22c55e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-    }
-
-    .photo-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,0.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 3500;
-    }
-
-    .photo-modal {
-      background: #ffffff;
-      padding: 1rem 1.1rem 0.9rem;
-      border-radius: 1rem;
-      width: 88%;
-      max-width: 340px;
-      box-shadow: 0 18px 40px rgba(15,23,42,0.55);
-      text-align: center;
-    }
-
-    .photo-modal-title {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .photo-modal-sub {
-      font-size: 0.8rem;
-      color: #6b7280;
-    }
-
-    .photo-modal-actions {
-      margin-top: 0.7rem;
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .pm-btn {
-      flex: 1;
-      border-radius: 999px;
-      padding: 0.35rem 0.5rem;
-      border: 1px solid #d1d5db;
-      font-size: 0.85rem;
-    }
-
-    .pm-btn-primary {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
-      color: #f9fafb;
-    }
-
-    .pm-btn-ghost {
-      background: #f3f4f6;
-      color: #111827;
-    }
   </style>
 </head>
 <body>
@@ -533,87 +502,56 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Admin – Match scoring</div>
-        <div id="viewerCount" class="viewer-count">Viewing now: 0</div>
+        <div class="site-subtitle">Match scoring (admin)</div>
       </div>
     </div>
     <div class="nav-links">
-      <a href="admin.html" class="nav-btn secondary">Admin</a>
-      <a href="match_spectator.html" id="viewMatchLink" class="nav-btn">Spectator view</a>
+      <a href="spectator.html" class="nav-btn secondary">All scores</a>
+      <a href="competitors.html" class="nav-btn secondary">Competitors</a>
     </div>
   </header>
 
   <main>
-    <section class="card">
-      <div class="match-header">
-        <div class="match-title" id="matchTitle">Match</div>
-        <div class="match-subtitle" id="matchSubtitle">Front 9 match</div>
-        <div class="status-row">
+    <section class="score-wrapper">
+      <div class="score-bubble">
+        <div class="match-header-line">
           <div>
-            <div class="status-label">Match status</div>
-            <div class="status-pill" id="matchStatusPill">
-              <span id="matchStatusText">Loading…</span>
-            </div>
+            <div class="match-title" id="matchTitle">Match</div>
+            <div class="match-subtitle" id="matchSubtitle">Front 9</div>
           </div>
-          <div>
-            <div class="status-label">Current score</div>
-            <div class="status-pill" id="matchScorePill">—</div>
-          </div>
+          <div class="match-tag" id="matchTag">On course</div>
         </div>
-        <div class="score-bar">
-          <div class="score-red" id="scoreRed" style="width:50%;"></div>
-          <div class="score-blue" id="scoreBlue" style="width:50%;"></div>
-        </div>
-        <div class="score-bar-labels">
-          <span id="redSideLabel">Red</span>
+
+        <div class="score-line">
+          <span id="scoreRedLabel">Red</span>
           <span id="scoreCenterLabel">All square</span>
-          <span id="blueSideLabel">Blue</span>
+          <span id="scoreBlueLabel">Blue</span>
+        </div>
+        <div class="score-slider">
+          <div class="score-slider-fill" id="scoreSliderFill"></div>
+        </div>
+
+        <div class="pill-row" id="scorePills">
+          <!-- pills for each hole will be injected here -->
+        </div>
+
+        <div class="players-row" id="playersRow">
+          <!-- players + mulligan toggles -->
         </div>
       </div>
-
-      <div class="camera-row">
-        <button id="cameraBtn" type="button" class="camera-btn">
-          <span>📷 Add photo</span>
-          <span style="font-size:0.68rem; color:#6b7280;">(opens camera)</span>
-        </button>
-        <span id="photoStatus" class="camera-status"></span>
-      </div>
-
-      <div class="players-row" id="playersRow">
-        <!-- filled by JS -->
-      </div>
     </section>
 
-    <section class="card">
-      <div class="section-title" id="holesTitle">Hole-by-hole</div>
-      <div id="holesContainer" class="holes-list">
-        <div class="empty-state">Loading holes…</div>
+    <section class="card holes-card">
+      <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
+      <div id="holesContainer"></div>
+      <div class="subtext">
+        Tap the last-names / ½ / last-names / Clear buttons to set or clear each hole.
+        Pills at the top show the match standing after each hole (1 up, AS, 2 up, …).
       </div>
     </section>
-
-    <!-- hidden camera input -->
-    <input id="photoInput" type="file" accept="image/*" capture="environment" style="display:none;" />
   </main>
 
-  <!-- WIN TOAST -->
-  <div id="toastWin" class="toast-win">
-    <div class="toast-win-icon">🏆</div>
-    <span>Nice win!</span>
-  </div>
-
-  <!-- PHOTO PROMPT MODAL -->
-  <div id="photoPrompt" class="photo-modal-backdrop">
-    <div class="photo-modal">
-      <div class="photo-modal-title">Nice win! 📸</div>
-      <div class="photo-modal-sub">
-        Want to capture this hole with a quick photo?
-      </div>
-      <div class="photo-modal-actions">
-        <button id="btnNoPhoto" class="pm-btn pm-btn-ghost">Not now</button>
-        <button id="btnTakePhoto" class="pm-btn pm-btn-primary">Take photo</button>
-      </div>
-    </div>
-  </div>
+  <div id="toastContainer"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -622,17 +560,14 @@
       ref,
       onValue,
       update,
-      set,
       push,
-      serverTimestamp,
-      onDisconnect,
+      set
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
     import {
       getStorage,
-      ref as storageRef,
+      ref as sRef,
       uploadBytes,
-      getDownloadURL,
+      getDownloadURL
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
     const firebaseConfig = {
@@ -649,44 +584,37 @@
     const db = getDatabase(app);
     const storage = getStorage(app);
 
+    const params = new URLSearchParams(window.location.search);
+    const matchId = params.get("match") || params.get("id") || "1";
+
+    const matchRef = ref(db, `matches/${matchId}`);
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
 
-    const viewerCountEl = document.getElementById("viewerCount");
     const matchTitleEl = document.getElementById("matchTitle");
     const matchSubtitleEl = document.getElementById("matchSubtitle");
-    const matchStatusPillEl = document.getElementById("matchStatusPill");
-    const matchStatusTextEl = document.getElementById("matchStatusText");
-    const matchScorePillEl = document.getElementById("matchScorePill");
-    const scoreRedEl = document.getElementById("scoreRed");
-    const scoreBlueEl = document.getElementById("scoreBlue");
-    const scoreCenterLabelEl = document.getElementById("scoreCenterLabel");
-    const redSideLabelEl = document.getElementById("redSideLabel");
-    const blueSideLabelEl = document.getElementById("blueSideLabel");
-    const holesContainer = document.getElementById("holesContainer");
+    const matchTagEl = document.getElementById("matchTag");
+
+    const scoreRedLabel = document.getElementById("scoreRedLabel");
+    const scoreCenterLabel = document.getElementById("scoreCenterLabel");
+    const scoreBlueLabel = document.getElementById("scoreBlueLabel");
+    const scoreSliderFill = document.getElementById("scoreSliderFill");
+    const scorePillsContainer = document.getElementById("scorePills");
     const playersRow = document.getElementById("playersRow");
-    const holesTitleEl = document.getElementById("holesTitle");
-    const viewMatchLink = document.getElementById("viewMatchLink");
-
-    const cameraBtn = document.getElementById("cameraBtn");
-    const photoInput = document.getElementById("photoInput");
-    const photoStatusEl = document.getElementById("photoStatus");
-
-    const toastWinEl = document.getElementById("toastWin");
-    const photoPromptEl = document.getElementById("photoPrompt");
-    const btnTakePhotoEl = document.getElementById("btnTakePhoto");
-    const btnNoPhotoEl = document.getElementById("btnNoPhoto");
+    const holesContainer = document.getElementById("holesContainer");
+    const holesSectionTitle = document.getElementById("holesSectionTitle");
+    const toastContainer = document.getElementById("toastContainer");
 
     const holeConfigs = [
-      { num: 1, par: 5,  yards: 474 },
-      { num: 2, par: 4,  yards: 340 },
-      { num: 3, par: 4,  yards: 360 },
-      { num: 4, par: 3,  yards: 180 },
-      { num: 5, par: 5,  yards: 455 },
-      { num: 6, par: 4,  yards: 390 },
-      { num: 7, par: 3,  yards: 145 },
-      { num: 8, par: 4,  yards: 400 },
-      { num: 9, par: 4,  yards: 270 },
+      { num: 1,  par: 5, yards: 474 },
+      { num: 2,  par: 4, yards: 340 },
+      { num: 3,  par: 4, yards: 360 },
+      { num: 4,  par: 3, yards: 180 },
+      { num: 5,  par: 5, yards: 455 },
+      { num: 6,  par: 4, yards: 390 },
+      { num: 7,  par: 3, yards: 145 },
+      { num: 8,  par: 4, yards: 400 },
+      { num: 9,  par: 4, yards: 270 },
       { num: 10, par: 3, yards: 155 },
       { num: 11, par: 4, yards: 335 },
       { num: 12, par: 3, yards: 160 },
@@ -698,53 +626,40 @@
       { num: 18, par: 5, yards: 490 },
     ];
 
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
-    }
-
-    const matchId = getQueryParam("id") || "1";
-    const matchRef = ref(db, `matches/${matchId}`);
-
-    if (viewMatchLink) {
-      viewMatchLink.href = `match_spectator.html?id=${matchId}`;
-    }
-
     let settings = {};
+    let matchData = null;
     let players = {};
-    let match = null;
 
-    // Presence
-    function setupPresence(db, pageKey, onCountChange) {
-      const connectionsRef = ref(db, `presence/${pageKey}`);
-      const connectedRef = ref(db, ".info/connected");
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      renderEverything();
+    });
 
-      onValue(connectedRef, (snap) => {
-        if (snap.val() === false) return;
-        const conRef = push(connectionsRef);
-        onDisconnect(conRef).remove().catch(() => {});
-        set(conRef, { connectedAt: serverTimestamp() }).catch(() => {});
-      });
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      renderEverything();
+    });
 
-      onValue(
-        connectionsRef,
-        (snap) => {
-          const val = snap.val();
-          const count = val ? Object.keys(val).length : 0;
-          onCountChange(count);
-        },
-        () => onCountChange(0)
-      );
-    }
-
-    setupPresence(db, `match_admin_${matchId}`, (count) => {
-      viewerCountEl.textContent =
-        count === 1 ? "Viewing now: 1 admin" : `Viewing now: ${count} admins`;
+    onValue(matchRef, (snap) => {
+      matchData = snap.val();
+      if (!matchData) {
+        matchData = {
+          type: Number(matchId) > 8 ? "back" : "front",
+          holes: Array(18).fill("none"),
+        };
+      }
+      if (!matchData.holes) {
+        matchData.holes = Array(18).fill("none");
+      }
+      renderEverything();
     });
 
     function getTeamNames() {
       const t = settings.teamNames || {};
-      return { red: t.red || "Red", blue: t.blue || "Blue" };
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
     }
 
     function getLastName(fullName) {
@@ -753,443 +668,462 @@
       return parts[parts.length - 1];
     }
 
-    function computeSideLabels(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
-      const redNames = redIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
-      const blueNames = blueIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
+    function getMatchPlayers() {
+      if (!matchData) return { red: [], blue: [] };
 
-      const { red: redTeam, blue: blueTeam } = getTeamNames();
+      const details = matchData.playerDetails || {};
+      const redIds = matchData.red?.players || [];
+      const blueIds = matchData.blue?.players || [];
 
-      return {
-        red: redNames.length ? redNames.join(" / ") : redTeam,
-        blue: blueNames.length ? blueNames.join(" / ") : blueTeam,
-        redLasts: redNames.length ? redNames.join(" / ") : redTeam,
-        blueLasts: blueNames.length ? blueNames.join(" / ") : blueTeam
-      };
+      const redPlayers = redIds.map(id => details[id] || players[id] || { id, name: "Red Player" });
+      const bluePlayers = blueIds.map(id => details[id] || players[id] || { id, name: "Blue Player" });
+
+      return { red: redPlayers, blue: bluePlayers };
     }
 
-    function computeMatchState(holes, type) {
-      const arr = Array.isArray(holes) ? holes : [];
-      const holeCount = 9;
+    function computeScoreSummary() {
+      const holes = matchData?.holes || Array(18).fill("none");
+      const type = matchData?.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
 
-      const playedIndices = [];
+      let redWins = 0;
+      let blueWins = 0;
+
       for (let i = start; i < end; i++) {
-        if (arr[i] && arr[i] !== "none") playedIndices.push(i);
+        const h = holes[i];
+        if (h === "red") redWins++;
+        if (h === "blue") blueWins++;
       }
 
-      if (playedIndices.length === 0) {
-        return { diff: 0, done: false, throughHole: null, margin: 0, holesLeft: holeCount };
-      }
+      const totalHoles = end - start;
+      const holesPlayed = redWins + blueWins + Array.from({length: totalHoles}, (_, idx) => holes[start + idx]).filter(v => v === "half").length;
+      const holesRemaining = totalHoles - holesPlayed;
+      const diff = redWins - blueWins;
 
-      let diff = 0;
-      let done = false;
-      let closingIndex = null;
-      let closingSeqIndex = null;
+      let leader = null;
+      if (diff > 0) leader = "red";
+      if (diff < 0) leader = "blue";
 
-      for (let k = 0; k < playedIndices.length; k++) {
-        const i = playedIndices[k];
-        const res = arr[i];
-        if (res === "red") diff += 1;
-        else if (res === "blue") diff -= 1;
+      let centerText = "All square";
+      let statusTag = "On course";
 
-        const holesRemaining = holeCount - (k + 1);
-        if (Math.abs(diff) > holesRemaining) {
-          done = true;
-          closingIndex = i;
-          closingSeqIndex = k;
-          break;
+      if (diff === 0 && holesPlayed === 0) {
+        centerText = "Ready to start";
+        statusTag = "Not started";
+      } else if (diff === 0 && holesRemaining > 0) {
+        centerText = "All square";
+        statusTag = "Live";
+      } else if (diff === 0 && holesRemaining === 0) {
+        centerText = "Halved";
+        statusTag = "Final";
+      } else if (leader === "red") {
+        const up = Math.abs(diff);
+        if (holesRemaining === 0) {
+          centerText = `Red wins ${up} up`;
+          statusTag = "Final";
+        } else if (up > holesRemaining) {
+          centerText = `Red wins ${up}&${holesRemaining}`;
+          statusTag = "Final";
+        } else {
+          centerText = `Red ${up} up`;
+          statusTag = "Live";
+        }
+      } else if (leader === "blue") {
+        const up = Math.abs(diff);
+        if (holesRemaining === 0) {
+          centerText = `Blue wins ${up} up`;
+          statusTag = "Final";
+        } else if (up > holesRemaining) {
+          centerText = `Blue wins ${up}&${holesRemaining}`;
+          statusTag = "Final";
+        } else {
+          centerText = `Blue ${up} up`;
+          statusTag = "Live";
         }
       }
 
-      const throughIndex = done
-        ? closingIndex
-        : playedIndices[playedIndices.length - 1];
-      const throughHole = throughIndex + 1;
-      const margin = Math.abs(diff);
-      const holesLeft = done
-        ? holeCount - (closingSeqIndex + 1)
-        : holeCount - playedIndices.length;
+      // Update match status field in DB if needed
+      const desiredStatus = statusTag === "Final" ? "final" : (holesPlayed === 0 ? "upcoming" : "live");
+      if (matchData && matchData.status !== desiredStatus) {
+        update(matchRef, { status: desiredStatus });
+      }
 
-      return { diff, done, throughHole, margin, holesLeft };
+      return { leader, diff, centerText, statusTag, totalHoles, holesPlayed };
     }
 
-    function buildDotsHTML(holes, type) {
-      const arr = Array.isArray(holes) ? holes : [];
+    function computeHolePills() {
+      const holes = matchData?.holes || Array(18).fill("none");
+      const type = matchData?.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
-      const dots = [];
-      let diff = 0;
 
-      for (let i = start; i < end; i++) {
-        const res = arr[i] || "none";
+      let redWins = 0;
+      let blueWins = 0;
+      const pills = [];
 
-        if (res === "red") diff += 1;
-        else if (res === "blue") diff -= 1;
+      for (let idx = start; idx < end; idx++) {
+        const h = holes[idx];
+        if (h === "red") redWins++;
+        if (h === "blue") blueWins++;
 
-        let cls = "empty";
+        const diff = redWins - blueWins;
+        const holeNum = holeConfigs[idx]?.num ?? (idx + 1);
+        const played = h && h !== "none";
+
         let label = "";
+        let tone = "empty";
 
-        if (!res || res === "none") {
-          cls = "empty";
+        if (!played) {
+          label = "";
+          tone = "empty";
         } else if (diff === 0) {
-          cls = "half";
           label = "AS";
+          tone = "half";
         } else if (diff > 0) {
-          cls = "red";
           label = `${diff}up`;
-        } else {
-          cls = "blue";
+          tone = "red";
+        } else if (diff < 0) {
           label = `${Math.abs(diff)}up`;
+          tone = "blue";
         }
 
-        dots.push(`<span class="dot ${cls}">${label}</span>`);
+        pills.push({
+          holeNum,
+          label,
+          tone,
+        });
       }
 
-      return dots.join("");
+      return pills;
     }
 
-    function computeMatchTitle(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
-      const redNames = redIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
-      const blueNames = blueIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
+    function renderScoreBubble() {
+      if (!matchData) return;
 
-      if (redNames.length && blueNames.length) {
-        return `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
-      }
-      return m.name || `Match ${matchId}`;
-    }
+      const { red, blue } = getMatchPlayers();
+      const teamNames = getTeamNames();
 
-    function renderMatchSummary() {
-      if (!match) return;
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || teamNames.red;
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || teamNames.blue;
 
-      const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const matchLabel = `Match ${matchId}`;
       const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
-      const holes = match.holes || [];
-      const state = computeMatchState(holes, type);
-      const { diff, done, throughHole, margin, holesLeft } = state;
-      const labels = computeSideLabels(match);
 
-      matchTitleEl.textContent = computeMatchTitle(match);
-      matchSubtitleEl.textContent = `${typeLabel} • Match ${matchId}`;
+      matchTitleEl.textContent = `${redLasts} vs ${blueLasts}`;
+      matchSubtitleEl.textContent = `${typeLabel} · ${matchLabel}`;
 
-      let statusText = "Not started";
-      let pillClass = "status-pill";
+      const { leader, diff, centerText, statusTag, totalHoles } = computeScoreSummary();
 
-      const hasActivity = throughHole !== null;
-      if (!hasActivity) {
-        statusText = "Not started";
-      } else if (done) {
-        statusText = "Final";
-        pillClass += " final";
-      } else {
-        statusText = "LIVE";
-        pillClass += " live";
+      scoreRedLabel.textContent = redLasts;
+      scoreBlueLabel.textContent = blueLasts;
+      scoreCenterLabel.textContent = centerText;
+      matchTagEl.textContent = statusTag;
+
+      // Slider fill – center at 50%, expand to show lead
+      let pctOffset = 0.5;
+      if (diff !== 0) {
+        const maxShift = 0.35;
+        const shift = Math.min(maxShift, Math.abs(diff) / totalHoles * 1.6);
+        pctOffset = diff > 0 ? 0.5 - shift : 0.5 + shift;
+      }
+      const width = 100;
+      scoreSliderFill.style.transform = `translateX(${(pctOffset - 0.5) * 100}%)`;
+      scoreSliderFill.classList.remove("red-lead", "blue-lead");
+      if (leader === "red") {
+        scoreSliderFill.classList.add("red-lead");
+      } else if (leader === "blue") {
+        scoreSliderFill.classList.add("blue-lead");
       }
 
-      matchStatusPillEl.className = pillClass;
-      matchStatusTextEl.textContent = statusText;
+      // Pills for each hole – one row, inside score bubble
+      const pills = computeHolePills();
+      scorePillsContainer.innerHTML = pills
+        .map(p => {
+          const cls = `score-pill ${
+            p.tone === "red"
+              ? "red"
+              : p.tone === "blue"
+              ? "blue"
+              : p.tone === "half"
+              ? "half"
+              : "empty"
+          }`;
+          const label = p.label || p.holeNum;
+          return `<div class="${cls}" title="Hole ${p.holeNum}">${label}</div>`;
+        })
+        .join("");
 
-      redSideLabelEl.textContent = labels.red;
-      blueSideLabelEl.textContent = labels.blue;
+      // Players row with mulligan toggles
+      const mRed = red
+        .map(p => {
+          const mid = p.id || p.playerId || "";
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+          return playerMulliganRow(mid, p.name, "red", mUsed, rmUsed);
+        })
+        .join("");
 
-      let scoreText = "All square";
-      let sliderCenter = "All square";
-      let redPct = 50;
+      const mBlue = blue
+        .map(p => {
+          const mid = p.id || p.playerId || "";
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+          return playerMulliganRow(mid, p.name, "blue", mUsed, rmUsed);
+        })
+        .join("");
 
-      if (diff === 0) {
-        if (done) {
-          scoreText = "Halved";
-          sliderCenter = "Halved";
-        } else if (throughHole) {
-          scoreText = `AS thru ${throughHole}`;
-          sliderCenter = `AS thru ${throughHole}`;
-        }
-      } else if (diff > 0) {
-        if (done) {
-          scoreText = `${labels.red} wins ${margin}&${holesLeft}`;
-        } else if (throughHole) {
-          scoreText = `${labels.red} ${Math.abs(diff)} up thru ${throughHole}`;
-        } else {
-          scoreText = `${labels.red} ${Math.abs(diff)} up`;
-        }
-        const total = 9;
-        redPct = Math.min(95, Math.max(5, ((diff + total / 2) / total) * 100));
-        sliderCenter = `${labels.red} lead`;
-      } else {
-        if (done) {
-          scoreText = `${labels.blue} wins ${margin}&${holesLeft}`;
-        } else if (throughHole) {
-          scoreText = `${labels.blue} ${Math.abs(diff)} up thru ${throughHole}`;
-        } else {
-          scoreText = `${labels.blue} ${Math.abs(diff)} up`;
-        }
-        const total = 9;
-        const blueLead = Math.abs(diff);
-        redPct = 100 - Math.min(95, Math.max(5, ((blueLead + total / 2) / total) * 100));
-        sliderCenter = `${labels.blue} lead`;
-      }
+      playersRow.innerHTML = `
+        <div class="team-col">
+          <div class="team-name red">${teamNames.red}</div>
+          ${mRed || '<div class="player-name">–</div>'}
+        </div>
+        <div class="team-col" style="text-align:right">
+          <div class="team-name blue">${teamNames.blue}</div>
+          ${mBlue || '<div class="player-name">–</div>'}
+        </div>
+      `;
 
-      matchScorePillEl.textContent = scoreText;
-      scoreRedEl.style.width = `${redPct}%`;
-      scoreBlueEl.style.width = `${100 - redPct}%`;
-      scoreCenterLabelEl.textContent = sliderCenter;
+      // Wire mulligan toggles
+      Array.from(document.querySelectorAll("[data-mulligan-toggle]")).forEach(el => {
+        el.addEventListener("click", () => {
+          const playerId = el.getAttribute("data-player-id");
+          const type = el.getAttribute("data-type"); // "m" or "rm"
+          toggleMulligan(playerId, type);
+        });
+      });
     }
 
-    function renderPlayers() {
-      if (!match) {
-        playersRow.innerHTML = "";
-        return;
-      }
-      const labels = computeSideLabels(match);
-      const redIds = match.red?.players || [];
-      const blueIds = match.blue?.players || [];
-
-      const renderSide = (ids, colorKey, titleText) => {
-        let html = `<div class="players-side">
-          <div class="players-side-title ${colorKey}">${titleText}</div>`;
-        if (!ids.length) {
-          html += `<div style="font-size:0.78rem;color:#9ca3af;">No players assigned</div>`;
-        } else {
-          ids.forEach(pid => {
-            const p = players[pid];
-            if (!p) return;
-            const name = p.name || "Player";
-            const mullUsed = !!p.mulliganUsed;
-            const rmUsed = !!p.reverseMulliganUsed;
-
-            html += `
-              <div class="player-line" data-player-id="${pid}">
-                <span class="player-name">${name}</span>
-                <span class="player-mulligans">
-                  <button type="button"
-                          class="mulligan-toggle ${mullUsed ? "used" : ""}"
-                          data-type="m">M</button>
-                  <button type="button"
-                          class="mulligan-toggle ${rmUsed ? "used" : ""}"
-                          data-type="rm">RM</button>
-                </span>
-              </div>
-            `;
-          });
-        }
-        html += `</div>`;
-        return html;
-      };
-
-      playersRow.innerHTML =
-        renderSide(redIds, "red", labels.red) +
-        renderSide(blueIds, "blue", labels.blue);
+    function playerMulliganRow(playerId, name, side, mUsed, rmUsed) {
+      const last = getLastName(name || "");
+      const label = last || name || "Player";
+      return `
+        <div class="player-line">
+          <div class="player-name">${label}</div>
+          <div class="player-mulligans">
+            <div class="m-pill ${mUsed ? "m-off" : "m-on"}"
+                 data-mulligan-toggle
+                 data-player-id="${playerId}"
+                 data-type="m">
+              M
+            </div>
+            <div class="m-pill ${rmUsed ? "m-off" : "m-on"}"
+                 data-mulligan-toggle
+                 data-player-id="${playerId}"
+                 data-type="rm">
+              RM
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    playersRow.addEventListener("click", (e) => {
-      const btn = e.target.closest(".mulligan-toggle");
-      if (!btn) return;
-      const line = btn.closest(".player-line");
-      if (!line) return;
-      const playerId = line.getAttribute("data-player-id");
-      const type = btn.getAttribute("data-type");
-      if (!playerId || !type) return;
+    function toggleMulligan(playerId, type) {
+      if (!playerId) return;
+      const field = type === "rm" ? "reverseMulliganUsed" : "mulliganUsed";
 
-      const player = players[playerId] || {};
-      const field = type === "m" ? "mulliganUsed" : "reverseMulliganUsed";
-      const current = !!player[field];
+      const details = matchData.playerDetails || {};
+      const existing = details[playerId] || players[playerId] || {};
+      const newVal = !existing[field];
 
-      update(ref(db, `players/${playerId}`), { [field]: !current }).catch(console.error);
-    });
+      const updates = {};
+      updates[`players/${playerId}/${field}`] = newVal;
+      updates[`matches/${matchId}/playerDetails/${playerId}/${field}`] = newVal;
+
+      update(ref(db), updates).catch(console.error);
+    }
 
     function renderHoles() {
-      if (!match) {
-        holesContainer.innerHTML = '<div class="empty-state">Match not found.</div>';
-        return;
-      }
+      if (!matchData) return;
 
-      const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
+      const holes = matchData.holes || Array(18).fill("none");
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
-      const holesState = match.holes || [];
-      const labels = computeSideLabels(match);
-      const dotsHTML = buildDotsHTML(holesState, type);
+      const segment = type === "back" ? "Back 9" : "Front 9";
 
-      holesTitleEl.textContent =
-        type === "back" ? "Hole-by-hole (Back 9)" : "Hole-by-hole (Front 9)";
+      holesSectionTitle.textContent = `Hole-by-hole (${segment})`;
+
+      const { red, blue } = getMatchPlayers();
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
 
       let html = "";
-
-      for (let i = start; i < end; i++) {
-        const cfg = holeConfigs[i];
-        if (!cfg) continue;
-        const holeNumber = cfg.num;
-        const res = holesState[i] || "none";
-
-        const isRed = res === "red";
-        const isBlue = res === "blue";
-        const isHalf = res === "half";
+      for (let idx = start; idx < end; idx++) {
+        const config = holeConfigs[idx];
+        const value = holes[idx] || "none";
+        const holeNum = config?.num ?? (idx + 1);
+        const par = config?.par ?? "–";
+        const yards = config?.yards ?? "–";
 
         html += `
-          <div class="hole-card" data-hole-index="${i}">
-            <div class="hole-header-row">
-              <div class="hole-title">Hole ${holeNumber}</div>
-              <div class="hole-meta">Par ${cfg.par} • ${cfg.yards} yds</div>
+          <div class="hole-row">
+            <div class="hole-header-line">
+              <div class="hole-label">Hole ${holeNum}</div>
+              <div class="hole-meta">Par ${par} · ${yards} yds</div>
             </div>
-            <div class="hole-buttons-row">
-              <button type="button"
-                      class="hole-btn red ${isRed ? "active red" : ""}"
-                      data-action="red">${labels.redLasts}</button>
-              <button type="button"
-                      class="hole-btn ${isHalf ? "active half" : ""}"
-                      data-action="half">½</button>
-              <button type="button"
-                      class="hole-btn blue ${isBlue ? "active blue" : ""}"
-                      data-action="blue">${labels.blueLasts}</button>
-              <button type="button"
-                      class="hole-btn clear-btn"
-                      data-action="clear">Clear</button>
+            <div class="hole-buttons">
+              <div class="pill-btn ${value === "red" ? "red-active" : ""}"
+                   data-hole="${idx}" data-result="red">
+                ${redLasts}
+              </div>
+              <div class="pill-btn ${value === "half" ? "half-active" : ""}"
+                   data-hole="${idx}" data-result="half">
+                ½
+              </div>
+              <div class="pill-btn ${value === "blue" ? "blue-active" : ""}"
+                   data-hole="${idx}" data-result="blue">
+                ${blueLasts}
+              </div>
+              <div class="pill-btn clear ${value === "none" ? "half-active" : ""}"
+                   data-hole="${idx}" data-result="none">
+                Clear
+              </div>
             </div>
-            ${i === start ? `<div class="dots-row">${dotsHTML}</div>` : ""}
           </div>
         `;
       }
 
       holesContainer.innerHTML = html;
-    }
 
-    // Toast + photo prompt helpers
-    function vibrateWin() {
-      if (navigator && typeof navigator.vibrate === "function") {
-        // short pattern: buzz - pause - buzz
-        navigator.vibrate([40, 40, 60]);
-      }
-    }
-
-    function showWinUI() {
-      // vibrate
-      vibrateWin();
-
-      // animated toast
-      if (toastWinEl) {
-        toastWinEl.classList.remove("show");
-        void toastWinEl.offsetWidth; // force reflow to restart animation
-        toastWinEl.classList.add("show");
-      }
-
-      // show photo modal
-      if (photoPromptEl) {
-        photoPromptEl.style.display = "flex";
-      }
-    }
-
-    btnTakePhotoEl?.addEventListener("click", () => {
-      photoPromptEl.style.display = "none";
-      // trigger existing camera flow
-      cameraBtn?.click();
-    });
-
-    btnNoPhotoEl?.addEventListener("click", () => {
-      photoPromptEl.style.display = "none";
-    });
-
-    // Hole click handler with win detection
-    holesContainer.addEventListener("click", (e) => {
-      const btn = e.target.closest(".hole-btn");
-      if (!btn || !match) return;
-      const card = btn.closest(".hole-card");
-      if (!card) return;
-      const index = parseInt(card.getAttribute("data-hole-index"), 10);
-      if (Number.isNaN(index)) return;
-
-      const action = btn.getAttribute("data-action");
-      let newVal = "none";
-
-      if (action === "red") newVal = "red";
-      else if (action === "blue") newVal = "blue";
-      else if (action === "half") newVal = "half";
-      else if (action === "clear") newVal = "none";
-
-      const prev = Array.isArray(match.holes) ? (match.holes[index] || "none") : "none";
-
-      const holes = Array.isArray(match?.holes) ? [...match.holes] : new Array(18).fill("none");
-      holes[index] = newVal;
-
-      const isNewWin =
-        (newVal === "red" || newVal === "blue") &&
-        prev !== newVal;
-
-      update(matchRef, { holes })
-        .then(() => {
-          if (isNewWin) {
-            showWinUI();
-          }
-        })
-        .catch(console.error);
-    });
-
-    // Camera / photo upload
-    cameraBtn?.addEventListener("click", () => {
-      if (!photoInput) return;
-      photoInput.value = "";
-      photoInput.click();
-    });
-
-    photoInput?.addEventListener("change", async (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try {
-        photoStatusEl.textContent = "Uploading photo…";
-
-        const tempRef = push(ref(db, "photos/temp"));
-        const id = tempRef.key;
-        const path = `matchPhotos/${matchId}/${id}_${Date.now()}.jpg`;
-
-        const sRef = storageRef(storage, path);
-        await uploadBytes(sRef, file);
-        const url = await getDownloadURL(sRef);
-
-        await set(ref(db, `photos/${matchId}/${id}`), {
-          url,
-          path,
-          matchId,
-          uploadedAt: serverTimestamp(),
+      // wire up buttons
+      Array.from(document.querySelectorAll(".pill-btn")).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-hole"));
+          const result = btn.getAttribute("data-result");
+          setHoleResult(idx, result);
         });
+      });
+    }
 
-        photoStatusEl.textContent = "Photo uploaded ✔";
-        setTimeout(() => (photoStatusEl.textContent = ""), 2500);
-      } catch (err) {
-        console.error(err);
-        const msg = err?.code || err?.message || "unknown error";
-        photoStatusEl.textContent = `Upload failed: ${msg}`;
-        setTimeout(() => (photoStatusEl.textContent = ""), 5000);
-      }
-    });
+    function setHoleResult(holeIndex, result) {
+      if (!matchData) return;
 
-    function renderAll() {
-      if (!match) {
-        holesContainer.innerHTML = '<div class="empty-state">Match not found.</div>';
-        playersRow.innerHTML = "";
+      const oldValue = matchData.holes?.[holeIndex] || "none";
+      if (oldValue === result) {
+        // no change
         return;
       }
-      renderMatchSummary();
-      renderPlayers();
-      renderHoles();
+
+      const holes = (matchData.holes || Array(18).fill("none")).slice();
+      holes[holeIndex] = result;
+
+      matchData.holes = holes;
+
+      update(matchRef, {
+        holes,
+        updatedAt: Date.now(),
+      }).catch(console.error);
+
+      // If this is a win (red / blue), prompt for photo for that HOLE
+      if (result === "red" || result === "blue") {
+        const holeNumber = holeConfigs[holeIndex]?.num ?? (holeIndex + 1);
+        handleHoleWin(result, holeNumber);
+      }
+
+      // Haptic feedback
+      try {
+        if (navigator.vibrate) {
+          navigator.vibrate([15, 40, 20]);
+        }
+      } catch (e) {
+        // ignore if unsupported
+      }
+
+      renderEverything();
     }
 
-    onValue(settingsRef, (s) => {
-      settings = s.val() || {};
-      renderAll();
-    });
+    function handleHoleWin(team, holeNumber) {
+      const { red, blue } = getMatchPlayers();
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
+      const teamLabel = team === "red" ? redLasts : blueLasts;
 
-    onValue(playersRef, (s) => {
-      players = s.val() || {};
-      renderAll();
-    });
+      showWinToast(teamLabel, holeNumber, () => {
+        captureAndUploadPhoto(matchId, holeNumber);
+      });
+    }
 
-    onValue(matchRef, (s) => {
-      match = s.val() || null;
-      renderAll();
-    });
+    async function captureAndUploadPhoto(matchId, holeNumber) {
+      try {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.capture = "environment";
+
+        const file = await new Promise((resolve, reject) => {
+          input.onchange = () => resolve(input.files[0]);
+          input.onerror = reject;
+          input.click();
+        });
+
+        if (!file) return;
+
+        const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const storageRef = sRef(storage, `matchPhotos/${matchId}/${imageId}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        const photosRef = ref(db, "photos");
+        const photoMeta = {
+          matchId,
+          holeNumber,           // freeze the hole at capture time
+          createdAt: Date.now(),
+          url: downloadURL,
+        };
+        await set(push(photosRef), photoMeta);
+      } catch (err) {
+        console.error("Photo upload failed", err);
+        alert("Photo upload failed. Please try again.");
+      }
+    }
+
+    function showWinToast(teamLabel, holeNumber, onTakePhoto) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+
+      toast.innerHTML = `
+        <div class="toast-icon">🏆</div>
+        <div class="toast-content">
+          <div class="toast-title">Nice win!</div>
+          <div class="toast-body">
+            ${teamLabel} wins Hole ${holeNumber}. Want to capture the moment?
+          </div>
+        </div>
+        <div class="toast-actions">
+          <button class="toast-btn primary">Take photo</button>
+          <button class="toast-btn secondary">Dismiss</button>
+        </div>
+      `;
+
+      const primaryBtn = toast.querySelector(".toast-btn.primary");
+      const secondaryBtn = toast.querySelector(".toast-btn.secondary");
+
+      const removeToast = () => {
+        if (!toast.parentNode) return;
+        toast.parentNode.removeChild(toast);
+      };
+
+      primaryBtn.addEventListener("click", () => {
+        removeToast();
+        if (typeof onTakePhoto === "function") {
+          onTakePhoto();
+        }
+      });
+
+      secondaryBtn.addEventListener("click", removeToast);
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(removeToast, 6000);
+    }
+
+    function renderEverything() {
+      if (!matchData) return;
+      renderScoreBubble();
+      renderHoles();
+    }
   </script>
 </body>
 </html>

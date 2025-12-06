@@ -7,8 +7,6 @@
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
-      --red: #b91c1c;
-      --blue: #1d4ed8;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
@@ -16,41 +14,35 @@
       --border: #d1d5db;
       --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
-
     body {
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       padding: 0.75rem;
     }
-
     @media (min-width: 768px) {
       body {
         max-width: 900px;
         margin: 0 auto;
       }
     }
-
     .site-header {
       display: flex;
       align-items: center;
       gap: 0.6rem;
       margin-bottom: 0.5rem;
     }
-
     .site-header-left {
       display: flex;
       align-items: center;
       gap: 0.6rem;
     }
-
     .site-logo {
       height: 32px;
       width: auto;
@@ -58,24 +50,20 @@
       object-fit: cover;
       background: #e5e7eb;
     }
-
     .site-title {
       font-size: 1rem;
       font-weight: 700;
     }
-
     .site-subtitle {
       font-size: 0.75rem;
       color: var(--muted);
     }
-
     .nav-links {
       margin-left: auto;
       display: flex;
       gap: 0.4rem;
       flex-wrap: wrap;
     }
-
     .nav-btn {
       font-size: 0.8rem;
       border-radius: 999px;
@@ -85,18 +73,15 @@
       text-decoration: none;
       color: var(--text);
     }
-
     .nav-btn.secondary {
       background: #f3f4f6;
     }
-
     main {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       padding-bottom: 2rem;
     }
-
     .card {
       background: var(--card);
       border-radius: 0.9rem;
@@ -104,7 +89,6 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow-soft);
     }
-
     .section-title {
       font-size: 0.9rem;
       font-weight: 600;
@@ -115,129 +99,84 @@
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
-
     .empty-state {
       font-size: 0.85rem;
       color: var(--muted);
       text-align: center;
       padding: 0.75rem 0.5rem;
     }
-
-    .match-group {
-      margin-bottom: 1rem;
-    }
-
-    .match-heading {
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .match-heading-main {
-      display: flex;
-      flex-direction: column;
-      gap: 0.1rem;
-    }
-
-    .match-heading-title {
-      font-size: 0.9rem;
-    }
-
-    .match-heading-sub {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .match-tag {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      align-self: flex-start;
-      white-space: nowrap;
-    }
-
     .photos-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.5rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
     }
-
-    @media (min-width: 640px) {
+    @media (min-width: 768px) {
       .photos-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
-
     .photo-card {
       background: #f9fafb;
-      border-radius: 0.7rem;
+      border-radius: 0.6rem;
       border: 1px solid #e5e7eb;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.2rem;
     }
-
     .photo-thumb-wrapper {
       width: 100%;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 4 / 5;
       overflow: hidden;
       background: #e5e7eb;
     }
-
     .photo-thumb {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
-
     .photo-meta {
-      padding: 0.25rem 0.45rem 0.35rem;
+      padding: 0.25rem 0.4rem 0.35rem;
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
     }
-
+    .photo-top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.3rem;
+      align-items: baseline;
+    }
     .photo-hole {
       font-size: 0.78rem;
       font-weight: 600;
     }
-
     .photo-hole span {
       font-weight: 500;
       color: var(--muted);
     }
-
+    .photo-match {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: right;
+      white-space: nowrap;
+    }
     .photo-bottom-row {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
       gap: 0.4rem;
     }
-
     .photo-timestamp {
       font-size: 0.7rem;
       color: var(--muted);
     }
-
     .photo-hashtag {
       font-size: 0.7rem;
       color: #4b5563;
       font-weight: 500;
     }
-
-    .photo-match-label {
-      font-size: 0.7rem;
-      color: #4b5563;
-    }
-
   </style>
 </head>
 <body>
@@ -286,164 +225,100 @@
     const db = getDatabase(app);
 
     const photosRef = ref(db, "photos");
-    const matchesRef = ref(db, "matches");
-    const settingsRef = ref(db, "settings");
-
     const photosContainer = document.getElementById("photosContainer");
 
-    let matches = {};
-    let settings = {};
     let photos = {};
-
-    let matchesLoaded = false;
-    let settingsLoaded = false;
     let photosLoaded = false;
 
-    function getTeamNames() {
-      const t = settings.teamNames || {};
-      return { red: t.red || "Red", blue: t.blue || "Blue" };
-    }
-
-    function getLastName(fullName) {
-      if (!fullName) return "";
-      const parts = fullName.trim().split(/\s+/);
-      return parts[parts.length - 1];
-    }
-
-    function describeMatch(matchId, matchData) {
-      if (!matchData) return `Match ${matchId}`;
-      const idNum = Number(matchId);
-      const type = matchData.type || (idNum <= 8 ? "front" : "back");
-      const typeLabel = type === "back" ? "Back 9" : "Front 9";
-
-      const redNames = (matchData.red?.players || [])
-        .map(pid => matchData.playerDetails?.[pid]?.name || "")
-        .filter(Boolean)
-        .map(getLastName);
-      const blueNames = (matchData.blue?.players || [])
-        .map(pid => matchData.playerDetails?.[pid]?.name || "")
-        .filter(Boolean)
-        .map(getLastName);
-
-      let title = `Match ${matchId}`;
-      if (redNames.length && blueNames.length) {
-        title = `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
+    function flattenPhotos(obj, parentMatchId = null, out = []) {
+      if (!obj || typeof obj !== "object") return out;
+      for (const [key, value] of Object.entries(obj)) {
+        if (!value || typeof value !== "object") continue;
+        const hasUrl =
+          "url" in value || "downloadURL" in value || "imageUrl" in value;
+        if (hasUrl) {
+          const photo = { id: key, ...value };
+          if (!photo.matchId && parentMatchId) {
+            photo.matchId = parentMatchId;
+          }
+          out.push(photo);
+        } else {
+          flattenPhotos(value, key, out);
+        }
       }
-
-      return {
-        title,
-        subtitle: `${typeLabel} • Match ${matchId}`
-      };
+      return out;
     }
 
-    function formatTime(ts) {
+    function formatDateTime(ts) {
       if (!ts) return "";
       try {
         const d = new Date(ts);
         if (Number.isNaN(d.getTime())) return "";
-        const opts = { hour: "numeric", minute: "2-digit" };
-        return d.toLocaleTimeString([], opts);
+        const opts = {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        };
+        return d.toLocaleString([], opts);
       } catch {
         return "";
       }
     }
 
     function render() {
-      if (!matchesLoaded || !settingsLoaded || !photosLoaded) {
+      if (!photosLoaded) return;
+
+      const flat = flattenPhotos(photos);
+      if (!flat.length) {
+        photosContainer.innerHTML =
+          '<div class="empty-state">No photos yet. Be the first to upload from a match!</div>';
         return;
       }
 
-      const photoEntries = Object.entries(photos || {});
-      if (!photoEntries.length) {
-        photosContainer.innerHTML = '<div class="empty-state">No photos yet. Be the first to upload from a match!</div>';
-        return;
-      }
+      flat.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-      // Group photos by matchId
-      const groups = {};
-      for (const [id, p] of photoEntries) {
-        const matchId = p.matchId || "unknown";
-        if (!groups[matchId]) groups[matchId] = [];
-        groups[matchId].push({ id, ...p });
-      }
+      const tag = "#ftkclassic";
 
-      // Sort matches numerically, unknown at end
-      const matchIds = Object.keys(groups).sort((a, b) => {
-        const na = Number(a), nb = Number(b);
-        if (Number.isNaN(na) && Number.isNaN(nb)) return a.localeCompare(b);
-        if (Number.isNaN(na)) return 1;
-        if (Number.isNaN(nb)) return -1;
-        return na - nb;
-      });
+      const html =
+        '<div class="photos-grid">' +
+        flat
+          .map((p) => {
+            const url = p.url || p.downloadURL || p.imageUrl || "";
+            const holeNumber = p.holeNumber ?? null;
+            const holeLabel = holeNumber ? `Hole ${holeNumber}` : "Hole —";
+            const dtLabel = formatDateTime(p.createdAt);
+            const matchLabel = p.matchId ? `Match ${p.matchId}` : "";
 
-      const { red: redTeam, blue: blueTeam } = getTeamNames();
-
-      let html = "";
-
-      for (const mid of matchIds) {
-        const matchData = matches[mid];
-        const desc = describeMatch(mid, matchData);
-        const list = groups[mid];
-
-        // newest first
-        list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-        html += `<div class="match-group">
-          <div class="match-heading">
-            <div class="match-heading-main">
-              <div class="match-heading-title">${desc.title}</div>
-              <div class="match-heading-sub">${desc.subtitle}</div>
-            </div>
-            <div class="match-tag">${list.length} photo${list.length === 1 ? "" : "s"}</div>
-          </div>
-          <div class="photos-grid">
-        `;
-
-        for (const p of list) {
-          const url = p.url || "";
-          const hole = p.holeNumber ?? p.hole ?? null;   // support both keys
-          const holeLabel = hole ? `Hole ${hole}` : "Hole —";
-          const timeLabel = formatTime(p.createdAt);
-          const tag = "#ftkclassic";
-
-          html += `
-            <div class="photo-card">
-              <div class="photo-thumb-wrapper">
-                ${url
-                  ? `<img src="${url}" alt="${tag}" class="photo-thumb" loading="lazy" />`
-                  : ""}
-              </div>
-              <div class="photo-meta">
-                <div class="photo-hole">${holeLabel} <span>${timeLabel ? "• " + timeLabel : ""}</span></div>
-                <div class="photo-bottom-row">
-                  <div class="photo-match-label">${p.caption || ""}</div>
-                  <div class="photo-hashtag">${tag}</div>
+            return `
+              <div class="photo-card">
+                <div class="photo-thumb-wrapper">
+                  ${
+                    url
+                      ? `<img src="${url}" alt="${tag}" class="photo-thumb" loading="lazy" />`
+                      : ""
+                  }
+                </div>
+                <div class="photo-meta">
+                  <div class="photo-top-row">
+                    <div class="photo-hole">${holeLabel} <span>${
+              dtLabel ? "• " + dtLabel : ""
+            }</span></div>
+                    <div class="photo-match">${matchLabel}</div>
+                  </div>
+                  <div class="photo-bottom-row">
+                    <div class="photo-timestamp"></div>
+                    <div class="photo-hashtag">${tag}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          `;
-        }
-
-        html += `</div></div>`;
-      }
+            `;
+          })
+          .join("") +
+        "</div>";
 
       photosContainer.innerHTML = html;
     }
-
-    // Load settings, matches, photos
-
-    onValue(settingsRef, (snap) => {
-      settings = snap.val() || {};
-      settingsLoaded = true;
-      render();
-    });
-
-    // Matches: we may not have player names under each match; if not, we still show generic label.
-    onValue(matchesRef, (snap) => {
-      matches = snap.val() || {};
-      matchesLoaded = true;
-      render();
-    });
 
     onValue(photosRef, (snap) => {
       photos = snap.val() || {};
