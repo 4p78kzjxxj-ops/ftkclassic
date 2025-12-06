@@ -1443,39 +1443,35 @@
        - one-time group photo per match
        - hides button once a photo exists
     */
-    async function matchGroupPhotoUpload() {
-      if (!matchId) return;
-      await captureAndUploadPhoto(matchId, null, { group: true });
-      if (matchPhotoButton) {
-        matchPhotoButton.style.display = "none";
-      }
-      if (clearMatchPhotoButton) {
-        clearMatchPhotoButton.style.display = "inline-flex";
-      }
-    }
-
     async function clearMatchPhoto() {
-      if (!matchId) return;
+  if (!matchId) return;
 
-      try {
-        await update(ref(db, `matches/${matchId}`), {
-          groupPhotoUrl: null,
-          groupPhotoTakenAt: null
-        });
+  const confirmed = window.confirm(
+    "Are you sure you want to clear the group photo for this match?"
+  );
+  if (!confirmed) {
+    return;
+  }
 
-        if (matchPhotoButton) {
-          matchPhotoButton.style.display = "inline-flex";
-        }
-        if (clearMatchPhotoButton) {
-          clearMatchPhotoButton.style.display = "none";
-        }
+  try {
+    await update(ref(db, `matches/${matchId}`), {
+      groupPhotoUrl: null,
+      groupPhotoTakenAt: null
+    });
 
-        alert("Match photo cleared.");
-      } catch (err) {
-        console.error("Failed to clear match photo", err);
-        alert("Could not clear the match photo. Try again.");
-      }
+    if (matchPhotoButton) {
+      matchPhotoButton.style.display = "inline-flex";
     }
+    if (clearMatchPhotoButton) {
+      clearMatchPhotoButton.style.display = "none";
+    }
+
+    alert("Match photo cleared.");
+  } catch (err) {
+    console.error("Failed to clear match photo", err);
+    alert("Could not clear the match photo. Try again.");
+  }
+}
 
     /* ---------- MAIN RENDER SWITCH ---------- */
 
