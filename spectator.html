@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic 2025 – Live Scores</title>
+  <title>FTK Classic - Spring 2026</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
@@ -14,9 +14,14 @@
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
-      --dot-empty: #e5e7eb;
-      --dot-half: #9ca3af;
-      --live: #22c55e;
+      --live: #16a34a;
+      --final: #111827;
+      --not-started: #6b7280;
+      --hole-pill-bg: #e5e7eb;
+      --hole-pill-border: #d1d5db;
+      --blue-win: #1d4ed8;
+      --red-win: #b91c1c;
+      --halved: #4b5563;
     }
 
     * {
@@ -27,13 +32,13 @@
     }
 
     body {
-      background: var(--bg);
+      background: radial-gradient(circle at top, #e5f0ff 0, #f3f4f6 42%, #e5e7eb 100%);
       color: var(--text);
       min-height: 100vh;
       padding: 0.75rem;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 900px) {
       body {
         max-width: 900px;
         margin: 0 auto;
@@ -44,7 +49,7 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .site-header-left {
@@ -71,6 +76,12 @@
       color: var(--muted);
     }
 
+    .viewer-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
     .nav-links {
       margin-left: auto;
       display: flex;
@@ -92,12 +103,6 @@
       background: #f3f4f6;
     }
 
-    .viewer-count {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-    }
-
     main {
       display: flex;
       flex-direction: column;
@@ -112,6 +117,12 @@
       border: 1px solid var(--border);
     }
 
+    .card-overview {
+      position: sticky;
+      top: 0.5rem;
+      z-index: 20;
+    }
+
     .section-title {
       font-size: 0.9rem;
       font-weight: 600;
@@ -123,35 +134,47 @@
       padding-bottom: 0.25rem;
     }
 
-    /* Overall slider */
+    /* Overall scoreboard */
 
     .overall-score-row {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 0.5rem;
-      align-items: center;
-      margin-bottom: 0.4rem;
+    }
+
+    @media (max-width: 600px) {
+      .overall-score-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
     }
 
     .overall-team {
       flex: 1;
-      min-width: 0;
+      text-align: center;
     }
 
     .overall-team-name {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.15rem;
     }
 
-    .overall-team-name.red { color: var(--red); }
-    .overall-team-name.blue { color: var(--blue); text-align: right; }
+    .overall-team-name.red {
+      color: var(--red);
+    }
+
+    .overall-team-name.blue {
+      color: var(--blue);
+    }
 
     .overall-points {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 700;
+      margin-bottom: 0.1rem;
     }
 
     .overall-subtext {
@@ -160,38 +183,94 @@
     }
 
     .overall-center {
-      text-align: center;
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     .overall-label {
       font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 0.2rem;
+      font-weight: 600;
     }
 
-    .slider-bar {
+    .overall-slider {
       position: relative;
       width: 100%;
+      max-width: 260px;
       height: 14px;
       border-radius: 999px;
       background: #e5e7eb;
       overflow: hidden;
     }
 
-    .slider-red,
-    .slider-blue {
+    .overall-slider-fill {
       position: absolute;
       top: 0;
       bottom: 0;
     }
-    .slider-red { left: 0; background: #fecaca; }
-    .slider-blue { right: 0; background: #bfdbfe; }
+
+    .overall-slider-fill.red {
+      left: 0;
+      background: #fecaca;
+    }
+
+    .overall-slider-fill.blue {
+      right: 0;
+      background: #bfdbfe;
+    }
 
     .overall-slider-text {
-      margin-top: 0.25rem;
       font-size: 0.75rem;
-      text-align: center;
-      color: #374151;
+      color: var(--muted);
+    }
+
+    /* Legend */
+
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 999px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-swatch.blue {
+      background: var(--blue-win);
+    }
+
+    .legend-swatch.red {
+      background: var(--red-win);
+    }
+
+    .legend-swatch.halved {
+      background: var(--halved);
+    }
+
+    .legend-swatch.empty {
+      border-radius: 4px;
+      border: 1px dashed #9ca3af;
+      width: 12px;
+      height: 12px;
+      background: transparent;
     }
 
     /* Match list */
@@ -205,189 +284,233 @@
     .match-card {
       border-radius: 0.9rem;
       border: 1px solid #e5e7eb;
-      padding: 0.5rem 0.55rem;
       background: #ffffff;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      padding: 0.55rem 0.55rem 0.5rem 0.55rem;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.04);
     }
 
-    .match-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-    }
-
-    .match-card.red-live   { background: #fef2f2; border-color: #fecaca; box-shadow: 0 0 0 1px rgba(248,113,113,0.4); }
-    .match-card.blue-live  { background: #eff6ff; border-color: #bfdbfe; box-shadow: 0 0 0 1px rgba(59,130,246,0.4); }
-    .match-card.red-final  { background: #fef2f2; border-color: #fecaca; }
-    .match-card.blue-final { background: #eff6ff; border-color: #bfdbfe; }
-    .match-card.even-live  { background: #f3f4f6; border-color: #d1d5db; box-shadow: 0 0 0 1px rgba(148,163,184,0.4); }
-    .match-card.even-final { background: #f9fafb; border-color: #e5e7eb; }
-    .match-card.not-started{ background: #ffffff; border-style: dashed; }
-
-    .match-line1 {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 0.1rem;
-    }
-
-    .match-line2 {
+    .match-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.25rem;
+      justify-content: space-between;
       gap: 0.4rem;
-      font-size: 0.78rem;
-      color: var(--muted);
+      margin-bottom: 0.35rem;
     }
 
-    .match-type-label {
-      font-size: 0.76rem;
+    .match-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .match-subtitle {
+      font-size: 0.75rem;
       color: var(--muted);
     }
 
     .match-status-pill {
-      font-size: 0.72rem;
-      padding: 0.1rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f3f4f6;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      white-space: nowrap;
+      font-size: 1rem;
+      line-height: 1;
     }
 
-    .match-status-pill.live {
-      border-color: #bbf7d0;
+    .match-body {
+      display: grid;
+      grid-template-columns: minmax(0,1.35fr) minmax(0,1.4fr);
+      gap: 0.4rem;
+      align-items: stretch;
+    }
+
+    @media (max-width: 640px) {
+      .match-body {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0,1.1fr);
+      }
+    }
+
+    .team-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .team-name {
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .team-name.red {
+      color: var(--red);
+    }
+
+    .team-name.blue {
+      color: var(--blue);
+    }
+
+    .team-players {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .team-score-line {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.78rem;
+      margin-top: 0.1rem;
+    }
+
+    .team-score {
+      font-weight: 600;
+    }
+
+    .score-label {
+      color: var(--muted);
+    }
+
+    .team-up-pill {
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.05rem 0.4rem;
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .team-up-pill.leading {
       background: #dcfce7;
       color: #166534;
     }
 
-    .match-status-pill.final {
-      border-color: #d1d5db;
+    .team-up-pill.tied {
       background: #e5e7eb;
       color: #374151;
     }
 
-    .match-status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--live);
-      box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
-      animation: pulse 1.4s infinite;
-    }
+    /* Hole bubbles & slider */
 
-    @keyframes pulse {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
-      70%{ transform: scale(1.9); box-shadow: 0 0 0 8px rgba(34,197,94,0); }
-      100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-    }
-
-    .match-score-pill {
-      font-size: 0.78rem;
-      padding: 0.15rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .match-score-pill.red  { background: #fee2e2; border-color: #fecaca; color: #7f1d1d; }
-    .match-score-pill.blue { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
-    .match-score-pill.even { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
-
-    /* Player-specific mulligan usage */
-
-    .m-players-block {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-top: 0.18rem;
-      margin-bottom: 0.25rem;
-      font-size: 0.65rem;
-    }
-
-    .m-players-side {
+    .holes-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 0.12rem;
-    }
-
-    .m-players-side-right {
-      align-items: flex-end;
-    }
-
-    .m-player {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.12rem;
-    }
-
-    .m-player-name {
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .m-pill {
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      padding: 0.05rem 0.32rem;
-      font-size: 0.63rem;
-      line-height: 1.2;
-      white-space: nowrap;
-    }
-
-    .m-pill.available {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
-      font-weight: 600;
-    }
-
-    .m-pill.used {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #7f1d1d;
-      font-weight: 600;
-    }
-
-    .dots-row {
-      display: flex;
       gap: 0.25rem;
-      flex-wrap: wrap;
     }
 
-    .dot {
-      min-width: 26px;
+    .holes-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.15rem;
+    }
+
+    .hole-pill {
+      width: 18px;
       height: 18px;
-      padding: 0 6px;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #ffffff;
+      border: 1px solid var(--hole-pill-border);
+      background: var(--hole-pill-bg);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.7rem;
-      font-weight: 600;
-      box-sizing: border-box;
+      color: #374151;
+      position: relative;
+      overflow: hidden;
     }
 
-    .dot.red   { background: #fee2e2; border-color: #fca5a5; color: #7f1d1d; }
-    .dot.blue  { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
-    .dot.half  { background: var(--dot-half); border-color: var(--dot-half); color: #ffffff; }
-    .dot.empty { background: var(--dot-empty); color: transparent; opacity: 0.4; }
+    .hole-pill span {
+      position: relative;
+      z-index: 2;
+    }
 
-    .empty-state {
+    .hole-pill.blue-win {
+      background: #1d4ed8;
+      border-color: #1e40af;
+      color: #eff6ff;
+    }
+
+    .hole-pill.red-win {
+      background: #b91c1c;
+      border-color: #7f1d1d;
+      color: #fee2e2;
+    }
+
+    .hole-pill.halved {
+      background: #6b7280;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+
+    .hole-pill.empty {
+      opacity: 0.6;
+    }
+
+    .hole-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .projected-score {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .projected-score strong {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .slider-wrapper {
+      margin-top: 0.25rem;
+    }
+
+    .slider-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.1rem;
+    }
+
+    .slider-bar {
+      position: relative;
+      height: 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .slider-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    .slider-final {
+      opacity: 0.95;
+    }
+
+    .slider-projected {
+      opacity: 0.7;
+    }
+
+    .slider-red {
+      left: 0;
+      background: #fecaca;
+    }
+
+    .slider-blue {
+      right: 0;
+      background: #bfdbfe;
+    }
+
+    .overall-slider-text {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      text-align: center;
+      color: #374151;
+    }
+
+    .matches-empty {
       font-size: 0.8rem;
       color: var(--muted);
       text-align: center;
-      padding: 0.75rem 0.5rem;
+      padding: 0.5rem;
     }
   </style>
 </head>
@@ -397,7 +520,8 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div id="viewerCount" class="viewer-count">Viewing now: 0</div>
+        <div class="site-subtitle">Live match scoreboard</div>
+        <div id="viewerCount" class="viewer-count">Viewing now: 0 devices</div>
       </div>
     </div>
     <div class="nav-links">
@@ -407,7 +531,7 @@
   </header>
 
   <main>
-    <section class="card">
+    <section class="card card-overview">
       <div class="section-title">Tournament overview</div>
       <div class="overall-score-row">
         <div class="overall-team">
@@ -416,25 +540,42 @@
           <div class="overall-subtext">Projected points</div>
         </div>
         <div class="overall-center">
-          <div class="overall-label">Projected leaderboard</div>
-          <div class="slider-bar">
-            <div class="slider-red" id="overallSliderRed" style="width:50%;"></div>
-            <div class="slider-blue" id="overallSliderBlue" style="width:50%;"></div>
+          <div class="overall-label">Projected outcome</div>
+          <div class="overall-slider">
+            <div class="overall-slider-fill red" id="overallRedFill" style="width: 50%;"></div>
+            <div class="overall-slider-fill blue" id="overallBlueFill" style="width: 50%;"></div>
           </div>
-          <div class="overall-slider-text" id="overallSliderText">All square overall</div>
+          <div class="overall-slider-text" id="overallSummaryText">
+            Tournament is currently level.
+          </div>
         </div>
-        <div class="overall-team" style="text-align:right;">
+        <div class="overall-team">
           <div class="overall-team-name blue" id="overallBlueName">Blue</div>
           <div class="overall-points" id="overallBluePoints">0</div>
           <div class="overall-subtext">Projected points</div>
         </div>
       </div>
+
+      <div class="legend-row">
+        <div class="legend-item">
+          <span class="legend-swatch blue"></span><span>Blue team won hole</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch red"></span><span>Red team won hole</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch halved"></span><span>Halved hole</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch empty"></span><span>No result yet</span>
+        </div>
+      </div>
     </section>
 
     <section class="card">
-      <div class="section-title">All matches</div>
+      <div class="section-title">Matches</div>
       <div id="matchesContainer" class="matches-list">
-        <div class="empty-state">Loading matches…</div>
+        <div class="matches-empty">Loading matches…</div>
       </div>
     </section>
   </main>
@@ -445,10 +586,10 @@
       getDatabase,
       ref,
       onValue,
-      onDisconnect,
-      serverTimestamp,
-      push,
       set,
+      push,
+      serverTimestamp,
+      onDisconnect,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -473,16 +614,16 @@
     const overallBlueNameEl = document.getElementById("overallBlueName");
     const overallRedPointsEl = document.getElementById("overallRedPoints");
     const overallBluePointsEl = document.getElementById("overallBluePoints");
-    const overallSliderRedEl = document.getElementById("overallSliderRed");
-    const overallSliderBlueEl = document.getElementById("overallSliderBlue");
-    const overallSliderTextEl = document.getElementById("overallSliderText");
+    const overallRedFillEl = document.getElementById("overallRedFill");
+    const overallBlueFillEl = document.getElementById("overallBlueFill");
+    const overallSummaryTextEl = document.getElementById("overallSummaryText");
     const matchesContainer = document.getElementById("matchesContainer");
 
     let settings = {};
     let players = {};
     let matches = {};
 
-    function setupPresence(db, pageKey, onCountChange) {
+    function setupPresence(pageKey) {
       const connectionsRef = ref(db, `presence/${pageKey}`);
       const connectedRef = ref(db, ".info/connected");
 
@@ -498,17 +639,16 @@
         (snap) => {
           const val = snap.val();
           const count = val ? Object.keys(val).length : 0;
-          console.log("Presence spectator =", count, val);
-          onCountChange(count);
+          viewerCountEl.textContent =
+            count === 1 ? "Viewing now: 1 device" : `Viewing now: ${count} devices`;
         },
-        () => onCountChange(0)
+        () => {
+          viewerCountEl.textContent = "Viewing now: 0 devices";
+        }
       );
     }
 
-    setupPresence(db, "spectator", (count) => {
-      viewerCountEl.textContent =
-        count === 1 ? "Viewing now: 1 person" : `Viewing now: ${count} people`;
-    });
+    setupPresence("spectator_main");
 
     function getTeamNames() {
       const t = settings.teamNames || {};
@@ -521,286 +661,246 @@
       return parts[parts.length - 1];
     }
 
-    function computeMatchState(holes, type) {
-      const arr = Array.isArray(holes) ? holes : [];
-      const holeCount = 9;
-      const start = type === "front" ? 0 : 9;
-      const end = type === "front" ? 9 : 18;
+    function formatTeamPlayers(playerIds = []) {
+      const names = playerIds
+        .map((id) => players[id])
+        .filter(Boolean)
+        .map((p) => p.name || "")
+        .filter(Boolean);
 
-      const playedIndices = [];
-      for (let i = start; i < end; i++) {
-        if (arr[i] && arr[i] !== "none") {
-          playedIndices.push(i);
-        }
-      }
-
-      if (playedIndices.length === 0) {
-        return { diff: 0, done: false, throughHole: null, margin: 0, holesLeft: holeCount };
-      }
-
-      let diff = 0;
-      let done = false;
-      let closingIndex = null;
-      let closingSeqIndex = null;
-
-      for (let k = 0; k < playedIndices.length; k++) {
-        const i = playedIndices[k];
-        const res = arr[i];
-        if (res === "red") diff += 1;
-        else if (res === "blue") diff -= 1;
-
-        const holesRemaining = holeCount - (k + 1);
-        if (Math.abs(diff) > holesRemaining) {
-          done = true;
-          closingIndex = i;
-          closingSeqIndex = k;
-          break;
-        }
-      }
-
-      const throughIndex = done
-        ? closingIndex
-        : playedIndices[playedIndices.length - 1];
-      const throughHole = throughIndex + 1;
-
-      const margin = Math.abs(diff);
-      const holesLeft = done
-        ? holeCount - (closingSeqIndex + 1)
-        : holeCount - playedIndices.length;
-
-      return { diff, done, throughHole, margin, holesLeft };
+      if (names.length === 0) return "TBD";
+      if (names.length === 1) return getLastName(names[0]);
+      if (names.length === 2)
+        return `${getLastName(names[0])} / ${getLastName(names[1])}`;
+      return names.map(getLastName).join(" / ");
     }
 
-    function buildDotsHTML(holes, type) {
-      const arr = Array.isArray(holes) ? holes : [];
-      const start = type === "front" ? 0 : 9;
-      const end = type === "front" ? 9 : 18;
-      const dots = [];
-      let diff = 0;
+    function displayScoreText(score) {
+      if (!score || !score.leader || !score.up) return "All square";
+      if (score.leader === "red") return `Red ${score.up} up`;
+      if (score.leader === "blue") return `Blue ${score.up} up`;
+      return "All square";
+    }
 
-      for (let i = start; i < end; i++) {
-        const res = arr[i] || "none";
+    function getMatchStatusEmoji(status) {
+      if (status === "final") return "🏁";           // match won
+      if (status === "live") return "🏌️‍♂️";         // glowing golf cart vibe
+      return "⏱️";                                   // not started
+    }
 
-        if (res === "red") diff += 1;
-        else if (res === "blue") diff -= 1;
+    function computeOverallProjection(matchesObj) {
+      let redProjected = 0;
+      let blueProjected = 0;
 
-        let cls = "empty";
-        let label = "";
+      Object.values(matchesObj || {}).forEach((m) => {
+        const totalPoints = m.totalPoints ?? 1;
+        const status = m.status || "not-started";
 
-        if (!res || res === "none") {
-          cls = "empty";
-        } else if (diff === 0) {
-          cls = "half";
-          label = "AS";
-        } else if (diff > 0) {
-          cls = "red";
-          label = `${diff}up`;
+        if (status === "final") {
+          if (m.final?.leader === "red") redProjected += totalPoints;
+          else if (m.final?.leader === "blue") blueProjected += totalPoints;
+          else {
+            redProjected += totalPoints / 2;
+            blueProjected += totalPoints / 2;
+          }
         } else {
-          cls = "blue";
-          label = `${Math.abs(diff)}up`;
+          if (m.projected?.leader === "red") redProjected += totalPoints;
+          else if (m.projected?.leader === "blue") blueProjected += totalPoints;
+          else {
+            redProjected += totalPoints / 2;
+            blueProjected += totalPoints / 2;
+          }
         }
+      });
 
-        dots.push(`<span class="dot ${cls}">${label}</span>`);
-      }
-
-      return dots.join("");
-    }
-
-    function computeMatchPairLabels(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
-      const redNames = redIds.map((id) => players[id]?.name).filter(Boolean).map(getLastName);
-      const blueNames = blueIds.map((id) => players[id]?.name).filter(Boolean).map(getLastName);
-      return {
-        redPair: redNames.length ? redNames.join(" / ") : "Red pair",
-        bluePair: blueNames.length ? blueNames.join(" / ") : "Blue pair",
-      };
-    }
-
-    function computeMatchTitle(m, id) {
-      const { redPair, bluePair } = computeMatchPairLabels(m);
-      if (redPair !== "Red pair" && bluePair !== "Blue pair") {
-        return `${redPair} vs ${bluePair}`;
-      }
-      return m.name || `Match ${id}`;
-    }
-
-    function computeTournamentProjection() {
-      const ids = Object.keys(matches || {});
-      if (!ids.length) return { red: 0, blue: 0 };
-
-      let red = 0;
-      let blue = 0;
-
-      for (const id of ids) {
-        const m = matches[id];
-        if (!m) continue;
-        const type = m.type || (Number(id) <= 8 ? "front" : "back");
-        const holes = m.holes || [];
-        const state = computeMatchState(holes, type);
-        const { diff, done } = state;
-
-        if (done) {
-          if (diff > 0) red += 1;
-          else if (diff < 0) blue += 1;
-          else { red += 0.5; blue += 0.5; }
-        } else {
-          if (diff > 0) red += 1;
-          else if (diff < 0) blue += 1;
-          else { red += 0.5; blue += 0.5; }
-        }
-      }
-
-      return { red, blue };
+      return { redProjected, blueProjected };
     }
 
     function renderTournamentOverview() {
-      const { red: redName, blue: blueName } = getTeamNames();
-      overallRedNameEl.textContent = redName;
-      overallBlueNameEl.textContent = blueName;
+      const { red, blue } = getTeamNames();
+      overallRedNameEl.textContent = red;
+      overallBlueNameEl.textContent = blue;
 
-      const proj = computeTournamentProjection();
-      const redPoints = proj.red.toFixed(1);
-      const bluePoints = proj.blue.toFixed(1);
+      const { redProjected, blueProjected } = computeOverallProjection(matches);
+      const total = redProjected + blueProjected;
+      overallRedPointsEl.textContent = redProjected.toFixed(1);
+      overallBluePointsEl.textContent = blueProjected.toFixed(1);
 
-      overallRedPointsEl.textContent = redPoints;
-      overallBluePointsEl.textContent = bluePoints;
-
-      const total = proj.red + proj.blue || 1;
-      let redPct = (proj.red / total) * 100;
-      redPct = Math.max(5, Math.min(95, redPct));
-      const bluePct = 100 - redPct;
-
-      overallSliderRedEl.style.width = `${redPct}%`;
-      overallSliderBlueEl.style.width = `${bluePct}%`;
-
-      if (Math.abs(proj.red - proj.blue) < 0.05) {
-        overallSliderTextEl.textContent = "All square on projected points";
-      } else if (proj.red > proj.blue) {
-        overallSliderTextEl.textContent = `${redName} lead ${redPoints} – ${bluePoints}`;
-      } else {
-        overallSliderTextEl.textContent = `${blueName} lead ${bluePoints} – ${redPoints}`;
+      let redPct = 50;
+      let bluePct = 50;
+      if (total > 0) {
+        redPct = (redProjected / total) * 100;
+        bluePct = (blueProjected / total) * 100;
       }
-    }
 
-    // Build per-player mulligan row HTML
-    function buildPlayersMulliganHTML(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
+      overallRedFillEl.style.width = `${Math.max(8, Math.min(92, redPct))}%`;
+      overallBlueFillEl.style.width = `${Math.max(8, Math.min(92, bluePct))}%`;
 
-      if (!redIds.length && !blueIds.length) return "";
+      let summary = "Tournament is currently level.";
+      const diff = redProjected - blueProjected;
+      if (Math.abs(diff) < 0.25) {
+        summary = "Tournament is currently level.";
+      } else if (diff > 0) {
+        summary = `${red} are projected to win by ${diff.toFixed(1)} pts.`;
+      } else {
+        summary = `${blue} are projected to win by ${Math.abs(diff).toFixed(1)} pts.`;
+      }
 
-      const renderPlayer = (pid) => {
-        const p = players[pid];
-        if (!p) return "";
-        const ln = getLastName(p.name || "Player");
-        const mUsed = !!p.mulliganUsed;
-        const rmUsed = !!p.reverseMulliganUsed;
-
-        return `
-          <span class="m-player">
-            <span class="m-player-name">${ln}</span>
-            <span class="m-pill ${mUsed ? "used" : "available"}">M</span>
-            <span class="m-pill ${rmUsed ? "used" : "available"}">RM</span>
-          </span>
-        `;
-      };
-
-      return `
-        <div class="m-players-block">
-          <div class="m-players-side">
-            ${redIds.map(renderPlayer).join("")}
-          </div>
-          <div class="m-players-side m-players-side-right">
-            ${blueIds.map(renderPlayer).join("")}
-          </div>
-        </div>
-      `;
+      overallSummaryTextEl.textContent = summary;
     }
 
     function renderMatches() {
-      const ids = Object.keys(matches || {}).sort((a, b) => Number(a) - Number(b));
-      if (!ids.length) {
-        matchesContainer.innerHTML = '<div class="empty-state">No matches configured yet.</div>';
+      const { red: redTeamName, blue: blueTeamName } = getTeamNames();
+      const matchEntries = Object.entries(matches || {}).sort(
+        ([aId], [bId]) => Number(aId) - Number(bId)
+      );
+
+      if (matchEntries.length === 0) {
+        matchesContainer.innerHTML =
+          '<div class="matches-empty">No matches defined yet.</div>';
         return;
       }
 
-      let html = "";
+      const html = matchEntries
+        .map(([id, m]) => {
+          const status = m.status || "not-started";
+          const type = m.type || (Number(id) <= 8 ? "front" : "back");
+          const emoji = getMatchStatusEmoji(status);
 
-      for (const id of ids) {
-        const m = matches[id];
-        if (!m) continue;
-        const type = m.type || (Number(id) <= 8 ? "front" : "back");
-        const typeLabel = type === "front" ? "Front 9" : "Back 9";
-        const holes = m.holes || [];
+          const redPlayers = m.red?.players || [];
+          const bluePlayers = m.blue?.players || [];
 
-        const state = computeMatchState(holes, type);
-        const { diff, done, throughHole, margin, holesLeft } = state;
+          const redTeamStr = formatTeamPlayers(redPlayers);
+          const blueTeamStr = formatTeamPlayers(bluePlayers);
 
-        const { redPair, bluePair } = computeMatchPairLabels(m);
-        const title = computeMatchTitle(m, id);
+          const finalScoreText = displayScoreText(m.final || null);
+          const projectedScoreText = displayScoreText(m.projected || null);
 
-        let cardClass = "match-card ";
-        if (throughHole === null && !done && diff === 0)      cardClass += "not-started";
-        else if (done && diff === 0)                          cardClass += "even-final";
-        else if (!done && diff === 0)                         cardClass += "even-live";
-        else if (diff > 0 && done)                            cardClass += "red-final";
-        else if (diff < 0 && done)                            cardClass += "blue-final";
-        else if (diff > 0 && !done)                           cardClass += "red-live";
-        else if (diff < 0 && !done)                           cardClass += "blue-live";
+          let redFinalUp = 0;
+          let blueFinalUp = 0;
+          if (m.final?.leader === "red") redFinalUp = m.final.up || 0;
+          else if (m.final?.leader === "blue") blueFinalUp = m.final.up || 0;
 
-        const hasActivity = throughHole !== null;
+          let redProjUp = 0;
+          let blueProjUp = 0;
+          if (m.projected?.leader === "red") redProjUp = m.projected.up || 0;
+          else if (m.projected?.leader === "blue") blueProjUp = m.projected.up || 0;
 
-        // Status pill: emoji only
-        let statusLabel = "⏱️"; // default: not started
-        let statusClass = "match-status-pill";
+          const holes = Array.isArray(m.holes) ? m.holes : [];
+          const maxHole = holes.length || 18;
 
-        if (!hasActivity) {
-          statusLabel = "⏱️";           // Not started
-        } else if (done) {
-          statusLabel = "🏁";           // Final (won/finished)
-          statusClass += " final";
-        } else {
-          statusLabel = "🛺✨";         // Live
-          statusClass += " live";
-        }
+          const holeSpans = [];
+          for (let i = 0; i < maxHole; i++) {
+            const result = holes[i] || "none";
+            let cls = "hole-pill empty";
+            if (result === "red") cls = "hole-pill red-win";
+            else if (result === "blue") cls = "hole-pill blue-win";
+            else if (result === "halved") cls = "hole-pill halved";
 
-        let scoreText = "All square";
-        let scoreClass = "match-score-pill even";
+            holeSpans.push(`<div class="${cls}"><span>${i + 1}</span></div>`);
+          }
 
-        if (diff === 0) {
-          if (done) scoreText = "Halved";
-          else if (throughHole) scoreText = `AS thru ${throughHole}`;
-          else scoreText = "All square";
-        } else if (diff > 0) {
-          if (done) scoreText = `${redPair} ${margin}&${holesLeft}`;
-          else scoreText = `${redPair} ${Math.abs(diff)} up thru ${throughHole}`;
-          scoreClass = "match-score-pill red";
-        } else {
-          if (done) scoreText = `${bluePair} ${margin}&${holesLeft}`;
-          else scoreText = `${bluePair} ${Math.abs(diff)} up thru ${throughHole}`;
-          scoreClass = "match-score-pill blue";
-        }
+          let projectedText = "All square";
+          if (m.projected?.leader === "red") {
+            projectedText = `${redTeamName} ${m.projected.up} up (projected)`;
+          } else if (m.projected?.leader === "blue") {
+            projectedText = `${blueTeamName} ${m.projected.up} up (projected)`;
+          }
 
-        const dotsHTML = buildDotsHTML(holes, type);
-        const playersMulliganHTML = buildPlayersMulliganHTML(m);
+          let redFinalPct = 50;
+          let blueFinalPct = 50;
+          if (redFinalUp + blueFinalUp > 0) {
+            const total = redFinalUp + blueFinalUp;
+            redFinalPct = (redFinalUp / total) * 100;
+            blueFinalPct = (blueFinalUp / total) * 100;
+          }
 
-        html += `
-          <a class="${cardClass}" href="match_spectator.html?id=${id}">
-            <div class="match-line1">${title}</div>
-            <div class="match-line2">
-              <span class="match-type-label">Match ${id} • ${typeLabel}</span>
-              <span class="${statusClass}">
-                ${(!hasActivity || done) ? "" : '<span class="match-status-dot"></span>'}
-                <span>${statusLabel}</span>
-              </span>
-            </div>
-            <div class="${scoreClass}" style="margin-bottom:0.1rem;">${scoreText}</div>
-            ${playersMulliganHTML}
-            <div class="dots-row">${dotsHTML}</div>
-          </a>
-        `;
-      }
+          let redProjPct = 50;
+          let blueProjPct = 50;
+          if (redProjUp + blueProjUp > 0) {
+            const total = redProjUp + blueProjUp;
+            redProjPct = (redProjUp / total) * 100;
+            blueProjPct = (blueProjUp / total) * 100;
+          }
+
+          const finalRedWidth = `${Math.max(8, Math.min(92, redFinalPct))}%`;
+          const finalBlueWidth = `${Math.max(8, Math.min(92, blueFinalPct))}%`;
+          const projRedWidth = `${Math.max(8, Math.min(92, redProjPct))}%`;
+          const projBlueWidth = `${Math.max(8, Math.min(92, blueProjPct))}%`;
+
+          let redUpLabel = "";
+          let blueUpLabel = "";
+          let pillClassRed = "team-up-pill";
+          let pillClassBlue = "team-up-pill";
+
+          if (m.projected?.leader === "red") {
+            redUpLabel = `${m.projected.up} up`;
+            pillClassRed += " leading";
+          } else if (m.projected?.leader === "blue") {
+            blueUpLabel = `${m.projected.up} up`;
+            pillClassBlue += " leading";
+          } else {
+            redUpLabel = "AS";
+            blueUpLabel = "AS";
+            pillClassRed += " tied";
+            pillClassBlue += " tied";
+          }
+
+          return `
+            <article class="match-card">
+              <header class="match-header">
+                <div>
+                  <div class="match-title">Match ${id}</div>
+                  <div class="match-subtitle">${type === "front" ? "Front 9" : "Back 9"}</div>
+                </div>
+                <div class="match-status-pill">${emoji}</div>
+              </header>
+              <div class="match-body">
+                <div class="team-column">
+                  <div class="team-name red">
+                    <span>${redTeamName}</span>
+                  </div>
+                  <div class="team-players">${redTeamStr}</div>
+                  <div class="team-score-line">
+                    <span class="team-score">${finalScoreText}</span>
+                    <span class="score-label">(final)</span>
+                  </div>
+                  <div class="team-score-line">
+                    <span class="${pillClassRed}">${redUpLabel}</span>
+                    <span class="${pillClassBlue}">${blueUpLabel}</span>
+                  </div>
+                </div>
+
+                <div class="holes-wrapper">
+                  <div class="holes-row">
+                    ${holeSpans.join("")}
+                  </div>
+                  <div class="hole-label">
+                    Hole-by-hole results
+                  </div>
+                  <div class="projected-score">
+                    <strong>Projected:</strong> ${projectedText}
+                  </div>
+                  <div class="slider-wrapper">
+                    <div class="slider-label">Final result</div>
+                    <div class="slider-bar">
+                      <div class="slider-fill slider-final slider-red" style="width:${finalRedWidth};"></div>
+                      <div class="slider-fill slider-final slider-blue" style="width:${finalBlueWidth};"></div>
+                    </div>
+                  </div>
+                  <div class="slider-wrapper">
+                    <div class="slider-label">Projected outcome</div>
+                    <div class="slider-bar">
+                      <div class="slider-fill slider-projected slider-red" style="width:${projRedWidth};"></div>
+                      <div class="slider-fill slider-projected slider-blue" style="width:${projBlueWidth};"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
 
       matchesContainer.innerHTML = html;
     }
