@@ -38,6 +38,11 @@
       }
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     .site-header {
       display: flex;
       align-items: center;
@@ -102,33 +107,66 @@
       border-radius: 0.9rem;
       padding: 0.75rem;
       border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
     }
 
-    /* Sticky header score card */
-    .sticky-shell {
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
+    }
+
+    .match-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    @media (min-width: 768px) {
+      .match-layout {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    .match-main {
+      flex: 1.4;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .match-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .match-header-card {
       position: sticky;
-      top: 0;
-      z-index: 20;
-      padding-bottom: 0.4rem;
+      top: 0.25rem;
+      z-index: 10;
     }
 
-    .sticky-shell::before {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(243,244,246,0.96), rgba(243,244,246,0.0));
-      z-index: -1;
-    }
-
-    .score-card {
-      box-shadow: 0 12px 25px rgba(15,23,42,0.16);
+    .match-header-inner {
+      border-radius: 0.9rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.6rem 0.65rem;
+      box-shadow: 0 12px 25px rgba(15, 23, 42, 0.18);
     }
 
     .match-header {
       display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: flex-start;
     }
 
     .match-title {
@@ -137,86 +175,69 @@
     }
 
     .match-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--muted);
-    }
-
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-top: 0.35rem;
+      margin-top: 0.1rem;
     }
 
     .status-pill {
-      padding: 0.18rem 0.7rem;
       border-radius: 999px;
+      padding: 0.15rem 0.6rem;
+      font-size: 0.75rem;
       border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      font-size: 0.76rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
+      background: #f3f4f6;
+      color: #374151;
       white-space: nowrap;
     }
 
     .status-pill.live {
-      border-color: #bbf7d0;
-      background: #dcfce7;
+      border-color: var(--live);
+      background: #ecfdf3;
       color: #166534;
     }
 
     .status-pill.final {
-      border-color: #d1d5db;
-      background: #e5e7eb;
-      color: #374151;
+      border-color: #334155;
+      background: #111827;
+      color: #e5e7eb;
     }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--live);
-      box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
-      animation: pulse 1.4s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
-      70%{ transform: scale(1.9); box-shadow: 0 0 0 8px rgba(34,197,94,0); }
-      100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    .status-row {
+      margin-top: 0.3rem;
+      display: flex;
+      justify-content: flex-start;
     }
 
     .score-pill-main {
-      margin-top: 0.35rem;
-      display: inline-flex;
+      margin-top: 0.45rem;
+      font-size: 0.85rem;
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.9rem;
+      background: #111827;
+      color: #f9fafb;
+      text-align: center;
+      min-height: 1.9rem;
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0.25rem 0.9rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      font-size: 0.85rem;
-      font-weight: 600;
-      background: radial-gradient(circle at top, #ffffff, #e5e7eb);
-      color: #111827;
-      min-height: 1.8rem;
+      border: 1px solid #020617;
     }
 
     .score-pill-main.red {
-      background: radial-gradient(circle at top, #fee2e2, #fecaca);
-      border-color: #fecaca;
-      color: #7f1d1d;
+      background: #7f1d1d;
+      border-color: #450a0a;
     }
 
     .score-pill-main.blue {
-      background: radial-gradient(circle at top, #dbeafe, #bfdbfe);
-      border-color: #bfdbfe;
-      color: #1e3a8a;
+      background: #1d4ed8;
+      border-color: #1e3a8a;
     }
 
-    /* Row of per-hole pills */
+    .score-pill-main.as {
+      background: #0f172a;
+      border-color: #020617;
+    }
+
     .margin-pills-row {
       margin-top: 0.3rem;
       display: flex;
@@ -266,7 +287,7 @@
       margin-top: 0.45rem;
       position: relative;
       width: 100%;
-      height: 16px;
+      height: 10px;
       border-radius: 999px;
       background: #e5e7eb;
       overflow: hidden;
@@ -279,91 +300,86 @@
       bottom: 0;
     }
 
-    .score-red { left: 0; background: #fecaca; }
-    .score-blue { right: 0; background: #bfdbfe; }
-
-    .score-bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.7rem;
-      color: #4b5563;
-      margin-top: 0.2rem;
+    .score-red {
+      left: 0;
+      background: #fecaca;
     }
 
-    /* Players + mulligans */
+    .score-blue {
+      right: 0;
+      background: #bfdbfe;
+    }
 
-    .section-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 0.4rem;
-      border-bottom: 1px solid #e5e7eb;
-      padding-bottom: 0.25rem;
+    .score-bar-labels {
+      margin-top: 0.25rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+
+    .score-bar-labels span:nth-child(2) {
+      text-align: center;
+      flex: 1;
+    }
+
+    .score-bar-labels span:first-child,
+    .score-bar-labels span:last-child {
+      flex: 1;
     }
 
     .players-row {
       display: flex;
       justify-content: space-between;
       gap: 0.75rem;
-      flex-wrap: wrap;
+      margin-top: 0.2rem;
     }
 
-    .players-side {
+    .players-team {
       flex: 1;
-      min-width: 0;
-    }
-
-    .players-side-title {
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin-bottom: 0.2rem;
-    }
-
-    .players-side-title.red { color: var(--red); }
-    .players-side-title.blue { color: var(--blue); }
-
-    .player-block {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.25rem;
       font-size: 0.8rem;
-      padding: 0.15rem 0;
+    }
+
+    .players-team.red {
+      text-align: left;
+    }
+
+    .players-team.blue {
+      text-align: right;
+    }
+
+    .team-label {
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .team-label.red {
+      color: var(--red);
+    }
+
+    .team-label.blue {
+      color: var(--blue);
     }
 
     .player-name {
-      flex: 1;
-      line-height: 1.2;
+      font-size: 0.8rem;
+      color: #111827;
     }
 
-    .player-mulligans {
+    .player-line {
       display: flex;
-      gap: 0.15rem;
+      justify-content: space-between;
+      gap: 0.3rem;
+      margin-top: 0.05rem;
+    }
+
+    .player-tag {
       font-size: 0.7rem;
-    }
-
-    .pill-m {
-      min-width: 22px;
+      padding: 0.05rem 0.4rem;
       border-radius: 999px;
-      padding: 0.05rem 0.35rem;
-      text-align: center;
-      border: 1px solid #d1d5db;
+      border: 1px solid #e5e7eb;
+      color: #6b7280;
     }
-
-    .pill-m.ok {
-      background: #dcfce7;
-      border-color: #bbf7d0;
-      color: #166534;
-    }
-
-    .pill-m.used {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #7f1d1d;
-    }
-
-    /* Holes */
 
     .holes-list {
       display: flex;
@@ -407,27 +423,6 @@
       text-align: center;
       padding: 0.75rem 0.5rem;
     }
-
-    /* Match photo card */
-
-    .match-photo-card {
-      margin-top: 0.25rem;
-    }
-
-    .match-photo-wrapper {
-      border-radius: 0.9rem;
-      overflow: hidden;
-      border: 1px solid #e5e7eb;
-      background: #111827;
-      max-height: 260px;
-    }
-
-    .match-photo-wrapper img {
-      display: block;
-      width: 100%;
-      height: auto;
-      object-fit: cover;
-    }
   </style>
 </head>
 <body>
@@ -447,65 +442,62 @@
 
   <main>
     <!-- STICKY SCORE CARD -->
-    <div class="sticky-shell">
-      <section class="card score-card">
-        <div class="match-header">
-          <div class="match-title" id="matchTitle">Match</div>
-          <div class="match-subtitle" id="matchSubtitle">Front 9 match</div>
+    <div class="match-layout">
+      <div class="match-main">
+        <section class="card match-header-card">
+          <div class="match-header-inner">
+            <div class="match-header">
+              <div>
+                <div class="match-title" id="matchTitle">Match</div>
+                <div class="match-subtitle" id="matchSubtitle">Front 9 match</div>
+              </div>
+              <div class="status-pill" id="statusPill">
+                <span id="statusText">Loading…</span>
+              </div>
+            </div>
+
+            <!-- Main score bubble with detailed text -->
+            <div id="scoreMainPill" class="score-pill-main">
+              &nbsp;
+            </div>
+
+            <!-- Row of per-hole pills -->
+            <div id="marginPillsRow" class="margin-pills-row">
+              <!-- pills injected here -->
+            </div>
+
+            <!-- Horizontal bar slider -->
+            <div class="score-bar">
+              <div class="score-red" id="scoreRed" style="width:50%;"></div>
+              <div class="score-blue" id="scoreBlue" style="width:50%;"></div>
+            </div>
+            <div class="score-bar-labels">
+              <span id="redSideLabel">Red</span>
+              <span id="scoreCenterLabel">All square</span>
+              <span id="blueSideLabel">Blue</span>
+            </div>
+          </section>
         </div>
 
-        <div class="status-row">
-          <div class="status-pill" id="statusPill">
-            <span id="statusText">Loading…</span>
+        <!-- PLAYERS / MULLIGANS -->
+        <section class="card">
+          <div class="section-title">Players</div>
+          <div class="players-row" id="playersRow">
+            <div class="empty-state">Loading players…</div>
           </div>
-        </div>
+        </section>
+      </div>
 
-        <!-- Main score bubble with detailed text -->
-        <div id="scoreMainPill" class="score-pill-main">
-          &nbsp;
-        </div>
-
-        <!-- Row of per-hole pills -->
-        <div id="marginPillsRow" class="margin-pills-row">
-          <!-- Filled by JS -->
-        </div>
-
-        <!-- Slider bar -->
-        <div class="score-bar">
-          <div class="score-red" id="scoreRed" style="width:50%;"></div>
-          <div class="score-blue" id="scoreBlue" style="width:50%;"></div>
-        </div>
-        <div class="score-bar-labels">
-          <span id="redSideLabel">Red</span>
-          <span id="scoreCenterLabel">All square</span>
-          <span id="blueSideLabel">Blue</span>
-        </div>
-      </section>
+      <!-- HOLE BY HOLE -->
+      <div class="match-side">
+        <section class="card">
+          <div class="section-title" id="holesTitle">Hole-by-hole</div>
+          <div id="holesContainer" class="holes-list">
+            <div class="empty-state">Loading holes…</div>
+          </div>
+        </section>
+      </div>
     </div>
-
-    <!-- MATCH PHOTO -->
-    <section class="card match-photo-card" id="matchPhotoCard" style="display:none;">
-      <div class="section-title">Match photo</div>
-      <div class="match-photo-wrapper">
-        <img id="matchPhotoImg" src="" alt="Match photo" />
-      </div>
-    </section>
-
-    <!-- PLAYERS / MULLIGANS -->
-    <section class="card">
-      <div class="section-title">Players</div>
-      <div class="players-row" id="playersRow">
-        <div class="empty-state">Loading players…</div>
-      </div>
-    </section>
-
-    <!-- HOLE BY HOLE -->
-    <section class="card">
-      <div class="section-title" id="holesTitle">Hole-by-hole</div>
-      <div id="holesContainer" class="holes-list">
-        <div class="empty-state">Loading holes…</div>
-      </div>
-    </section>
   </main>
 
   <script type="module">
@@ -537,8 +529,9 @@
       return params.get(name);
     }
 
-    const matchId = getQueryParam("id") || "1";
-    const matchRef = ref(db, `matches/${matchId}`);
+    const matchId = getQueryParam("match") || getQueryParam("id") || null;
+
+    const matchRef = matchId ? ref(db, `matches/${matchId}`) : null;
 
     const matchTitleEl = document.getElementById("matchTitle");
     const matchSubtitleEl = document.getElementById("matchSubtitle");
@@ -548,43 +541,40 @@
     const marginPillsRowEl = document.getElementById("marginPillsRow");
     const scoreRedEl = document.getElementById("scoreRed");
     const scoreBlueEl = document.getElementById("scoreBlue");
-    const scoreCenterLabelEl = document.getElementById("scoreCenterLabel");
     const redSideLabelEl = document.getElementById("redSideLabel");
     const blueSideLabelEl = document.getElementById("blueSideLabel");
-    const holesTitleEl = document.getElementById("holesTitle");
-    const holesContainer = document.getElementById("holesContainer");
+    const scoreCenterLabelEl = document.getElementById("scoreCenterLabel");
     const playersRow = document.getElementById("playersRow");
-    const matchPhotoCard = document.getElementById("matchPhotoCard");
-    const matchPhotoImg = document.getElementById("matchPhotoImg");
-
-    const holeConfigs = [
-      { num: 1, par: 5,  yards: 474 },
-      { num: 2, par: 4,  yards: 340 },
-      { num: 3, par: 4,  yards: 360 },
-      { num: 4, par: 3,  yards: 180 },
-      { num: 5, par: 5,  yards: 455 },
-      { num: 6, par: 4,  yards: 390 },
-      { num: 7, par: 3,  yards: 145 },
-      { num: 8, par: 4,  yards: 400 },
-      { num: 9, par: 4,  yards: 270 },
-      { num: 10, par: 3, yards: 155 },
-      { num: 11, par: 4, yards: 335 },
-      { num: 12, par: 3, yards: 160 },
-      { num: 13, par: 4, yards: 385 },
-      { num: 14, par: 3, yards: 170 },
-      { num: 15, par: 5, yards: 500 },
-      { num: 16, par: 4, yards: 435 },
-      { num: 17, par: 4, yards: 355 },
-      { num: 18, par: 5, yards: 490 },
-    ];
+    const holesContainer = document.getElementById("holesContainer");
+    const holesTitleEl = document.getElementById("holesTitle");
 
     let settings = {};
     let players = {};
     let match = null;
 
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      renderAll();
+    });
+
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      renderAll();
+    });
+
+    if (matchRef) {
+      onValue(matchRef, (snap) => {
+        match = snap.val() || null;
+        renderAll();
+      });
+    }
+
     function getTeamNames() {
       const t = settings.teamNames || {};
-      return { red: t.red || "Red", blue: t.blue || "Blue" };
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
     }
 
     function getLastName(fullName) {
@@ -602,69 +592,86 @@
       return {
         red: redNames.length ? redNames.join(" / ") : redTeam,
         blue: blueNames.length ? blueNames.join(" / ") : blueTeam,
-        redFull: redIds.map((pid) => players[pid]).filter(Boolean),
-        blueFull: blueIds.map((pid) => players[pid]).filter(Boolean),
       };
     }
 
-    function computeMatchTitle(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
-      const redNames = redIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
-      const blueNames = blueIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
-
-      if (redNames.length && blueNames.length) {
-        return `${redNames.join(" / ")} vs ${blueNames.join(" / ")}`;
+    function getMatchName(m) {
+      if (!m) return `Match ${matchId}`;
+      if (m.title) return m.title;
+      const sideLabels = computeSideLabels(m);
+      if (sideLabels.red && sideLabels.blue) {
+        return `${sideLabels.red} vs ${sideLabels.blue}`;
       }
       return m.name || `Match ${matchId}`;
     }
 
     function computeMatchState(holes, type) {
       const arr = Array.isArray(holes) ? holes : [];
-      const holeCount = 9;
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
 
-      const playedIndices = [];
-      for (let i = start; i < end; i++) {
-        if (arr[i] && arr[i] !== "none") playedIndices.push(i);
-      }
-
-      if (playedIndices.length === 0) {
-        return { diff: 0, done: false, throughHole: null, margin: 0, holesLeft: holeCount };
-      }
-
       let diff = 0;
-      let done = false;
-      let closingIndex = null;
-      let closingSeqIndex = null;
+      let playedIndices = [];
 
-      for (let k = 0; k < playedIndices.length; k++) {
-        const i = playedIndices[k];
+      for (let i = start; i < end; i++) {
         const res = arr[i];
         if (res === "red") diff += 1;
         else if (res === "blue") diff -= 1;
 
-        const holesRemaining = holeCount - (k + 1);
-        if (Math.abs(diff) > holesRemaining) {
-          done = true;
-          closingIndex = i;
-          closingSeqIndex = k;
-          break;
+        if (res && res !== "none") {
+          playedIndices.push(i);
         }
       }
 
-      const throughIndex = done
-        ? closingIndex
-        : playedIndices[playedIndices.length - 1];
-      const throughHole = throughIndex + 1;
-      const margin = Math.abs(diff);
-      const holesLeft = done
-        ? holeCount - (closingSeqIndex + 1)
-        : holeCount - playedIndices.length;
+      const totalHoles = end - start;
+      const holesPlayed = playedIndices.length;
+      const holesRemaining = totalHoles - holesPlayed;
 
-      return { diff, done, throughHole, margin, holesLeft };
+      let leader = null;
+      if (diff > 0) leader = "red";
+      if (diff < 0) leader = "blue";
+
+      let status = "upcoming";
+      let done = false;
+      let throughHole = null;
+      let margin = Math.abs(diff);
+      let holesLeft = holesRemaining;
+
+      if (holesPlayed === 0) {
+        status = "upcoming";
+      } else {
+        // check if result is final (leader is dormie or has closed match)
+        done = false;
+        if (leader && margin > holesRemaining) {
+          done = true;
+          holesLeft = holesRemaining;
+        } else if (holesRemaining === 0) {
+          done = true;
+          holesLeft = 0;
+        }
+
+        status = done ? "final" : "live";
+        if (holesPlayed > 0) {
+          const lastPlayed = playedIndices[playedIndices.length - 1];
+          throughHole = lastPlayed + 1;
+        }
+      }
+
+      return {
+        diff,
+        leader,
+        status,
+        done,
+        margin,
+        throughHole,
+        holesLeft,
+        totalHoles,
+        holesPlayed,
+      };
     }
+
+    // Original margin-based computation is kept but now only used for text/slider;
+    // hole bubbles themselves are shaded per-hole in renderHolePills.
 
     function computeHoleMargins(holes, type) {
       const arr = Array.isArray(holes) ? holes : [];
@@ -678,6 +685,7 @@
 
         if (res === "red") diff += 1;
         else if (res === "blue") diff -= 1;
+        // half or none: diff unchanged
 
         if (!res || res === "none") {
           result.push({ text: "–", cls: "margin-pill empty" });
@@ -693,16 +701,43 @@
       return result;
     }
 
+    // NEW: shade each hole bubble based on which team won that hole
     function renderHolePills(holes, type) {
-      const items = computeHoleMargins(holes, type);
+      const arr = Array.isArray(holes) ? holes : [];
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const items = [];
+
+      for (let i = start; i < end; i++) {
+        const res = arr[i] || "none";
+        let cls = "margin-pill";
+        let text = String(i - start + 1); // default: show hole # in the segment
+
+        if (!res || res === "none") {
+          // not played yet
+          cls += " empty";
+        } else if (res === "half") {
+          // halved hole
+          cls += " as";
+          text = "½";
+        } else if (res === "red") {
+          cls += " red";
+        } else if (res === "blue") {
+          cls += " blue";
+        }
+
+        items.push({ text, cls, holeIndex: i });
+      }
+
       if (!items.length) {
         marginPillsRowEl.innerHTML = "";
         return;
       }
 
       const html = items
-        .map((item, idx) => {
-          return `<span class="${item.cls}" title="Hole ${idx + 1}">${item.text}</span>`;
+        .map((item) => {
+          const holeNum = item.holeIndex + 1;
+          return `<span class="${item.cls}" title="Hole ${holeNum}">${item.text}</span>`;
         })
         .join("");
       marginPillsRowEl.innerHTML = html;
@@ -713,142 +748,53 @@
         playersRow.innerHTML = '<div class="empty-state">Match not found.</div>';
         return;
       }
-      const labels = computeSideLabels(match);
-      const redPlayers = labels.redFull;
-      const bluePlayers = labels.blueFull;
 
-      const renderSide = (ps, colorKey, title) => {
-        let html = `<div class="players-side">
-          <div class="players-side-title ${colorKey}">${title}</div>`;
+      const sideLabels = computeSideLabels(match);
+      const redIds = match.red?.players || [];
+      const blueIds = match.blue?.players || [];
 
-        if (!ps.length) {
-          html += `<div style="font-size:0.78rem;color:#9ca3af;">No players assigned</div>`;
-        } else {
-          ps.forEach((p) => {
-            const mullUsed = !!p.mulliganUsed;
-            const rmUsed = !!p.reverseMulliganUsed;
-            html += `
-              <div class="player-block">
-                <div class="player-name">${p.name || "Player"}</div>
-                <div class="player-mulligans">
-                  <span class="pill-m ${mullUsed ? "used" : "ok"}">M</span>
-                  <span class="pill-m ${rmUsed ? "used" : "ok"}">RM</span>
-                </div>
-              </div>
-            `;
-          });
-        }
+      const redPlayers = redIds.map((pid) => players[pid]).filter(Boolean);
+      const bluePlayers = blueIds.map((pid) => players[pid]).filter(Boolean);
 
-        html += `</div>`;
-        return html;
-      };
+      const redHtml = `
+        <div class="players-team red">
+          <div class="team-label red">${sideLabels.red}</div>
+          ${
+            redPlayers.length
+              ? redPlayers
+                  .map(
+                    (p) => `
+                    <div class="player-line">
+                      <span class="player-name">${p.name || ""}</span>
+                    </div>
+                  `
+                  )
+                  .join("")
+              : '<div class="player-name">–</div>'
+          }
+        </div>
+      `;
 
-      playersRow.innerHTML =
-        renderSide(redPlayers, "red", labels.red) +
-        renderSide(bluePlayers, "blue", labels.blue);
-    }
+      const blueHtml = `
+        <div class="players-team blue">
+          <div class="team-label blue">${sideLabels.blue}</div>
+          ${
+            bluePlayers.length
+              ? bluePlayers
+                  .map(
+                    (p) => `
+                    <div class="player-line">
+                      <span class="player-name">${p.name || ""}</span>
+                    </div>
+                  `
+                  )
+                  .join("")
+              : '<div class="player-name">–</div>'
+          }
+        </div>
+      `;
 
-    function renderMatchPhoto() {
-      if (match && match.groupPhotoUrl) {
-        matchPhotoImg.src = match.groupPhotoUrl;
-        matchPhotoImg.alt = computeMatchTitle(match) + " – match photo";
-        matchPhotoCard.style.display = "block";
-      } else {
-        matchPhotoCard.style.display = "none";
-      }
-    }
-
-    function renderHeader() {
-      if (!match) return;
-      const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
-      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
-      const holes = match.holes || [];
-      const state = computeMatchState(holes, type);
-      const { diff, done, throughHole, margin, holesLeft } = state;
-      const labels = computeSideLabels(match);
-
-      matchTitleEl.textContent = computeMatchTitle(match);
-      matchSubtitleEl.textContent = `${typeLabel} • Match ${matchId}`;
-      holesTitleEl.textContent =
-        type === "back" ? "Hole-by-hole (Back 9)" : "Hole-by-hole (Front 9)";
-
-      // Status pill
-      let pillClass = "status-pill";
-      let pillText = "Not started";
-      const hasActivity = throughHole !== null;
-
-      if (!hasActivity) {
-        pillText = "Not started";
-      } else if (done) {
-        pillClass += " final";
-        pillText = "Final";
-      } else {
-        pillClass += " live";
-        pillText = "LIVE";
-      }
-
-      statusPillEl.className = pillClass;
-      if (pillClass.includes("live")) {
-        statusPillEl.innerHTML = '<span class="live-dot"></span><span>' + pillText + "</span>";
-      } else {
-        statusPillEl.innerHTML = "<span>" + pillText + "</span>";
-      }
-
-      // Main score pill – full description
-      let mainText = "All square";
-      let mainClass = "score-pill-main";
-      let sliderCenter = "All square";
-      let redPct = 50;
-
-      if (diff === 0) {
-        if (done) {
-          mainText = "Halved";
-          sliderCenter = "Halved";
-        } else if (throughHole) {
-          mainText = `AS thru ${throughHole}`;
-          sliderCenter = `AS thru ${throughHole}`;
-        }
-      } else if (diff > 0) {
-        mainClass += " red";
-        if (done) {
-          mainText = `${labels.red} wins ${margin}&${holesLeft}`;
-        } else if (throughHole) {
-          mainText = `${labels.red} ${Math.abs(diff)} up thru ${throughHole}`;
-        } else {
-          mainText = `${labels.red} ${Math.abs(diff)} up`;
-        }
-        const total = 9;
-        redPct = Math.min(95, Math.max(5, ((diff + total / 2) / total) * 100));
-        sliderCenter = `${labels.red} lead`;
-      } else {
-        mainClass += " blue";
-        if (done) {
-          mainText = `${labels.blue} wins ${margin}&${holesLeft}`;
-        } else if (throughHole) {
-          mainText = `${labels.blue} ${Math.abs(diff)} up thru ${throughHole}`;
-        } else {
-          mainText = `${labels.blue} ${Math.abs(diff)} up`;
-        }
-        const total = 9;
-        const blueLead = Math.abs(diff);
-        redPct = 100 - Math.min(95, Math.max(5, ((blueLead + total / 2) / total) * 100));
-        sliderCenter = `${labels.blue} lead`;
-      }
-
-      scoreMainPillEl.textContent = mainText;
-      scoreMainPillEl.className = mainClass;
-
-      // Per-hole pills row
-      renderHolePills(holes, type);
-
-      // Slider bar
-      scoreRedEl.style.width = `${redPct}%`;
-      scoreBlueEl.style.width = `${100 - redPct}%`;
-      scoreCenterLabelEl.textContent = sliderCenter;
-
-      const { red: redTeam, blue: blueTeam } = getTeamNames();
-      redSideLabelEl.textContent = labels.red || redTeam;
-      blueSideLabelEl.textContent = labels.blue || blueTeam;
+      playersRow.innerHTML = redHtml + blueHtml;
     }
 
     function renderHoles() {
@@ -857,36 +803,58 @@
         return;
       }
 
-      const type = match.type || (Number(matchId) <= 8 ? "front" : "back");
+      const type = match.type || (Number(matchId) > 8 ? "back" : "front");
+      const arr = Array.isArray(match.holes) ? match.holes : [];
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
-      const holesState = match.holes || [];
-      const labels = computeSideLabels(match);
+      const segmentLabel = type === "back" ? "Back 9" : "Front 9";
+      holesTitleEl.textContent = `Hole-by-hole (${segmentLabel})`;
+
+      if (!arr.length) {
+        holesContainer.innerHTML = '<div class="empty-state">No holes yet.</div>';
+        return;
+      }
+
+      const holeConfigs = [
+        { num: 1,  par: 5, yards: 474 },
+        { num: 2,  par: 4, yards: 340 },
+        { num: 3,  par: 4, yards: 360 },
+        { num: 4,  par: 3, yards: 180 },
+        { num: 5,  par: 5, yards: 455 },
+        { num: 6,  par: 4, yards: 390 },
+        { num: 7,  par: 3, yards: 145 },
+        { num: 8,  par: 4, yards: 400 },
+        { num: 9,  par: 4, yards: 270 },
+        { num: 10, par: 3, yards: 155 },
+        { num: 11, par: 4, yards: 335 },
+        { num: 12, par: 3, yards: 160 },
+        { num: 13, par: 4, yards: 385 },
+        { num: 14, par: 3, yards: 170 },
+        { num: 15, par: 5, yards: 500 },
+        { num: 16, par: 4, yards: 435 },
+        { num: 17, par: 4, yards: 355 },
+        { num: 18, par: 5, yards: 490 },
+      ];
+
+      const sideLabels = computeSideLabels(match);
 
       let html = "";
-
       for (let i = start; i < end; i++) {
-        const cfg = holeConfigs[i];
-        if (!cfg) continue;
-        const res = holesState[i] || "none";
-        const holeNumber = cfg.num;
+        const cfg = holeConfigs[i] || { num: i + 1, par: "–", yards: "–" };
+        const res = arr[i];
+        let statusText = "Not played yet";
 
-        let holeLabel = "Not played";
-        if (res === "half") {
-          holeLabel = "Halved hole";
-        } else if (res === "red") {
-          holeLabel = `${labels.red} won`;
-        } else if (res === "blue") {
-          holeLabel = `${labels.blue} won`;
-        }
+        if (res === "red") statusText = `${sideLabels.red} wins hole`;
+        else if (res === "blue") statusText = `${sideLabels.blue} wins hole`;
+        else if (res === "half") statusText = "Hole halved";
 
         html += `
           <div class="hole-card">
             <div class="hole-header-row">
-              <div class="hole-title">Hole ${holeNumber}</div>
-              <div class="hole-meta">Par ${cfg.par} • ${cfg.yards} yds</div>
+              <div class="hole-title">Hole ${cfg.num}</div>
+              <div class="hole-meta">Par ${cfg.par} · ${cfg.yards} yds</div>
             </div>
-            <div class="hole-status">${holeLabel}</div>
+            <div class="hole-status">${statusText}</div>
           </div>
         `;
       }
@@ -894,34 +862,117 @@
       holesContainer.innerHTML = html;
     }
 
-    function renderAll() {
+    function renderScoreHeader() {
       if (!match) {
-        holesContainer.innerHTML = '<div class="empty-state">Match not found.</div>';
-        playersRow.innerHTML = '<div class="empty-state">No players.</div>';
+        matchTitleEl.textContent = "Match not found";
+        matchSubtitleEl.textContent = "";
+        statusPillEl.className = "status-pill";
+        statusTextEl.textContent = "Not found";
+        scoreMainPillEl.className = "score-pill-main";
+        scoreMainPillEl.textContent = "No data";
+        redSideLabelEl.textContent = "Red";
+        blueSideLabelEl.textContent = "Blue";
+        scoreCenterLabelEl.textContent = "–";
+        scoreRedEl.style.width = "50%";
+        scoreBlueEl.style.width = "50%";
         marginPillsRowEl.innerHTML = "";
-        matchPhotoCard.style.display = "none";
         return;
       }
-      renderHeader();
-      renderPlayers();
-      renderHoles();
-      renderMatchPhoto();
+
+      const type = match.type || (Number(matchId) > 8 ? "back" : "front");
+      const holes = match.holes || [];
+      const sideLabels = computeSideLabels(match);
+      const state = computeMatchState(holes, type);
+
+      matchTitleEl.textContent = getMatchName(match);
+      matchSubtitleEl.textContent = `${
+        type === "back" ? "Back 9" : "Front 9"
+      } · Match ${matchId}`;
+
+      redSideLabelEl.textContent = sideLabels.red;
+      blueSideLabelEl.textContent = sideLabels.blue;
+
+      statusPillEl.className = "status-pill";
+      if (state.status === "live") {
+        statusPillEl.classList.add("live");
+        statusTextEl.textContent = "Live";
+      } else if (state.status === "final") {
+        statusPillEl.classList.add("final");
+        statusTextEl.textContent = "Final";
+      } else {
+        statusTextEl.textContent = "Not started";
+      }
+
+      let mainText = "Ready to start";
+      let mainClass = "score-pill-main";
+      let sliderCenter = "";
+      let redPct = 50;
+      let bluePct = 50;
+
+      const { diff, leader, done, margin, throughHole, holesLeft, totalHoles, holesPlayed } = state;
+
+      if (holesPlayed === 0) {
+        mainText = "Ready to start";
+        mainClass = "score-pill-main";
+        sliderCenter = "Ready";
+      } else if (diff === 0) {
+        mainClass += " as";
+        if (done) {
+          mainText = "Halved";
+          sliderCenter = "Halved";
+        } else if (throughHole) {
+          mainText = `AS thru ${throughHole}`;
+          sliderCenter = `AS thru ${throughHole}`;
+        } else {
+          mainText = "All square";
+          sliderCenter = "AS";
+        }
+      } else if (diff > 0) {
+        mainClass += " red";
+        if (done) {
+          mainText = `${sideLabels.red} wins ${margin}&${holesLeft}`;
+        } else if (throughHole) {
+          mainText = `${sideLabels.red} ${Math.abs(diff)} up thru ${throughHole}`;
+        } else {
+          mainText = `${sideLabels.red} ${Math.abs(diff)} up`;
+        }
+        const total = 9;
+        redPct = Math.min(95, Math.max(50, 50 + (diff / total) * 40));
+        bluePct = 100 - redPct;
+        sliderCenter = mainText;
+      } else if (diff < 0) {
+        mainClass += " blue";
+        if (done) {
+          mainText = `${sideLabels.blue} wins ${margin}&${holesLeft}`;
+        } else if (throughHole) {
+          mainText = `${sideLabels.blue} ${Math.abs(diff)} up thru ${throughHole}`;
+        } else {
+          mainText = `${sideLabels.blue} ${Math.abs(diff)} up`;
+        }
+        const total = 9;
+        bluePct = Math.min(95, Math.max(50, 50 + (Math.abs(diff) / total) * 40));
+        redPct = 100 - bluePct;
+        sliderCenter = mainText;
+      }
+
+      scoreMainPillEl.className = mainClass;
+      scoreMainPillEl.textContent = mainText;
+      scoreCenterLabelEl.textContent = sliderCenter || "All square";
+
+      scoreRedEl.style.width = `${redPct}%`;
+      scoreBlueEl.style.width = `${bluePct}%`;
+
+      // shade the per-hole bubbles based on which side won each hole
+      renderHolePills(holes, type);
     }
 
-    onValue(settingsRef, (snap) => {
-      settings = snap.val() || {};
-      renderAll();
-    });
+    function renderAll() {
+      renderScoreHeader();
+      renderPlayers();
+      renderHoles();
+    }
 
-    onValue(playersRef, (snap) => {
-      players = snap.val() || {};
-      renderAll();
-    });
-
-    onValue(matchRef, (snap) => {
-      match = snap.val() || null;
-      renderAll();
-    });
+    renderAll();
   </script>
 </body>
 </html>
