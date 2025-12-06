@@ -345,12 +345,12 @@
       animation: fadeIn 0.2s ease-out;
     }
 
-    #authBox h2 {
+    #authTitle {
       font-size: 1rem;
       margin-bottom: 0.4rem;
     }
 
-    #authBox p {
+    #authMessage {
       font-size: 0.8rem;
       color: var(--muted);
       margin-bottom: 0.7rem;
@@ -422,8 +422,8 @@
   <!-- AUTH MODAL OVERLAY -->
   <div id="authOverlay">
     <div id="authBox">
-      <h2>Admin access</h2>
-      <p>Enter the admin password to manage players, teams, matches and photos.</p>
+      <h2 id="authTitle">Admin access</h2>
+      <p id="authMessage">Enter the admin password to manage players, teams, matches and photos.</p>
       <input
         id="authPasswordInput"
         type="password"
@@ -523,28 +523,46 @@
         🗑️ Delete ALL photos
       </button>
       <div class="danger-note">
-        Requires password. This permanently deletes all photos from Storage and the photos node in the database.
+        This permanently deletes all photos from Storage and the photos node in the database.
       </div>
 
       <div id="adminToolsStatus" class="status-text"></div>
     </section>
   </main>
 
-  <!-- AUTH LOGIC (runs before Firebase module logic matters visually) -->
+  <!-- AUTH / PASSWORD MODAL LOGIC -->
   <script>
     (function () {
-      const ADMIN_PASSWORD = "admin123"; // change this if you want a different password
+      const ADMIN_PASSWORD = "admin123"; // change here if you want a different password
 
       const overlay = document.getElementById("authOverlay");
+      const titleEl = document.getElementById("authTitle");
+      const msgEl = document.getElementById("authMessage");
       const pwdInput = document.getElementById("authPasswordInput");
       const submitBtn = document.getElementById("authSubmitBtn");
       const cancelBtn = document.getElementById("authCancelBtn");
       const errorEl = document.getElementById("authError");
 
-      function showOverlay() {
-        overlay.style.display = "flex";
+      let currentAction = null;
+      let redirectHomeOnCancel = false;
+
+      function showOverlay(options) {
+        const {
+          title = "Admin access",
+          message = "Enter the admin password.",
+          onSuccess = null,
+          redirectHome = false,
+        } = options || {};
+
+        currentAction = typeof onSuccess === "function" ? onSuccess : null;
+        redirectHomeOnCancel = !!redirectHome;
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
         errorEl.textContent = "";
         pwdInput.value = "";
+
+        overlay.style.display = "flex";
         setTimeout(() => pwdInput.focus(), 50);
       }
 
@@ -558,16 +576,28 @@
           errorEl.textContent = "Please enter the admin password.";
           return;
         }
+
         if (value === ADMIN_PASSWORD) {
-          sessionStorage.setItem("ftkAdminAuthorized", "true");
-          hideOverlay();
+          const action = currentAction;
+          currentAction = null;
+          errorEl.textContent = "";
+
+          if (action) {
+            action();
+          } else {
+            hideOverlay();
+          }
         } else {
           errorEl.textContent = "Incorrect password. Try again.";
         }
       }
 
       function handleCancel() {
-        window.location.href = "index.html";
+        if (redirectHomeOnCancel) {
+          window.location.href = "index.html";
+        } else {
+          hideOverlay();
+        }
       }
 
       submitBtn.addEventListener("click", handleSubmit);
@@ -578,10 +608,32 @@
         }
       });
 
+      // Expose a helper for other scripts to require password again
+      window.requireAdminPassword = function (onSuccess, options) {
+        showOverlay({
+          title: options?.title || "Admin confirmation",
+          message: options?.message || "Re-enter the admin password to continue.",
+          onSuccess: function () {
+            hideOverlay();
+            if (typeof onSuccess === "function") onSuccess();
+          },
+          redirectHome: false,
+        });
+      };
+
+      // Initial gate: only once per tab
       window.addEventListener("load", () => {
         const already = sessionStorage.getItem("ftkAdminAuthorized") === "true";
         if (!already) {
-          showOverlay();
+          showOverlay({
+            title: "Admin access",
+            message: "Enter the admin password to manage players, teams, matches and photos.",
+            onSuccess: function () {
+              sessionStorage.setItem("ftkAdminAuthorized", "true");
+              hideOverlay();
+            },
+            redirectHome: true,
+          });
         }
       });
     })();
@@ -754,8 +806,6 @@
         .forEach(([id, p]) => {
           const team = p.team || "red";
           const hcp = p.handicap ?? "";
-          const last = getLastName(p.name || "");
-
           const rowHtml = `
             <div class="player-row" data-player-id="${id}">
               <div class="player-name-cell">
@@ -840,7 +890,7 @@
     bluePlayersList.addEventListener("click", handlePlayerListClick);
 
     // Matches
-    function buildPlayerOptions(team, selectedId, groupType, usedFront, usedBack, currentMatchId) {
+    function buildPlayerOptions(team, selectedId, groupType, usedFront, usedBack) {
       const usedSet = groupType === "front" ? usedFront : usedBack;
       const opts = ['<option value="">—</option>'];
 
@@ -882,32 +932,28 @@
             redPlayers[0] || "",
             type,
             usedFront,
-            usedBack,
-            id
+            usedBack
           );
           const redOpt2 = buildPlayerOptions(
             "red",
             redPlayers[1] || "",
             type,
             usedFront,
-            usedBack,
-            id
+            usedBack
           );
           const blueOpt1 = buildPlayerOptions(
             "blue",
             bluePlayers[0] || "",
             type,
             usedFront,
-            usedBack,
-            id
+            usedBack
           );
           const blueOpt2 = buildPlayerOptions(
             "blue",
             bluePlayers[1] || "",
             type,
             usedFront,
-            usedBack,
-            id
+            usedBack
           );
 
           html.push(`
@@ -1039,31 +1085,31 @@
       await deleteFolder(rootRef);
     }
 
-    deletePhotosBtn.addEventListener("click", async () => {
-      const pwd = prompt("Enter admin password to delete ALL photos:");
-      if (pwd === null) return;
-      if (pwd !== "admin123") {
-        alert("Incorrect password.");
-        return;
-      }
-
+    deletePhotosBtn.addEventListener("click", () => {
       const really = confirm(
         "This will permanently delete ALL tournament photos from Storage and the 'photos' node in the database. Are you sure?"
       );
       if (!really) return;
 
-      try {
-        adminToolsStatus.textContent = "Deleting all photos…";
+      if (window.requireAdminPassword) {
+        window.requireAdminPassword(async () => {
+          try {
+            adminToolsStatus.textContent = "Deleting all photos…";
 
-        await deleteAllPhotosInStorage();
-        await set(ref(db, "photos"), null);
+            await deleteAllPhotosInStorage();
+            await set(ref(db, "photos"), null);
 
-        adminToolsStatus.textContent = "All photos deleted.";
-        setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
-      } catch (err) {
-        console.error(err);
-        adminToolsStatus.textContent =
-          "Failed to delete photos: " + (err?.code || err?.message || "unknown error");
+            adminToolsStatus.textContent = "All photos deleted.";
+            setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
+          } catch (err) {
+            console.error(err);
+            adminToolsStatus.textContent =
+              "Failed to delete photos: " + (err?.code || err?.message || "unknown error");
+          }
+        }, {
+          title: "Confirm photo deletion",
+          message: "Re-enter the admin password to delete ALL photos.",
+        });
       }
     });
 
