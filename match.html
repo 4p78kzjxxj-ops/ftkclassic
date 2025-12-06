@@ -666,6 +666,10 @@
               <span>📸</span>
               <span>Match photo</span>
             </button>
+            <button id="clearMatchPhotoButton" class="camera-btn" style="display:none;" type="button">
+              <span>🗑️</span>
+              <span>Clear photo</span>
+            </button>
             <button id="cameraButton" class="camera-btn" type="button">
               <span>📷</span>
               <span>Photo</span>
@@ -766,6 +770,7 @@
     const toastContainer = document.getElementById("toastContainer");
     const cameraButton = document.getElementById("cameraButton");
     const matchPhotoButton = document.getElementById("matchPhotoButton");
+    const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 },
@@ -1343,7 +1348,7 @@
         };
         await set(push(photosRef), photoMeta);
 
-        // If it's a group "match photo", store on the match and hide the button
+        // If it's a group "match photo", store on the match
         if (options.group) {
           await update(ref(db, `matches/${matchId}`), {
             groupPhotoUrl: downloadURL,
@@ -1441,9 +1446,34 @@
     async function matchGroupPhotoUpload() {
       if (!matchId) return;
       await captureAndUploadPhoto(matchId, null, { group: true });
-
       if (matchPhotoButton) {
         matchPhotoButton.style.display = "none";
+      }
+      if (clearMatchPhotoButton) {
+        clearMatchPhotoButton.style.display = "inline-flex";
+      }
+    }
+
+    async function clearMatchPhoto() {
+      if (!matchId) return;
+
+      try {
+        await update(ref(db, `matches/${matchId}`), {
+          groupPhotoUrl: null,
+          groupPhotoTakenAt: null
+        });
+
+        if (matchPhotoButton) {
+          matchPhotoButton.style.display = "inline-flex";
+        }
+        if (clearMatchPhotoButton) {
+          clearMatchPhotoButton.style.display = "none";
+        }
+
+        alert("Match photo cleared.");
+      } catch (err) {
+        console.error("Failed to clear match photo", err);
+        alert("Could not clear the match photo. Try again.");
       }
     }
 
@@ -1488,17 +1518,23 @@
           };
         }
 
-        // match group photo button:
-        // show only if match does NOT yet have a groupPhotoUrl
-        if (matchPhotoButton) {
+        // match group photo + clear button logic
+        if (matchPhotoButton && clearMatchPhotoButton) {
           if (matchData.groupPhotoUrl) {
             matchPhotoButton.style.display = "none";
+            clearMatchPhotoButton.style.display = "inline-flex";
           } else {
             matchPhotoButton.style.display = "inline-flex";
-            matchPhotoButton.onclick = () => {
-              matchGroupPhotoUpload();
-            };
+            clearMatchPhotoButton.style.display = "none";
           }
+
+          matchPhotoButton.onclick = () => {
+            matchGroupPhotoUpload();
+          };
+
+          clearMatchPhotoButton.onclick = () => {
+            clearMatchPhoto();
+          };
         }
       }
     }
