@@ -540,6 +540,7 @@
       border-top: 1px solid #e5e7eb;
       padding: 0.5rem 0.1rem 0.55rem;
       transition: background-color 0.2s ease;
+      border-radius: 0.75rem;
     }
 
     .hole-row-red {
@@ -627,6 +628,39 @@
     .pill-btn.clear {
       font-size: 0.8rem;
       color: var(--muted);
+    }
+
+    .hole-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hole-nav-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .hole-nav-btn[disabled] {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .hole-meta-count {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+      flex: 1;
     }
 
     .subtext {
@@ -908,6 +942,50 @@
     let playersLoaded = false;
     let matchesLoaded = false;
 
+    // state: which absolute hole index (0–17) we’re on
+    let currentHoleIndex = null;
+    let segmentStart = 0;
+    let segmentEnd = 9;
+
+    function initCurrentHoleIndex() {
+      if (!matchData || !matchId) return;
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      segmentStart = type === "back" ? 9 : 0;
+      segmentEnd = segmentStart + 9;
+      const holes = matchData.holes || Array(18).fill("none");
+
+      let firstEmpty = -1;
+      for (let i = segmentStart; i < segmentEnd; i++) {
+        if (holes[i] === "none") {
+          firstEmpty = i;
+          break;
+        }
+      }
+      if (firstEmpty >= 0) {
+        currentHoleIndex = firstEmpty;
+      } else {
+        // all holes filled -> show last hole in the segment
+        currentHoleIndex = segmentEnd - 1;
+      }
+    }
+
+    function recalcCurrentHoleIndex() {
+      if (!matchData || !matchId) return;
+      const holes = matchData.holes || [];
+      let firstEmpty = -1;
+      for (let i = segmentStart; i < segmentEnd; i++) {
+        if (holes[i] === "none") {
+          firstEmpty = i;
+          break;
+        }
+      }
+      if (firstEmpty >= 0) {
+        currentHoleIndex = firstEmpty;
+      } else {
+        currentHoleIndex = segmentEnd - 1;
+      }
+    }
+
     onValue(settingsRef, (snap) => {
       settings = snap.val() || {};
       settingsLoaded = true;
@@ -931,6 +1009,9 @@
         };
         if (!matchData.holes) {
           matchData.holes = Array(18).fill("none");
+        }
+        if (currentHoleIndex === null) {
+          initCurrentHoleIndex();
         }
       }
       renderMain();
@@ -1287,20 +1368,16 @@
       const targetWins = 5;
       const leaderWins = Math.max(redWins, blueWins);
 
-      let centerPct = 50; // percentage of bar that is red (0..100)
+      let centerPct = 50;
 
       if (redWins === blueWins) {
-        // Tied = perfect 50/50
         centerPct = 50;
       } else if (leaderWins >= targetWins) {
-        // First to 5 => full bar for winner
-        centerPct = diff > 0 ? 100 : 0; // 100% red or 0% red (100% blue)
+        centerPct = diff > 0 ? 100 : 0;
       } else if (diff !== 0) {
-        // Use the margin to tilt the bar, up to ~80% at 4 "points"
-        const margin = Math.min(targetWins, Math.abs(diff)); // 0..5
-        const maxShift = 40; // how far from 50% we can slide
-        const shift = maxShift * (margin / targetWins); // 0..40
-
+        const margin = Math.min(targetWins, Math.abs(diff));
+        const maxShift = 40;
+        const shift = maxShift * (margin / targetWins);
         centerPct = diff > 0 ? 50 + shift : 50 - shift;
       }
 
@@ -1375,11 +1452,19 @@
     function renderHoles() {
       if (!matchData || !matchId) return;
 
+      if (currentHoleIndex === null) {
+        initCurrentHoleIndex();
+      }
+
       const holes = matchData.holes || Array(18).fill("none");
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
+      segmentStart = start;
+      segmentEnd = end;
+
       const segment = type === "back" ? "Back 9" : "Front 9";
+      const totalInSegment = end - start;
 
       holesSectionTitle.textContent = "Hole-by-hole (" + segment + ")";
 
@@ -1387,54 +1472,72 @@
       const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
       const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
 
-      let html = "";
-      for (let idx = start; idx < end; idx++) {
-        const config = holeConfigs[idx];
-        const value = holes[idx] || "none";
-        const holeNum = config?.num ?? (idx + 1);
-        const par = config?.par ?? "–";
-        const yards = config?.yards ?? "–";
+      const idx = Math.min(Math.max(currentHoleIndex ?? start, start), end - 1);
+      const config = holeConfigs[idx];
+      const value = holes[idx] || "none";
+      const holeNum = config?.num ?? (idx + 1);
+      const par = config?.par ?? "–";
+      const yards = config?.yards ?? "–";
 
-        let rowClass = "hole-row";
-        if (value === "red") rowClass += " hole-row-red";
-        else if (value === "blue") rowClass += " hole-row-blue";
-        else if (value === "half") rowClass += " hole-row-half";
+      let rowClass = "hole-row";
+      if (value === "red") rowClass += " hole-row-red";
+      else if (value === "blue") rowClass += " hole-row-blue";
+      else if (value === "half") rowClass += " hole-row-half";
 
-        html += `
-          <div class="${rowClass}">
-            <div class="hole-header-line">
-              <div class="hole-label">Hole ${holeNum}</div>
-              <div class="hole-meta">Par ${par} · ${yards} yds</div>
+      const holeNumberInSegment = idx - start + 1;
+
+      let holeHtml = `
+        <div class="hole-nav">
+          <button class="hole-nav-btn" data-nav="back" ${idx === start ? "disabled" : ""}>
+            ◀ Back
+          </button>
+          <div class="hole-meta-count">
+            Hole ${holeNumberInSegment} of ${totalInSegment}
+          </div>
+        </div>
+        <div class="${rowClass}">
+          <div class="hole-header-line">
+            <div class="hole-label">Hole ${holeNum}</div>
+            <div class="hole-meta">Par ${par} · ${yards} yds</div>
+          </div>
+          <div class="hole-buttons">
+            <div class="pill-btn ${value === "red" ? "red-active" : ""}"
+                 data-hole="${idx}" data-result="red">
+              ${redLasts}
             </div>
-            <div class="hole-buttons">
-              <div class="pill-btn ${value === "red" ? "red-active" : ""}"
-                   data-hole="${idx}" data-result="red">
-                ${redLasts}
-              </div>
-              <div class="pill-btn halved ${value === "half" ? "half-active" : ""}"
-                   data-hole="${idx}" data-result="half">
-                Halved
-              </div>
-              <div class="pill-btn ${value === "blue" ? "blue-active" : ""}"
-                   data-hole="${idx}" data-result="blue">
-                ${blueLasts}
-              </div>
-              <div class="pill-btn clear ${value === "none" ? "half-active" : ""}"
-                   data-hole="${idx}" data-result="none">
-                Clear
-              </div>
+            <div class="pill-btn halved ${value === "half" ? "half-active" : ""}"
+                 data-hole="${idx}" data-result="half">
+              Halved
+            </div>
+            <div class="pill-btn ${value === "blue" ? "blue-active" : ""}"
+                 data-hole="${idx}" data-result="blue">
+              ${blueLasts}
+            </div>
+            <div class="pill-btn clear ${value === "none" ? "half-active" : ""}"
+                 data-hole="${idx}" data-result="none">
+              Clear
             </div>
           </div>
-        `;
-      }
+        </div>
+      `;
 
-      holesContainer.innerHTML = html;
+      holesContainer.innerHTML = holeHtml;
+
+      const backBtn = document.querySelector("[data-nav='back']");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          if (currentHoleIndex > segmentStart) {
+            currentHoleIndex--;
+            renderHoles();
+          }
+        });
+      }
 
       Array.from(document.querySelectorAll(".pill-btn")).forEach(btn => {
         btn.addEventListener("click", () => {
-          const idx = Number(btn.getAttribute("data-hole"));
+          const holeIdx = Number(btn.getAttribute("data-hole"));
           const result = btn.getAttribute("data-result");
-          setHoleResult(idx, result);
+          setHoleResult(holeIdx, result);
         });
       });
     }
@@ -1449,7 +1552,6 @@
 
       const holes = (matchData.holes || Array(18).fill("none")).slice();
       holes[holeIndex] = result;
-
       matchData.holes = holes;
 
       update(ref(db, "matches/" + matchId), {
@@ -1468,7 +1570,9 @@
         }
       } catch (e) {}
 
-      renderMain();
+      recalcCurrentHoleIndex();
+      renderScoreBubble();
+      renderHoles();
     }
 
     async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
@@ -1665,6 +1769,9 @@
         }
         if (!matchData.holes) {
           matchData.holes = Array(18).fill("none");
+        }
+        if (currentHoleIndex === null) {
+          initCurrentHoleIndex();
         }
 
         renderScoreBubble();
