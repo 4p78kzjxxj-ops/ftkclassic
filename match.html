@@ -19,7 +19,6 @@
       --muted: #6b7280;
       --border: #d1d5db;
       --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
-      --toast-bg: #111827;
     }
 
     * {
@@ -236,6 +235,8 @@
       display: flex;
       align-items: center;
       gap: 0.35rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .match-tag {
@@ -247,7 +248,7 @@
       white-space: nowrap;
     }
 
-    /* camera button */
+    /* camera buttons */
     .camera-btn {
       border-radius: 999px;
       border: 1px solid var(--border);
@@ -274,6 +275,14 @@
 
     .camera-btn:active {
       transform: scale(0.97);
+    }
+
+    .match-photo-btn {
+      background: #e0f2fe;
+    }
+
+    .match-photo-btn:hover {
+      background: #bfdbfe;
     }
 
     .score-line {
@@ -617,7 +626,6 @@
         transform: scale(1) translateY(0);
       }
     }
-
   </style>
 </head>
 <body>
@@ -654,9 +662,13 @@
             <div class="match-subtitle-text" id="matchSubtitle">Front 9</div>
           </div>
           <div class="match-header-actions">
-            <button id="cameraButton" class="camera-btn" type="button">
+            <button id="matchPhotoButton" class="camera-btn match-photo-btn" type="button">
               <span>📸</span>
-              <span>Selfie</span>
+              <span>Match photo</span>
+            </button>
+            <button id="cameraButton" class="camera-btn" type="button">
+              <span>📷</span>
+              <span>Photo</span>
             </button>
             <div class="match-tag" id="matchTag">On course</div>
           </div>
@@ -753,6 +765,7 @@
     const holesSectionTitle = document.getElementById("holesSectionTitle");
     const toastContainer = document.getElementById("toastContainer");
     const cameraButton = document.getElementById("cameraButton");
+    const matchPhotoButton = document.getElementById("matchPhotoButton");
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 },
@@ -1101,11 +1114,11 @@
       const existing = details[playerId] || players[playerId] || {};
       const newVal = !existing[field];
 
-      const updates = {};
-      updates[`players/${playerId}/${field}`] = newVal;
-      updates[`matches/${matchId}/playerDetails/${playerId}/${field}`] = newVal;
+      const updatesObj = {};
+      updatesObj[`players/${playerId}/${field}`] = newVal;
+      updatesObj[`matches/${matchId}/playerDetails/${playerId}/${field}`] = newVal;
 
-      update(ref(db), updates).catch(console.error);
+      update(ref(db), updatesObj).catch(console.error);
     }
 
     function renderScoreBubble() {
@@ -1294,13 +1307,14 @@
       renderMain();
     }
 
-    async function captureAndUploadPhoto(matchId, holeNumber) {
+    // Generic photo capture + upload
+    async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
       try {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
-        // HINT: use selfie / front camera
-        input.capture = "user";
+        // Hint: use back camera (not selfie)
+        input.capture = "environment";
 
         const file = await new Promise((resolve, reject) => {
           input.onchange = () => resolve(input.files[0]);
@@ -1311,7 +1325,11 @@
         if (!file) return;
 
         const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        const storageRef = sRef(storage, `matchPhotos/${matchId}/${imageId}`);
+        const storagePath = options.group
+          ? `matchGroupPhotos/${matchId}/${imageId}`
+          : `matchPhotos/${matchId}/${imageId}`;
+
+        const storageRef = sRef(storage, storagePath);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
 
@@ -1321,8 +1339,17 @@
           holeNumber: holeNumber || null,
           createdAt: Date.now(),
           url: downloadURL,
+          type: options.group ? "group" : "regular",
         };
         await set(push(photosRef), photoMeta);
+
+        // If it's a group "match photo", store on the match and hide the button
+        if (options.group) {
+          await update(ref(db, `matches/${matchId}`), {
+            groupPhotoUrl: downloadURL,
+            groupPhotoTakenAt: Date.now(),
+          });
+        }
       } catch (err) {
         console.error("Photo upload failed", err);
         alert("Photo upload failed. Please try again.");
@@ -1352,11 +1379,11 @@
         <div class="toast-content">
           <div class="toast-title">Nice win!</div>
           <div class="toast-body">
-            ${teamLabel} wins Hole ${holeNumber}. Snap a quick celebration selfie?
+            ${teamLabel} wins Hole ${holeNumber}. Want to grab a quick photo?
           </div>
         </div>
         <div class="toast-actions">
-          <button class="toast-btn primary">Take selfie</button>
+          <button class="toast-btn primary">Take photo</button>
           <button class="toast-btn secondary">Dismiss</button>
         </div>
      `;
@@ -1397,35 +1424,27 @@
       }, 7000);
     }
 
-    /* manual camera button handler */
+    /* manual camera button:
+       - not a selfie
+       - no hole prompt
+       - generic match photo
+    */
     function manualPhotoUpload() {
       if (!matchId) return;
+      captureAndUploadPhoto(matchId, null);
+    }
 
-      let holeNumber = null;
+    /* match group photo button:
+       - one-time group photo per match
+       - hides button once a photo exists
+    */
+    async function matchGroupPhotoUpload() {
+      if (!matchId) return;
+      await captureAndUploadPhoto(matchId, null, { group: true });
 
-      const type = matchData?.type || (Number(matchId) > 8 ? "back" : "front");
-      const start = type === "back" ? 9 : 0;
-      const end = start + 9;
-      const segmentHoles = holeConfigs.slice(start, end);
-      const minHole = segmentHoles[0]?.num;
-      const maxHole = segmentHoles[segmentHoles.length - 1]?.num;
-
-      const input = window.prompt(
-        `This will open your front (selfie) camera.\n\nEnter hole number for this selfie (${minHole}–${maxHole}), or leave blank for a general match selfie:`,
-        ""
-      );
-
-      if (input && input.trim() !== "") {
-        const parsed = parseInt(input.trim(), 10);
-        const validNums = segmentHoles.map(h => h.num);
-        if (!Number.isNaN(parsed) && validNums.includes(parsed)) {
-          holeNumber = parsed;
-        } else {
-          alert("That hole number is not in this 9. Saving as a general match selfie instead.");
-        }
+      if (matchPhotoButton) {
+        matchPhotoButton.style.display = "none";
       }
-
-      captureAndUploadPhoto(matchId, holeNumber);
     }
 
     /* ---------- MAIN RENDER SWITCH ---------- */
@@ -1462,10 +1481,24 @@
         renderScoreBubble();
         renderHoles();
 
+        // manual photo button (always available)
         if (cameraButton) {
           cameraButton.onclick = () => {
             manualPhotoUpload();
           };
+        }
+
+        // match group photo button:
+        // show only if match does NOT yet have a groupPhotoUrl
+        if (matchPhotoButton) {
+          if (matchData.groupPhotoUrl) {
+            matchPhotoButton.style.display = "none";
+          } else {
+            matchPhotoButton.style.display = "inline-flex";
+            matchPhotoButton.onclick = () => {
+              matchGroupPhotoUpload();
+            };
+          }
         }
       }
     }
