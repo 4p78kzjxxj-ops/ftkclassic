@@ -142,11 +142,6 @@
       font-weight: 700;
     }
 
-    .match-group-subtitle {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
     .match-group-tag {
       font-size: 0.7rem;
       padding: 0.15rem 0.6rem;
@@ -192,7 +187,7 @@
     .photo-thumb {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* show full photo, just scaled down */
+      object-fit: contain; /* full photo, just scaled */
       display: block;
     }
 
@@ -383,16 +378,9 @@
     function buildMatchDescription(matchId) {
       const m = matches[matchId];
       const teamNames = getTeamNames();
-      const idNum = Number(matchId);
-      const type = m ? (m.type || (idNum <= 8 ? "front" : "back"))
-                     : (idNum <= 8 ? "front" : "front");
-      const typeLabel = type === "back" ? "Back 9" : "Front 9";
 
       if (!m) {
-        return {
-          vsTitle: `Match ${matchId || "?"}`,
-          subLabel: `${typeLabel} • Match ${matchId || "?"}`,
-        };
+        return { vsTitle: `Match ${matchId || "?"}` };
       }
 
       const details = m.playerDetails || {};
@@ -412,9 +400,7 @@
       const blueLabel = blueNames.length ? blueNames.join(" / ") : teamNames.blue;
 
       const vsTitle = `${redLabel} vs ${blueLabel}`;
-      const subLabel = `${typeLabel} • Match ${matchId}`;
-
-      return { vsTitle, subLabel };
+      return { vsTitle };
     }
 
     function attachPhotoClickHandlers() {
@@ -466,7 +452,6 @@
         if (!groups[key]) {
           groups[key] = {
             vsTitle: desc.vsTitle,
-            subLabel: desc.subLabel,
             photos: [],
           };
         }
@@ -490,23 +475,17 @@
         html += `
           <div class="match-group-card">
             <div class="match-group-header">
-              <div>
-                <div class="match-group-title">${group.vsTitle}</div>
-                <div class="match-group-subtitle">${group.subLabel}</div>
-              </div>
+              <div class="match-group-title">${group.vsTitle}</div>
               <div class="match-group-tag">${countLabel}</div>
             </div>
             <div class="photos-grid">
-        `;
+       `;
 
         for (const p of group.photos) {
           const url = p.url || p.downloadURL || p.imageUrl || "";
           const holeNumber = p.holeNumber ?? p.hole ?? null;
           const holeLabel = holeNumber ? `Hole ${holeNumber}` : "Hole —";
           const dtLabel = formatDateTime(p.createdAt);
-          const matchId = p.matchId || "";
-          const mDesc = buildMatchDescription(matchId);
-          const matchSmall = matchId ? mDesc.subLabel : "";
 
           html += `
             <div class="photo-card">
@@ -514,8 +493,8 @@
                 ${url ? `<img src="${url}" alt="${holeLabel}" class="photo-thumb" loading="lazy" />` : ""}
               </div>
               <div class="photo-meta">
-                <div class="photo-line"><strong>${holeLabel}</strong> • ${dtLabel}</div>
-                <div class="photo-line">${matchSmall}</div>
+                <div class="photo-line"><strong>${holeLabel}</strong></div>
+                <div class="photo-line">${dtLabel}</div>
               </div>
             </div>
           `;
