@@ -128,7 +128,7 @@
     /* Match list view */
 
     #matchListCard {
-      display: none; /* toggled via JS */
+      display: none;
     }
 
     .match-list-container {
@@ -201,7 +201,7 @@
       position: sticky;
       top: 0.25rem;
       z-index: 40;
-      display: none; /* toggled via JS */
+      display: none;
     }
 
     .score-bubble {
@@ -210,6 +210,62 @@
       background: #f9fafb;
       padding: 0.6rem 0.7rem 0.55rem;
       box-shadow: 0 12px 25px rgba(15,23,42,0.18);
+    }
+
+    /* BIG GROUP PHOTO BOX */
+
+    .group-photo-area {
+      margin-bottom: 0.55rem;
+    }
+
+    .group-photo-big-button {
+      width: 100%;
+      border-radius: 0.85rem;
+      border: 1.5px dashed #d4d4d8;
+      background: #fefce8;
+      padding: 0.55rem 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      cursor: pointer;
+    }
+
+    .group-photo-big-button:hover {
+      background: #fef9c3;
+      border-color: #eab308;
+    }
+
+    .group-photo-big-button:active {
+      transform: scale(0.98);
+    }
+
+    .group-photo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: #facc15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .group-photo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      text-align: left;
+    }
+
+    .group-photo-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .group-photo-subtitle {
+      font-size: 0.78rem;
+      color: #4b5563;
     }
 
     .match-header-line {
@@ -450,7 +506,7 @@
 
     .holes-card {
       margin-top: 0.2rem;
-      display: none; /* toggled via JS */
+      display: none;
     }
 
     .hole-row {
@@ -646,16 +702,25 @@
     <!-- ADMIN VIEW -->
     <section id="scoreWrapper" class="score-wrapper">
       <div class="score-bubble">
+        <!-- BIG GROUP PHOTO BOX -->
+        <div id="groupPhotoArea" class="group-photo-area">
+          <button id="groupPhotoBigButton" type="button" class="group-photo-big-button">
+            <div class="group-photo-icon">📸</div>
+            <div class="group-photo-text">
+              <div class="group-photo-title">Take group photo</div>
+              <div class="group-photo-subtitle">
+                Tap to capture a group photo for this match.
+              </div>
+            </div>
+          </button>
+        </div>
+
         <div class="match-header-line">
           <div>
             <div class="match-title-text" id="matchTitle">Match</div>
             <div class="match-subtitle-text" id="matchSubtitle">Front 9</div>
           </div>
           <div class="match-header-actions">
-            <button id="matchPhotoButton" class="camera-btn match-photo-btn" type="button">
-              <span>📸</span>
-              <span>Group photo</span>
-            </button>
             <button id="clearMatchPhotoButton" class="camera-btn" style="display:none;" type="button">
               <span>🗑️</span>
               <span>Clear photo</span>
@@ -752,8 +817,9 @@
     const holesSectionTitle = document.getElementById("holesSectionTitle");
     const toastContainer = document.getElementById("toastContainer");
     const cameraButton = document.getElementById("cameraButton");
-    const matchPhotoButton = document.getElementById("matchPhotoButton");
     const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
+    const groupPhotoArea = document.getElementById("groupPhotoArea");
+    const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 },
@@ -1291,12 +1357,13 @@
       renderMain();
     }
 
+    // returns downloadURL on success
     async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
       try {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
-        // back camera hint (not a selfie)
+        // back camera hint (not selfie)
         input.capture = "environment";
 
         const file = await new Promise((resolve, reject) => {
@@ -1305,7 +1372,7 @@
           input.click();
         });
 
-        if (!file) return;
+        if (!file) return null;
 
         const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         const storagePath = `matchPhotos/${matchId}/${imageId}`;
@@ -1329,9 +1396,12 @@
             groupPhotoTakenAt: Date.now(),
           });
         }
+
+        return downloadURL;
       } catch (err) {
         console.error("Photo upload failed", err);
         alert("Photo upload failed: " + (err && err.message ? err.message : "Please try again."));
+        return null;
       }
     }
 
@@ -1409,11 +1479,27 @@
       captureAndUploadPhoto(matchId, null);
     }
 
-    // Group photo for the match
+    // Group photo for the match – only if none exists
     async function matchGroupPhotoUpload() {
       if (!matchId) return;
-      await captureAndUploadPhoto(matchId, null, { group: true });
-      // Firebase onValue will update matchData.groupPhotoUrl and renderMain()
+
+      if (matchData && matchData.groupPhotoUrl) {
+        alert("There is already a group photo for this match. Clear it first to take another.");
+        return;
+      }
+
+      const url = await captureAndUploadPhoto(matchId, null, { group: true });
+      if (url) {
+        if (!matchData) {
+          matchData = {
+            type: Number(matchId) > 8 ? "back" : "front",
+            holes: Array(18).fill("none"),
+          };
+        }
+        matchData.groupPhotoUrl = url;
+        matchData.groupPhotoTakenAt = Date.now();
+        renderMain(); // hide big box, show clear button
+      }
     }
 
     // Clear group photo with confirmation, then allow a new one
@@ -1436,7 +1522,7 @@
           matchData.groupPhotoTakenAt = null;
         }
 
-        renderMain();
+        renderMain(); // show big box again
       } catch (err) {
         console.error("Failed to clear match photo", err);
         alert("Could not clear the match photo. Try again.");
@@ -1479,12 +1565,13 @@
           cameraButton.onclick = manualPhotoUpload;
         }
 
-        if (matchPhotoButton && clearMatchPhotoButton) {
+        if (groupPhotoBigButton && clearMatchPhotoButton && groupPhotoArea) {
           const hasGroupPhoto = !!(matchData && matchData.groupPhotoUrl);
-          matchPhotoButton.style.display = hasGroupPhoto ? "none" : "inline-flex";
+
+          groupPhotoArea.style.display = hasGroupPhoto ? "none" : "block";
           clearMatchPhotoButton.style.display = hasGroupPhoto ? "inline-flex" : "none";
 
-          matchPhotoButton.onclick = matchGroupPhotoUpload;
+          groupPhotoBigButton.onclick = matchGroupPhotoUpload;
           clearMatchPhotoButton.onclick = clearMatchPhoto;
         }
       }
