@@ -535,7 +535,7 @@
 
     .hole-buttons {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: 1.6fr 0.7fr 1.6fr 0.7fr;
       gap: 0.25rem;
     }
 
@@ -567,6 +567,11 @@
       background: var(--half-soft);
       border-color: #d4d4d8;
       color: var(--half);
+    }
+
+    .pill-btn.halved {
+      padding: 0.18rem 0.25rem;
+      font-size: 0.72rem;
     }
 
     .pill-btn.clear {
@@ -949,13 +954,13 @@
       } else if (holesRemaining === 0) {
         status = "final";
         if (diff === 0) summary = "Halved";
-        else if (diff > 0) summary = `Red wins ${Math.abs(diff)} up`;
-        else summary = `Blue wins ${Math.abs(diff)} up`;
+        else if (diff > 0) summary = "Red wins " + Math.abs(diff) + " up";
+        else summary = "Blue wins " + Math.abs(diff) + " up";
       } else {
         status = "live";
         if (diff === 0) summary = "All square";
-        else if (diff > 0) summary = `Red ${Math.abs(diff)} up`;
-        else summary = `Blue ${Math.abs(diff)} up`;
+        else if (diff > 0) summary = "Red " + Math.abs(diff) + " up";
+        else summary = "Blue " + Math.abs(diff) + " up";
       }
 
       return { status, summary, type };
@@ -981,8 +986,8 @@
         const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
         const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
 
-        const vsTitle = `${redLabel} vs ${blueLabel}`;
-        const subtitle = `${typeLabel} · Match ${mid}`;
+        const vsTitle = redLabel + " vs " + blueLabel;
+        const subtitle = typeLabel + " · Match " + mid;
 
         let statusClass = "upcoming";
         if (status === "live") statusClass = "live";
@@ -1057,25 +1062,25 @@
       } else if (leader === "red") {
         const up = Math.abs(diff);
         if (holesRemaining === 0) {
-          centerText = `Red wins ${up} up`;
+          centerText = "Red wins " + up + " up";
           statusTag = "Final";
         } else if (up > holesRemaining) {
-          centerText = `Red wins ${up}&${holesRemaining}`;
+          centerText = "Red wins " + up + "&" + holesRemaining;
           statusTag = "Final";
         } else {
-          centerText = `Red ${up} up`;
+          centerText = "Red " + up + " up";
           statusTag = "Live";
         }
       } else if (leader === "blue") {
         const up = Math.abs(diff);
         if (holesRemaining === 0) {
-          centerText = `Blue wins ${up} up`;
+          centerText = "Blue wins " + up + " up";
           statusTag = "Final";
         } else if (up > holesRemaining) {
-          centerText = `Blue wins ${up}&${holesRemaining}`;
+          centerText = "Blue wins " + up + "&" + holesRemaining;
           statusTag = "Final";
         } else {
-          centerText = `Blue ${up} up`;
+          centerText = "Blue " + up + " up";
           statusTag = "Live";
         }
       }
@@ -1088,7 +1093,7 @@
           : "live";
 
       if (matchData && matchId && matchData.status !== desiredStatus) {
-        update(ref(db, `matches/${matchId}`), { status: desiredStatus }).catch(
+        update(ref(db, "matches/" + matchId), { status: desiredStatus }).catch(
           console.error
         );
       }
@@ -1127,10 +1132,10 @@
           label = "AS";
           tone = "half";
         } else if (diff > 0) {
-          label = `${diff}up`;
+          label = diff + "up";
           tone = "red";
         } else if (diff < 0) {
-          label = `${Math.abs(diff)}up`;
+          label = Math.abs(diff) + "up";
           tone = "blue";
         }
 
@@ -1186,8 +1191,8 @@
       };
 
       const updatesObj = {};
-      updatesObj[`players/${playerId}/${field}`] = newVal;
-      updatesObj[`matches/${matchId}/playerDetails/${playerId}/${field}`] = newVal;
+      updatesObj["players/" + playerId + "/" + field] = newVal;
+      updatesObj["matches/" + matchId + "/playerDetails/" + playerId + "/" + field] = newVal;
 
       update(ref(db), updatesObj).catch(console.error);
 
@@ -1204,11 +1209,11 @@
       const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || teamNames.blue;
 
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
-      const matchLabel = `Match ${matchId}`;
+      const matchLabel = "Match " + matchId;
       const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
 
-      matchTitleEl.textContent = `${redLasts} vs ${blueLasts}`;
-      matchSubtitleEl.textContent = `${typeLabel} · ${matchLabel}`;
+      matchTitleEl.textContent = redLasts + " vs " + blueLasts;
+      matchSubtitleEl.textContent = typeLabel + " · " + matchLabel;
 
       const { leader, diff, centerText, statusTag, totalHoles } = computeScoreSummary();
 
@@ -1230,22 +1235,25 @@
       const blueColor = leader === "blue" ? "var(--blue)" : "var(--blue-soft)";
 
       scoreSliderFill.style.background =
-        `linear-gradient(to right, ${redColor} 0%, ${redColor} ${centerPct}%, ${blueColor} ${centerPct}%, ${blueColor} 100%)`;
+        "linear-gradient(to right, " +
+        redColor + " 0%, " +
+        redColor + " " + centerPct + "%, " +
+        blueColor + " " + centerPct + "%, " +
+        blueColor + " 100%)";
 
       const pills = computeHolePills();
       scorePillsContainer.innerHTML = pills
         .map(p => {
-          const cls = `score-pill ${
-            p.tone === "red"
+          const cls = "score-pill " +
+            (p.tone === "red"
               ? "red"
               : p.tone === "blue"
               ? "blue"
               : p.tone === "half"
               ? "half"
-              : "empty"
-          }`;
+              : "empty");
           const label = p.label || p.holeNum;
-          return `<div class="${cls}" title="Hole ${p.holeNum}">${label}</div>`;
+          return '<div class="' + cls + '" title="Hole ' + p.holeNum + '">' + label + "</div>";
         })
         .join("");
 
@@ -1296,7 +1304,7 @@
       const end = start + 9;
       const segment = type === "back" ? "Back 9" : "Front 9";
 
-      holesSectionTitle.textContent = `Hole-by-hole (${segment})`;
+      holesSectionTitle.textContent = "Hole-by-hole (" + segment + ")";
 
       const { red, blue } = getMatchPlayersFor(matchData);
       const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
@@ -1326,7 +1334,7 @@
                    data-hole="${idx}" data-result="red">
                 ${redLasts}
               </div>
-              <div class="pill-btn ${value === "half" ? "half-active" : ""}"
+              <div class="pill-btn halved ${value === "half" ? "half-active" : ""}"
                    data-hole="${idx}" data-result="half">
                 Halved
               </div>
@@ -1367,7 +1375,7 @@
 
       matchData.holes = holes;
 
-      update(ref(db, `matches/${matchId}`), {
+      update(ref(db, "matches/" + matchId), {
         holes,
         updatedAt: Date.now(),
       }).catch(console.error);
@@ -1401,8 +1409,8 @@
 
         if (!file) return null;
 
-        const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        const storagePath = `matchPhotos/${matchId}/${imageId}`;
+        const imageId = Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+        const storagePath = "matchPhotos/" + matchId + "/" + imageId;
         const storageRef = sRef(storage, storagePath);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
@@ -1418,7 +1426,7 @@
         await set(push(photosRef), photoMeta);
 
         if (options.group) {
-          await update(ref(db, `matches/${matchId}`), {
+          await update(ref(db, "matches/" + matchId), {
             groupPhotoUrl: downloadURL,
             groupPhotoTakenAt: Date.now(),
           });
@@ -1536,7 +1544,7 @@
       if (!confirmed) return;
 
       try {
-        await update(ref(db, `matches/${matchId}`), {
+        await update(ref(db, "matches/" + matchId), {
           groupPhotoUrl: null,
           groupPhotoTakenAt: null
         });
