@@ -370,22 +370,9 @@
 
     .score-slider-fill {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(to right, var(--red-soft), var(--blue-soft));
-      transition: transform 0.25s ease, background 0.25s ease;
-      transform-origin: center;
-      transform: translateX(0);
-    }
-
-    .score-slider-fill.red-lead {
-      background: linear-gradient(to right, var(--red), var(--red-soft));
-    }
-
-    .score-slider-fill.blue-lead {
-      background: linear-gradient(to right, var(--blue-soft), var(--blue));
+      inset: 0;
+      border-radius: inherit;
+      transition: background 0.25s ease;
     }
 
     .pill-row {
@@ -583,8 +570,10 @@
     }
 
     .pill-btn.clear {
-      font-size: 0.7rem;
+      padding: 0.1rem 0.2rem;
       color: var(--muted);
+      align-self: center;
+      justify-self: center;
     }
 
     .subtext {
@@ -765,7 +754,7 @@
       <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
       <div id="holesContainer"></div>
       <div class="subtext">
-        Tap the last-names / ½ / last-names / Clear buttons to set or clear each hole.
+        Tap the last-names / Halved / last-names / Clear buttons to set or clear each hole.
         Pills at the top show the match standing after each hole (1 up, AS, 2 up, …).
       </div>
     </section>
@@ -1187,7 +1176,6 @@
       const existing = details[playerId] || players[playerId] || {};
       const newVal = !existing[field];
 
-      // keep local matchData in sync so UI updates immediately
       if (!matchData.playerDetails) {
         matchData.playerDetails = {};
       }
@@ -1203,7 +1191,6 @@
 
       update(ref(db), updatesObj).catch(console.error);
 
-      // re-render UI using updated local data
       renderScoreBubble();
     }
 
@@ -1230,19 +1217,20 @@
       scoreCenterLabel.textContent = centerText;
       matchTagEl.textContent = statusTag;
 
-      let pctOffset = 0.5;
-      if (diff !== 0) {
-        const maxShift = 0.35;
-        const shift = Math.min(maxShift, Math.abs(diff) / totalHoles * 1.6);
-        pctOffset = diff > 0 ? 0.5 - shift : 0.5 + shift;
+      const maxShift = 20;
+      let centerPct = 50;
+
+      if (diff !== 0 && totalHoles > 0) {
+        const relative = Math.min(1, Math.abs(diff) / totalHoles);
+        const shift = relative * maxShift;
+        centerPct = diff > 0 ? 50 + shift : 50 - shift;
       }
-      scoreSliderFill.style.transform = `translateX(${(pctOffset - 0.5) * 100}%)`;
-      scoreSliderFill.classList.remove("red-lead", "blue-lead");
-      if (leader === "red") {
-        scoreSliderFill.classList.add("red-lead");
-      } else if (leader === "blue") {
-        scoreSliderFill.classList.add("blue-lead");
-      }
+
+      const redColor = leader === "red" ? "var(--red)" : "var(--red-soft)";
+      const blueColor = leader === "blue" ? "var(--blue)" : "var(--blue-soft)";
+
+      scoreSliderFill.style.background =
+        `linear-gradient(to right, ${redColor} 0%, ${redColor} ${centerPct}%, ${blueColor} ${centerPct}%, ${blueColor} 100%)`;
 
       const pills = computeHolePills();
       scorePillsContainer.innerHTML = pills
@@ -1322,7 +1310,6 @@
         const par = config?.par ?? "–";
         const yards = config?.yards ?? "–";
 
-        // choose row shading class based on winner
         let rowClass = "hole-row";
         if (value === "red") rowClass += " hole-row-red";
         else if (value === "blue") rowClass += " hole-row-blue";
@@ -1341,7 +1328,7 @@
               </div>
               <div class="pill-btn ${value === "half" ? "half-active" : ""}"
                    data-hole="${idx}" data-result="half">
-                ½
+                Halved
               </div>
               <div class="pill-btn ${value === "blue" ? "blue-active" : ""}"
                    data-hole="${idx}" data-result="blue">
@@ -1399,13 +1386,11 @@
       renderMain();
     }
 
-    // returns downloadURL on success
     async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
       try {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
-        // back camera hint (not selfie)
         input.capture = "environment";
 
         const file = await new Promise((resolve, reject) => {
@@ -1515,13 +1500,11 @@
       }, 7000);
     }
 
-    // Manual photo (non-group, no hole prompt)
     function manualPhotoUpload() {
       if (!matchId) return;
       captureAndUploadPhoto(matchId, null);
     }
 
-    // Group photo for the match – only if none exists
     async function matchGroupPhotoUpload() {
       if (!matchId) return;
 
@@ -1540,11 +1523,10 @@
         }
         matchData.groupPhotoUrl = url;
         matchData.groupPhotoTakenAt = Date.now();
-        renderMain(); // hide big box, show clear button
+        renderMain();
       }
     }
 
-    // Clear group photo with confirmation, then allow a new one
     async function clearMatchPhoto() {
       if (!matchId) return;
 
@@ -1564,7 +1546,7 @@
           matchData.groupPhotoTakenAt = null;
         }
 
-        renderMain(); // show big box again
+        renderMain();
       } catch (err) {
         console.error("Failed to clear match photo", err);
         alert("Could not clear the match photo. Try again.");
