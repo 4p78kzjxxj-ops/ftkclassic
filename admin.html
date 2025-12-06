@@ -322,6 +322,84 @@
       color: #991b1b;
       margin-top: 0.2rem;
     }
+
+    /* AUTH MODAL */
+    #authOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #authBox {
+      background: #ffffff;
+      padding: 1.2rem;
+      border-radius: 0.9rem;
+      width: 85%;
+      max-width: 360px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    #authBox h2 {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    #authBox p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.7rem;
+    }
+
+    #authPasswordInput {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      margin-bottom: 0.6rem;
+      text-align: center;
+    }
+
+    #authError {
+      font-size: 0.78rem;
+      color: var(--danger);
+      min-height: 1em;
+      margin-bottom: 0.35rem;
+    }
+
+    #authSubmitBtn,
+    #authCancelBtn {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+      cursor: pointer;
+    }
+
+    #authSubmitBtn {
+      background: #111827;
+      color: #f9fafb;
+      border: none;
+      font-weight: 600;
+    }
+
+    #authCancelBtn {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      color: #374151;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -340,6 +418,23 @@
       <a href="photos.html" class="nav-btn">Photos</a>
     </div>
   </header>
+
+  <!-- AUTH MODAL OVERLAY -->
+  <div id="authOverlay">
+    <div id="authBox">
+      <h2>Admin access</h2>
+      <p>Enter the admin password to manage players, teams, matches and photos.</p>
+      <input
+        id="authPasswordInput"
+        type="password"
+        placeholder="Admin password"
+        autocomplete="off"
+      />
+      <div id="authError"></div>
+      <button id="authSubmitBtn">Continue</button>
+      <button id="authCancelBtn">Back to home</button>
+    </div>
+  </div>
 
   <main>
     <!-- TEAM SETTINGS -->
@@ -434,6 +529,63 @@
       <div id="adminToolsStatus" class="status-text"></div>
     </section>
   </main>
+
+  <!-- AUTH LOGIC (runs before Firebase module logic matters visually) -->
+  <script>
+    (function () {
+      const ADMIN_PASSWORD = "admin123"; // change this if you want a different password
+
+      const overlay = document.getElementById("authOverlay");
+      const pwdInput = document.getElementById("authPasswordInput");
+      const submitBtn = document.getElementById("authSubmitBtn");
+      const cancelBtn = document.getElementById("authCancelBtn");
+      const errorEl = document.getElementById("authError");
+
+      function showOverlay() {
+        overlay.style.display = "flex";
+        errorEl.textContent = "";
+        pwdInput.value = "";
+        setTimeout(() => pwdInput.focus(), 50);
+      }
+
+      function hideOverlay() {
+        overlay.style.display = "none";
+      }
+
+      function handleSubmit() {
+        const value = (pwdInput.value || "").trim();
+        if (!value) {
+          errorEl.textContent = "Please enter the admin password.";
+          return;
+        }
+        if (value === ADMIN_PASSWORD) {
+          sessionStorage.setItem("ftkAdminAuthorized", "true");
+          hideOverlay();
+        } else {
+          errorEl.textContent = "Incorrect password. Try again.";
+        }
+      }
+
+      function handleCancel() {
+        window.location.href = "index.html";
+      }
+
+      submitBtn.addEventListener("click", handleSubmit);
+      cancelBtn.addEventListener("click", handleCancel);
+      pwdInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          handleSubmit();
+        }
+      });
+
+      window.addEventListener("load", () => {
+        const already = sessionStorage.getItem("ftkAdminAuthorized") === "true";
+        if (!already) {
+          showOverlay();
+        }
+      });
+    })();
+  </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
