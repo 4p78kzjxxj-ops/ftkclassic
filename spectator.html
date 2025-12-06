@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,6 +110,19 @@
       border-radius: 0.9rem;
       padding: 0.75rem;
       border: 1px solid var(--border);
+    }
+
+    /* Make tournament overview sticky */
+    .overview-card {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    @media (min-width: 768px) {
+      .overview-card {
+        top: 0.5rem;
+      }
     }
 
     .section-title {
@@ -408,7 +420,8 @@
   </header>
 
   <main>
-    <section class="card">
+    <!-- Added overview-card here -->
+    <section class="card overview-card">
       <div class="section-title">Tournament overview</div>
       <div class="overall-score-row">
         <div class="overall-team">
