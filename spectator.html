@@ -8,7 +8,7 @@
   <style>
     :root {
       --red: #b91c1c;
-      --blue: #11d4ed8;
+      --blue: #1d4ed8;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
@@ -302,6 +302,8 @@
     .match-score-pill.blue { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
     .match-score-pill.even { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
 
+    /* Player-specific mulligan usage */
+
     .m-players-block {
       display: flex;
       justify-content: space-between;
@@ -497,6 +499,7 @@
         (snap) => {
           const val = snap.val();
           const count = val ? Object.keys(val).length : 0;
+          console.log("Presence spectator =", count, val);
           onCountChange(count);
         },
         () => onCountChange(0)
@@ -681,6 +684,7 @@
       }
     }
 
+    // Build per-player mulligan row HTML
     function buildPlayersMulliganHTML(m) {
       const redIds = m.red?.players || [];
       const blueIds = m.blue?.players || [];
@@ -747,23 +751,19 @@
         else if (diff < 0 && !done)                           cardClass += "blue-live";
 
         const hasActivity = throughHole !== null;
-        
-        // NEW EMOJI LOGIC
-        let statusLabel = "Not started";
+
+        // Status pill: emoji only
+        let statusLabel = "⏱️"; // default: not started
         let statusClass = "match-status-pill";
-        let statusEmoji = "⏱️";
 
         if (!hasActivity) {
-          statusLabel = "Not started";
-          statusEmoji = "⏱️";
+          statusLabel = "⏱️";           // Not started
         } else if (done) {
-          statusLabel = "Final";
+          statusLabel = "🏁";           // Final (won/finished)
           statusClass += " final";
-          statusEmoji = "🏁";
         } else {
-          statusLabel = "LIVE";
+          statusLabel = "🛺✨";         // Live
           statusClass += " live";
-          statusEmoji = "🛺✨";
         }
 
         let scoreText = "All square";
@@ -788,11 +788,11 @@
 
         html += `
           <a class="${cardClass}" href="match_spectator.html?id=${id}">
-            <div class="match-line1">${statusEmoji} ${title}</div>
+            <div class="match-line1">${title}</div>
             <div class="match-line2">
               <span class="match-type-label">Match ${id} • ${typeLabel}</span>
               <span class="${statusClass}">
-                ${statusLabel === "LIVE" ? '<span class="match-status-dot"></span>' : ""}
+                ${(!hasActivity || done) ? "" : '<span class="match-status-dot"></span>'}
                 <span>${statusLabel}</span>
               </span>
             </div>
