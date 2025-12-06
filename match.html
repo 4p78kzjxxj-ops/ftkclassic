@@ -1330,9 +1330,9 @@
         if (!file) return;
 
         const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        const storagePath = options.group
-          ? `matchGroupPhotos/${matchId}/${imageId}`
-          : `matchPhotos/${matchId}/${imageId}`;
+
+        // Use the SAME base path for all photos so storage rules are identical
+        const storagePath = `matchPhotos/${matchId}/${imageId}`;
 
         const storageRef = sRef(storage, storagePath);
         await uploadBytes(storageRef, file);
@@ -1357,7 +1357,7 @@
         }
       } catch (err) {
         console.error("Photo upload failed", err);
-        alert("Photo upload failed. Please try again.");
+        alert("Photo upload failed: " + (err && err.message ? err.message : "Please try again."));
       }
     }
 
