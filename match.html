@@ -230,7 +230,6 @@
       color: var(--muted);
     }
 
-    /* header actions (camera + tag) */
     .match-header-actions {
       display: flex;
       align-items: center;
@@ -248,7 +247,6 @@
       white-space: nowrap;
     }
 
-    /* camera buttons */
     .camera-btn {
       border-radius: 999px;
       border: 1px solid var(--border);
@@ -334,8 +332,6 @@
       background: linear-gradient(to right, var(--blue-soft), var(--blue));
     }
 
-    /* Pills for each hole at top */
-
     .pill-row {
       display: flex;
       flex-wrap: nowrap;
@@ -387,8 +383,6 @@
     .score-pill.empty {
       opacity: 0.3;
     }
-
-    /* Players / mulligans */
 
     .players-row {
       display: flex;
@@ -453,8 +447,6 @@
       border-color: #fecaca;
       color: #991b1b;
     }
-
-    /* Hole list (admin view) */
 
     .holes-card {
       margin-top: 0.2rem;
@@ -536,7 +528,7 @@
     #toastContainer {
       position: fixed;
       inset: 0;
-      display: none;            /* toggled via JS */
+      display: none;
       align-items: center;
       justify-content: center;
       background: rgba(15, 23, 42, 0.55);
@@ -645,15 +637,13 @@
   </header>
 
   <main>
-    <!-- LIST VIEW: shown when NO match query param -->
+    <!-- LIST VIEW -->
     <section id="matchListCard" class="card">
       <div class="section-title">Matches</div>
-      <div id="matchListContainer" class="match-list-container">
-        <!-- match rows injected here -->
-      </div>
+      <div id="matchListContainer" class="match-list-container"></div>
     </section>
 
-    <!-- ADMIN VIEW: shown when match query param exists -->
+    <!-- ADMIN VIEW -->
     <section id="scoreWrapper" class="score-wrapper">
       <div class="score-bubble">
         <div class="match-header-line">
@@ -687,13 +677,8 @@
           <div class="score-slider-fill" id="scoreSliderFill"></div>
         </div>
 
-        <div class="pill-row" id="scorePills">
-          <!-- pills for each hole will be injected here -->
-        </div>
-
-        <div class="players-row" id="playersRow">
-          <!-- players + mulligan toggles -->
-        </div>
+        <div class="pill-row" id="scorePills"></div>
+        <div class="players-row" id="playersRow"></div>
       </div>
     </section>
 
@@ -707,7 +692,6 @@
     </section>
   </main>
 
-  <!-- POP-UP TOAST CONTAINER -->
   <div id="toastContainer"></div>
 
   <script type="module">
@@ -752,7 +736,6 @@
     const matchListContainer = document.getElementById("matchListContainer");
     const scoreWrapper = document.getElementById("scoreWrapper");
     const holesCard = document.getElementById("holesCard");
-
     const headerSubtitleEl = document.querySelector(".site-subtitle");
 
     const matchTitleEl = document.getElementById("matchTitle");
@@ -857,8 +840,6 @@
       return { red: redPlayers, blue: bluePlayers };
     }
 
-    /* ---------- MATCH LIST VIEW ---------- */
-
     function summarizeMatchForList(m, mid) {
       const type = m?.type || (Number(mid) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
@@ -945,8 +926,6 @@
 
       matchListContainer.innerHTML = html;
     }
-
-    /* ---------- ADMIN VIEW SCORE SUMMARY / PILLS ---------- */
 
     function computeScoreSummary() {
       if (!matchData || !matchId) {
@@ -1312,13 +1291,12 @@
       renderMain();
     }
 
-    // Generic photo capture + upload
     async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
       try {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
-        // Hint: use back camera (not selfie)
+        // back camera hint (not a selfie)
         input.capture = "environment";
 
         const file = await new Promise((resolve, reject) => {
@@ -1330,10 +1308,7 @@
         if (!file) return;
 
         const imageId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-        // Use the SAME base path for all photos so storage rules are identical
         const storagePath = `matchPhotos/${matchId}/${imageId}`;
-
         const storageRef = sRef(storage, storagePath);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
@@ -1348,7 +1323,6 @@
         };
         await set(push(photosRef), photoMeta);
 
-        // If it's a group "match photo", store on the match
         if (options.group) {
           await update(ref(db, `matches/${matchId}`), {
             groupPhotoUrl: downloadURL,
@@ -1391,7 +1365,7 @@
           <button class="toast-btn primary">Take photo</button>
           <button class="toast-btn secondary">Dismiss</button>
         </div>
-     `;
+      `;
 
       const primaryBtn = toast.querySelector(".toast-btn.primary");
       const secondaryBtn = toast.querySelector(".toast-btn.secondary");
@@ -1429,51 +1403,45 @@
       }, 7000);
     }
 
-    /* manual camera button:
-       - not a selfie
-       - no hole prompt
-       - generic match photo
-    */
+    // Manual photo (non-group, no hole prompt)
     function manualPhotoUpload() {
       if (!matchId) return;
       captureAndUploadPhoto(matchId, null);
     }
 
-    /* match group photo button:
-       - one-time group photo per match
-       - hides button once a photo exists
-    */
+    // Group photo for the match
+    async function matchGroupPhotoUpload() {
+      if (!matchId) return;
+      await captureAndUploadPhoto(matchId, null, { group: true });
+      // Firebase onValue will update matchData.groupPhotoUrl and renderMain()
+    }
+
+    // Clear group photo with confirmation, then allow a new one
     async function clearMatchPhoto() {
-  if (!matchId) return;
+      if (!matchId) return;
 
-  const confirmed = window.confirm(
-    "Are you sure you want to clear the group photo for this match?"
-  );
-  if (!confirmed) {
-    return;
-  }
+      const confirmed = window.confirm(
+        "Are you sure you want to clear the group photo for this match?"
+      );
+      if (!confirmed) return;
 
-  try {
-    await update(ref(db, `matches/${matchId}`), {
-      groupPhotoUrl: null,
-      groupPhotoTakenAt: null
-    });
+      try {
+        await update(ref(db, `matches/${matchId}`), {
+          groupPhotoUrl: null,
+          groupPhotoTakenAt: null
+        });
 
-    if (matchPhotoButton) {
-      matchPhotoButton.style.display = "inline-flex";
+        if (matchData) {
+          matchData.groupPhotoUrl = null;
+          matchData.groupPhotoTakenAt = null;
+        }
+
+        renderMain();
+      } catch (err) {
+        console.error("Failed to clear match photo", err);
+        alert("Could not clear the match photo. Try again.");
+      }
     }
-    if (clearMatchPhotoButton) {
-      clearMatchPhotoButton.style.display = "none";
-    }
-
-    alert("Match photo cleared.");
-  } catch (err) {
-    console.error("Failed to clear match photo", err);
-    alert("Could not clear the match photo. Try again.");
-  }
-}
-
-    /* ---------- MAIN RENDER SWITCH ---------- */
 
     function renderMain() {
       const hasMatchParam = !!matchId;
@@ -1507,30 +1475,17 @@
         renderScoreBubble();
         renderHoles();
 
-        // manual photo button (always available)
         if (cameraButton) {
-          cameraButton.onclick = () => {
-            manualPhotoUpload();
-          };
+          cameraButton.onclick = manualPhotoUpload;
         }
 
-        // match group photo + clear button logic
         if (matchPhotoButton && clearMatchPhotoButton) {
-          if (matchData.groupPhotoUrl) {
-            matchPhotoButton.style.display = "none";
-            clearMatchPhotoButton.style.display = "inline-flex";
-          } else {
-            matchPhotoButton.style.display = "inline-flex";
-            clearMatchPhotoButton.style.display = "none";
-          }
+          const hasGroupPhoto = !!(matchData && matchData.groupPhotoUrl);
+          matchPhotoButton.style.display = hasGroupPhoto ? "none" : "inline-flex";
+          clearMatchPhotoButton.style.display = hasGroupPhoto ? "inline-flex" : "none";
 
-          matchPhotoButton.onclick = () => {
-            matchGroupPhotoUpload();
-          };
-
-          clearMatchPhotoButton.onclick = () => {
-            clearMatchPhoto();
-          };
+          matchPhotoButton.onclick = matchGroupPhotoUpload;
+          clearMatchPhotoButton.onclick = clearMatchPhoto;
         }
       }
     }
