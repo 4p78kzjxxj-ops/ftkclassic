@@ -93,6 +93,12 @@
       background: #f3f4f6;
     }
 
+    .nav-btn.current {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
     main {
       display: flex;
       flex-direction: column;
@@ -120,18 +126,18 @@
     }
 
     .empty-state {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--muted);
       text-align: center;
       padding: 0.75rem 0.5rem;
     }
 
     .match-group-card {
+      background: #f9fafb;
       border-radius: 0.9rem;
       border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      padding: 0.6rem 0.6rem 0.5rem;
       margin-bottom: 0.6rem;
+      padding: 0.6rem 0.6rem 0.5rem;
     }
 
     .match-group-header {
@@ -139,7 +145,9 @@
       justify-content: space-between;
       align-items: baseline;
       gap: 0.4rem;
-      margin-bottom: 0.45rem;
+      margin-bottom: 0.4rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
     }
 
     .match-group-title {
@@ -147,119 +155,128 @@
       font-weight: 600;
     }
 
-    .match-group-tag {
-      font-size: 0.72rem;
-      padding: 0.1rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      color: #4b5563;
-      white-space: nowrap;
+    .match-group-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
     }
 
-    .photos-grid {
+    .photo-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.4rem;
+      gap: 0.45rem;
     }
 
     @media (min-width: 640px) {
-      .photos-grid {
+      .photo-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
     .photo-card {
       background: #ffffff;
-      border-radius: 0.75rem;
+      border-radius: 0.7rem;
       border: 1px solid #e5e7eb;
       overflow: hidden;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
 
     .photo-thumb-wrapper {
-      position: relative;
       width: 100%;
-      padding-top: 75%;
-      overflow: hidden;
-      background: #e5e7eb;
-      cursor: pointer;
+      aspect-ratio: 4 / 3;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .photo-thumb {
-      position: absolute;
-      inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* show full photo, just scaled */
+      display: block;
     }
 
     .photo-meta {
-      padding: 0.35rem 0.4rem 0.4rem;
+      padding: 0.3rem 0.4rem 0.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .photo-meta-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.25rem;
       font-size: 0.72rem;
-      color: #4b5563;
+      color: var(--muted);
     }
 
-    .photo-line {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .photo-meta-time {
+      font-weight: 500;
+      color: #374151;
     }
 
-    .photo-line + .photo-line {
-      margin-top: 0.1rem;
+    .photo-meta-label {
+      font-weight: 500;
     }
 
-    .photo-line strong {
-      color: #111827;
-    }
-
-    .group-photo-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    /* Lightbox overlay */
-    .lightbox {
+    /* Full-screen photo viewer */
+    #photoModal {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.85);
       display: none;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       z-index: 100;
       padding: 1rem;
     }
 
-    .lightbox.active {
+    #photoModal.active {
       display: flex;
     }
 
-    .lightbox-img-wrapper {
+    .photo-modal-inner {
       max-width: 100%;
       max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      align-items: center;
     }
 
-    .lightbox-img {
+    .photo-modal-img-box {
       max-width: 100%;
-      max-height: 100%;
+      max-height: calc(100vh - 4rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-modal-img {
+      max-width: 100%;
+      max-height: calc(100vh - 5rem);
+      object-fit: contain;
       border-radius: 0.75rem;
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.6);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      background: #000;
     }
 
-    .lightbox-close {
-      position: fixed;
-      top: 0.75rem;
-      right: 0.75rem;
-      border-radius: 999px;
-      border: none;
-      background: rgba(15, 23, 42, 0.85);
-      color: #f9fafb;
-      padding: 0.35rem 0.7rem;
+    .photo-modal-meta {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      text-align: center;
+    }
+
+    .photo-modal-close {
+      margin-top: 0.2rem;
       font-size: 0.8rem;
-      cursor: pointer;
+      color: #e5e7eb;
+      opacity: 0.9;
     }
   </style>
 </head>
@@ -269,29 +286,31 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Match photos</div>
+        <div class="site-subtitle">Tournament photos</div>
       </div>
     </div>
     <div class="nav-links">
       <a href="spectator.html" class="nav-btn secondary">Scores</a>
-      <a href="photos.html" class="nav-btn secondary">Photos</a>
+      <a href="competitors.html" class="nav-btn secondary">Competitors</a>
+      <a href="photos.html" class="nav-btn current">Photos</a>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <div class="section-title">Gallery</div>
-      <div id="photosContainer">
-        <div class="empty-state">Loading photos…</div>
-      </div>
+      <div class="section-title">Photos by match</div>
+      <div id="photosContainer"></div>
     </section>
   </main>
 
-  <!-- Lightbox overlay -->
-  <div id="lightbox" class="lightbox">
-    <button class="lightbox-close" id="lightboxClose">Close ✕</button>
-    <div class="lightbox-img-wrapper">
-      <img id="lightboxImg" class="lightbox-img" src="" alt="Photo" />
+  <!-- Full-screen viewer -->
+  <div id="photoModal">
+    <div class="photo-modal-inner">
+      <div class="photo-modal-img-box">
+        <img id="photoModalImg" class="photo-modal-img" src="" alt="Full size" />
+      </div>
+      <div id="photoModalMeta" class="photo-modal-meta"></div>
+      <div class="photo-modal-close">(Tap anywhere to close)</div>
     </div>
   </div>
 
@@ -317,19 +336,22 @@
     const db = getDatabase(app);
 
     const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
     const photosRef = ref(db, "photos");
 
     const photosContainer = document.getElementById("photosContainer");
-
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
-    const lightboxClose = document.getElementById("lightboxClose");
+    const photoModal = document.getElementById("photoModal");
+    const photoModalImg = document.getElementById("photoModalImg");
+    const photoModalMeta = document.getElementById("photoModalMeta");
 
     let settings = {};
+    let players = {};
     let matches = {};
     let photos = {};
+
     let settingsLoaded = false;
+    let playersLoaded = false;
     let matchesLoaded = false;
     let photosLoaded = false;
 
@@ -347,147 +369,200 @@
       return parts[parts.length - 1];
     }
 
-    function getMatchLabel(matchId, matchObj) {
-      if (!matchObj) return `Match ${matchId}`;
-      const { red, blue } = getTeamNames();
-      const redPlayers = matchObj.red?.players || [];
-      const bluePlayers = matchObj.blue?.players || [];
+    function getMatchPlayersFor(matchObj) {
+      if (!matchObj) return { red: [], blue: [] };
 
-      const redNames = (matchObj.playerDetails || {});
-      const playersRoot = redNames;
+      const details = matchObj.playerDetails || {};
+      const redIds = matchObj.red?.players || [];
+      const blueIds = matchObj.blue?.players || [];
 
-      let redLabel = red;
-      let blueLabel = blue;
-
-      const pd = matchObj.playerDetails || {};
-      const redLasts = (matchObj.red?.players || []).map(id => getLastName(pd[id]?.name)).filter(Boolean);
-      const blueLasts = (matchObj.blue?.players || []).map(id => getLastName(pd[id]?.name)).filter(Boolean);
-
-      if (redLasts.length) redLabel = redLasts.join(" / ");
-      if (blueLasts.length) blueLabel = blueLasts.join(" / ");
-
-      return `${redLabel} vs ${blueLabel}`;
-    }
-
-    function formatDateTime(ts) {
-      if (!ts) return "";
-      const d = new Date(ts);
-      if (Number.isNaN(d.getTime())) return "";
-      const dateStr = d.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
+      const redPlayers = redIds.map(id => {
+        return details[id] || players[id] || { id, name: "Red Player" };
       });
-      const timeStr = d.toLocaleTimeString(undefined, {
-        hour: "numeric",
-        minute: "2-digit",
+
+      const bluePlayers = blueIds.map(id => {
+        return details[id] || players[id] || { id, name: "Blue Player" };
       });
-      return `${dateStr} · ${timeStr}`;
+
+      return { red: redPlayers, blue: bluePlayers };
     }
 
-    function openLightbox(url) {
-      if (!url) return;
-      lightboxImg.src = url;
-      lightbox.classList.add("active");
-    }
+    // Build label like "Wolf / Wall vs Smith / Vaughn"
+    function buildMatchDescription(matchId) {
+      const teamNames = getTeamNames();
+      const m = matches[matchId];
 
-    function closeLightbox() {
-      lightbox.classList.remove("active");
-      lightboxImg.src = "";
-    }
-
-    lightboxClose.addEventListener("click", closeLightbox);
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) {
-        closeLightbox();
+      if (!m) {
+        return {
+          vsTitle: `Match ${matchId || "unknown"}`,
+        };
       }
-    });
+
+      const { red, blue } = getMatchPlayersFor(m);
+
+      const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+      const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+      const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+      const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+      return {
+        vsTitle: `${redLabel} vs ${blueLabel}`,
+      };
+    }
+
+    function flattenPhotos(raw) {
+      const out = [];
+      if (!raw) return out;
+
+      for (const [id, p] of Object.entries(raw)) {
+        if (!p || !p.url) continue;
+        out.push({
+          id,
+          url: p.url,
+          matchId: p.matchId || null,
+          holeNumber: p.holeNumber ?? null,
+          createdAt: p.createdAt || 0,
+          type: p.type || "regular",
+        });
+      }
+      return out;
+    }
+
+    function formatTime(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      } catch {
+        return "";
+      }
+    }
+
+    function formatDate(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        return d.toLocaleDateString([], { month: "short", day: "numeric" });
+      } catch {
+        return "";
+      }
+    }
+
+    function openModal(url, metaText) {
+      photoModalImg.src = url;
+      photoModalMeta.textContent = metaText || "";
+      photoModal.classList.add("active");
+    }
+
+    function closeModal() {
+      photoModal.classList.remove("active");
+      photoModalImg.src = "";
+      photoModalMeta.textContent = "";
+    }
+
+    photoModal.addEventListener("click", closeModal);
 
     function render() {
-      if (!settingsLoaded || !matchesLoaded || !photosLoaded) return;
-
-      const photosList = Object.entries(photos || {}).map(([id, p]) => ({
-        id,
-        ...p,
-      }));
-
-      if (!photosList.length) {
-        photosContainer.innerHTML = '<div class="empty-state">No photos yet.</div>';
+      if (!settingsLoaded || !playersLoaded || !matchesLoaded || !photosLoaded) {
         return;
       }
 
-      const groups = {};
+      const flat = flattenPhotos(photos);
 
-      for (const p of photosList) {
-        const matchId = p.matchId || "unknown";
-        if (!groups[matchId]) {
-          const m = matches[matchId];
-          const vsTitle = getMatchLabel(matchId, m);
-          groups[matchId] = {
-            matchId,
-            vsTitle,
-            photos: [],
-          };
-        }
-        groups[matchId].photos.push(p);
+      if (!flat.length) {
+        photosContainer.innerHTML =
+          '<div class="empty-state">No photos yet. Be the first to upload from a match!</div>';
+        return;
       }
 
-      const groupList = Object.values(groups).sort((a, b) => {
+      // newest first
+      flat.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      // Group by matchId
+      const groupsByMatch = {};
+      for (const p of flat) {
+        const mid = p.matchId || "unknown";
+        if (!groupsByMatch[mid]) {
+          groupsByMatch[mid] = { matchId: mid, photos: [] };
+        }
+        groupsByMatch[mid].photos.push(p);
+      }
+
+      // Sort groups by latest photo time
+      const groups = Object.values(groupsByMatch).sort((a, b) => {
         const aLatest = Math.max(...a.photos.map(p => p.createdAt || 0));
         const bLatest = Math.max(...b.photos.map(p => p.createdAt || 0));
         return bLatest - aLatest;
       });
 
       let html = "";
-      for (const group of groupList) {
-        group.photos.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-        const countLabel = `${group.photos.length} photo${group.photos.length === 1 ? "" : "s"}`;
+      for (const group of groups) {
+        const desc = buildMatchDescription(group.matchId);
+        const vsTitle = desc.vsTitle || "Match";
+
+        // Sort photos newest first inside each group
+        group.photos.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
         html += `
           <div class="match-group-card">
             <div class="match-group-header">
-              <div class="match-group-title">${group.vsTitle}</div>
-              <div class="match-group-tag">${countLabel}</div>
+              <div class="match-group-title">${vsTitle}</div>
             </div>
-            <div class="photos-grid">
-       `;
+            <div class="photo-grid">
+        `;
 
         for (const p of group.photos) {
-          const url = p.url || p.downloadURL || p.imageUrl || "";
-          const isGroupPhoto = p.type === "group" || p.isGroupPhoto === true;
-          let holeLabel = "";
-          if (isGroupPhoto) {
-            holeLabel = "Group Photo";
-          } else if (p.holeNumber != null || p.hole != null) {
-            const holeNumber = p.holeNumber ?? p.hole;
-            holeLabel = `Hole ${holeNumber}`;
-          } else {
-            holeLabel = "";
-          }
-          const dtLabel = formatDateTime(p.createdAt);
+          const timeStr = formatTime(p.createdAt);
+          const dateStr = formatDate(p.createdAt);
+
+          let labelLine = "";
+          if (p.type === "group") {
+            labelLine = "Group Photo";
+          } else if (p.holeNumber != null && p.holeNumber !== "" && !isNaN(Number(p.holeNumber))) {
+            labelLine = `Hole ${p.holeNumber}`;
+          } // else leave blank – no "hole" word if no hole number
+
+          const modalMeta =
+            (dateStr ? dateStr + " · " : "") +
+            (timeStr ? timeStr : "") +
+            (labelLine ? " · " + labelLine : "");
 
           html += `
-            <div class="photo-card">
-              <div class="photo-thumb-wrapper" data-full-url="${url}">
-                ${url ? `<img src="${url}" alt="${holeLabel}" class="photo-thumb" loading="lazy" />` : ""}
+            <div class="photo-card" data-full-url="${p.url}" data-meta="${modalMeta.replace(/"/g, "&quot;")}">
+              <div class="photo-thumb-wrapper">
+                <img src="${p.url}" class="photo-thumb" alt="Match photo" loading="lazy" />
               </div>
               <div class="photo-meta">
-                <div class="photo-line">${holeLabel ? `<strong>${holeLabel}</strong>` : ""}</div>
-                <div class="photo-line">${dtLabel}</div>
+                <div class="photo-meta-line">
+                  <span class="photo-meta-time">
+                    ${timeStr || ""}
+                    ${dateStr ? " · " + dateStr : ""}
+                  </span>
+                </div>
+                <div class="photo-meta-line">
+                  <span class="photo-meta-label">${labelLine || ""}</span>
+                </div>
               </div>
             </div>
           `;
         }
 
-        html += `</div></div>`;
+        html += `
+            </div>
+          </div>
+        `;
       }
 
       photosContainer.innerHTML = html;
 
-      document.querySelectorAll(".photo-thumb-wrapper").forEach((el) => {
-        el.addEventListener("click", () => {
-          const url = el.getAttribute("data-full-url");
-          openLightbox(url);
+      // Wire up click-to-open
+      Array.from(document.querySelectorAll(".photo-card")).forEach(card => {
+        card.addEventListener("click", () => {
+          const url = card.getAttribute("data-full-url");
+          const metaText = card.getAttribute("data-meta") || "";
+          if (url) openModal(url, metaText);
         });
       });
     }
@@ -495,6 +570,12 @@
     onValue(settingsRef, (snap) => {
       settings = snap.val() || {};
       settingsLoaded = true;
+      render();
+    });
+
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      playersLoaded = true;
       render();
     });
 
