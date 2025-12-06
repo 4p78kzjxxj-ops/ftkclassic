@@ -249,7 +249,8 @@
         <a href="competitors.html">Competitors</a>
         <a href="photos.html">Photos</a>
         <a href="past_winners.html">Past winners</a>
-        <a href="#" id="adminLink">Admin</a>
+        <!-- Admin now goes straight to admin.html, no prompt -->
+        <a href="admin.html" id="adminLink">Admin</a>
       </div>
     </section>
   </main>
@@ -295,16 +296,7 @@
     // "I'm a player" → open match code modal
     document.getElementById('playerBtn').addEventListener('click', openMatchModal);
 
-    // ADMIN link → password prompt
-    document.getElementById('adminLink').addEventListener('click', function (e) {
-      e.preventDefault();
-      const pwd = prompt('Enter admin password:');
-      if (pwd === 'admin123') {
-        window.location.href = 'admin.html';
-      } else if (pwd !== null) {
-        alert('Incorrect password.');
-      }
-    });
+    // Admin link now just uses its href (no JS needed)
 
     // MODAL BUTTONS
     document.getElementById('modalCancel').addEventListener('click', closeMatchModal);
