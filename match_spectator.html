@@ -202,12 +202,6 @@
       color: #e5e7eb;
     }
 
-    .status-row {
-      margin-top: 0.3rem;
-      display: flex;
-      justify-content: flex-start;
-    }
-
     .score-pill-main {
       margin-top: 0.45rem;
       font-size: 0.85rem;
@@ -373,14 +367,6 @@
       margin-top: 0.05rem;
     }
 
-    .player-tag {
-      font-size: 0.7rem;
-      padding: 0.05rem 0.4rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      color: #6b7280;
-    }
-
     .holes-list {
       display: flex;
       flex-direction: column;
@@ -423,6 +409,29 @@
       text-align: center;
       padding: 0.75rem 0.5rem;
     }
+
+    /* Group photo card */
+    #groupPhotoCard {
+      display: none;
+    }
+
+    .group-photo-wrapper {
+      border-radius: 0.85rem;
+      overflow: hidden;
+      background: #e5e7eb;
+    }
+
+    .group-photo-link {
+      display: block;
+      width: 100%;
+    }
+
+    .group-photo-img {
+      display: block;
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -441,9 +450,9 @@
   </header>
 
   <main>
-    <!-- STICKY SCORE CARD -->
     <div class="match-layout">
       <div class="match-main">
+        <!-- STICKY SCORE CARD -->
         <section class="card match-header-card">
           <div class="match-header-inner">
             <div class="match-header">
@@ -456,17 +465,10 @@
               </div>
             </div>
 
-            <!-- Main score bubble with detailed text -->
-            <div id="scoreMainPill" class="score-pill-main">
-              &nbsp;
-            </div>
+            <div id="scoreMainPill" class="score-pill-main">&nbsp;</div>
 
-            <!-- Row of per-hole pills -->
-            <div id="marginPillsRow" class="margin-pills-row">
-              <!-- pills injected here -->
-            </div>
+            <div id="marginPillsRow" class="margin-pills-row"></div>
 
-            <!-- Horizontal bar slider -->
             <div class="score-bar">
               <div class="score-red" id="scoreRed" style="width:50%;"></div>
               <div class="score-blue" id="scoreBlue" style="width:50%;"></div>
@@ -476,10 +478,10 @@
               <span id="scoreCenterLabel">All square</span>
               <span id="blueSideLabel">Blue</span>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
 
-        <!-- PLAYERS / MULLIGANS -->
+        <!-- PLAYERS -->
         <section class="card">
           <div class="section-title">Players</div>
           <div class="players-row" id="playersRow">
@@ -488,8 +490,18 @@
         </section>
       </div>
 
-      <!-- HOLE BY HOLE -->
       <div class="match-side">
+        <!-- GROUP PHOTO -->
+        <section class="card" id="groupPhotoCard">
+          <div class="section-title">Group photo</div>
+          <div class="group-photo-wrapper">
+            <a id="groupPhotoLink" class="group-photo-link" href="#" target="_blank" rel="noopener">
+              <img id="groupPhotoImg" class="group-photo-img" src="" alt="Group photo" />
+            </a>
+          </div>
+        </section>
+
+        <!-- HOLE BY HOLE -->
         <section class="card">
           <div class="section-title" id="holesTitle">Hole-by-hole</div>
           <div id="holesContainer" class="holes-list">
@@ -530,7 +542,6 @@
     }
 
     const matchId = getQueryParam("match") || getQueryParam("id") || null;
-
     const matchRef = matchId ? ref(db, `matches/${matchId}`) : null;
 
     const matchTitleEl = document.getElementById("matchTitle");
@@ -547,6 +558,10 @@
     const playersRow = document.getElementById("playersRow");
     const holesContainer = document.getElementById("holesContainer");
     const holesTitleEl = document.getElementById("holesTitle");
+
+    const groupPhotoCard = document.getElementById("groupPhotoCard");
+    const groupPhotoImg = document.getElementById("groupPhotoImg");
+    const groupPhotoLink = document.getElementById("groupPhotoLink");
 
     let settings = {};
     let players = {};
@@ -640,7 +655,6 @@
       if (holesPlayed === 0) {
         status = "upcoming";
       } else {
-        // check if result is final (leader is dormie or has closed match)
         done = false;
         if (leader && margin > holesRemaining) {
           done = true;
@@ -670,38 +684,7 @@
       };
     }
 
-    // Original margin-based computation is kept but now only used for text/slider;
-    // hole bubbles themselves are shaded per-hole in renderHolePills.
-
-    function computeHoleMargins(holes, type) {
-      const arr = Array.isArray(holes) ? holes : [];
-      const start = type === "back" ? 9 : 0;
-      const end = start + 9;
-      const result = [];
-      let diff = 0;
-
-      for (let i = start; i < end; i++) {
-        const res = arr[i];
-
-        if (res === "red") diff += 1;
-        else if (res === "blue") diff -= 1;
-        // half or none: diff unchanged
-
-        if (!res || res === "none") {
-          result.push({ text: "–", cls: "margin-pill empty" });
-        } else if (diff === 0) {
-          result.push({ text: "AS", cls: "margin-pill as" });
-        } else {
-          const absDiff = Math.abs(diff);
-          const label = absDiff >= 4 ? "4+ up" : `${absDiff} up`;
-          const colorCls = diff > 0 ? "red" : "blue";
-          result.push({ text: label, cls: `margin-pill ${colorCls}` });
-        }
-      }
-      return result;
-    }
-
-    // NEW: shade each hole bubble based on which team won that hole
+    // Shade per-hole pills based on hole winner
     function renderHolePills(holes, type) {
       const arr = Array.isArray(holes) ? holes : [];
       const start = type === "back" ? 9 : 0;
@@ -711,13 +694,11 @@
       for (let i = start; i < end; i++) {
         const res = arr[i] || "none";
         let cls = "margin-pill";
-        let text = String(i - start + 1); // default: show hole # in the segment
+        let text = String(i - start + 1); // default: segment hole #
 
         if (!res || res === "none") {
-          // not played yet
           cls += " empty";
         } else if (res === "half") {
-          // halved hole
           cls += " as";
           text = "½";
         } else if (res === "red") {
@@ -876,6 +857,7 @@
         scoreRedEl.style.width = "50%";
         scoreBlueEl.style.width = "50%";
         marginPillsRowEl.innerHTML = "";
+        renderGroupPhoto();
         return;
       }
 
@@ -962,8 +944,23 @@
       scoreRedEl.style.width = `${redPct}%`;
       scoreBlueEl.style.width = `${bluePct}%`;
 
-      // shade the per-hole bubbles based on which side won each hole
       renderHolePills(holes, type);
+      renderGroupPhoto();
+    }
+
+    function renderGroupPhoto() {
+      if (!groupPhotoCard) return;
+
+      const url = match && match.groupPhotoUrl ? match.groupPhotoUrl : "";
+      if (url) {
+        groupPhotoImg.src = url;
+        groupPhotoLink.href = url;
+        groupPhotoCard.style.display = "block";
+      } else {
+        groupPhotoImg.src = "";
+        groupPhotoLink.href = "#";
+        groupPhotoCard.style.display = "none";
+      }
     }
 
     function renderAll() {
