@@ -176,70 +176,87 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
     }
 
     .photo-thumb-wrapper {
       width: 100%;
       aspect-ratio: 4 / 5;
       overflow: hidden;
-      background: #e5e7eb;
+      background: #111827;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .photo-thumb {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* show full photo, just scaled down */
       display: block;
     }
 
     .photo-meta {
-      padding: 0.25rem 0.4rem 0.35rem;
+      padding: 0.28rem 0.4rem 0.35rem;
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
     }
 
-    .photo-top-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.3rem;
-      align-items: baseline;
+    .photo-line {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .photo-hole {
-      font-size: 0.78rem;
+    .photo-line strong {
+      color: var(--text);
       font-weight: 600;
     }
 
-    .photo-hole span {
-      font-weight: 500;
-      color: var(--muted);
+    /* Lightbox */
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
     }
 
-    .photo-match {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .photo-bottom-row {
+    .lightbox.open {
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.4rem;
     }
 
-    .photo-timestamp {
-      font-size: 0.7rem;
-      color: var(--muted);
+    .lightbox-img-wrapper {
+      max-width: 100%;
+      max-height: 100%;
     }
 
-    .photo-hashtag {
-      font-size: 0.7rem;
-      color: #4b5563;
-      font-weight: 500;
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.9rem;
+      background: rgba(17,24,39,0.8);
+      color: #e5e7eb;
+      border-radius: 999px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.8rem;
+      border: 1px solid rgba(229,231,235,0.4);
+      cursor: pointer;
     }
   </style>
 </head>
@@ -266,6 +283,14 @@
       </div>
     </section>
   </main>
+
+  <!-- Lightbox overlay -->
+  <div id="lightbox" class="lightbox">
+    <button class="lightbox-close" id="lightboxClose">Close ✕</button>
+    <div class="lightbox-img-wrapper">
+      <img id="lightboxImg" class="lightbox-img" src="" alt="Photo" />
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -294,6 +319,9 @@
     const settingsRef = ref(db, "settings");
 
     const photosContainer = document.getElementById("photosContainer");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
+    const lightboxClose = document.getElementById("lightboxClose");
 
     let photos = {};
     let matches = {};
@@ -316,8 +344,7 @@
       return parts[parts.length - 1];
     }
 
-    // Flatten photos whether structure is:
-    // photos/{photoId} OR photos/{matchId}/{photoId}
+    // Flatten photos whether stored as photos/{id} or photos/{matchId}/{id}
     function flattenPhotos(obj, parentMatchId = null, out = []) {
       if (!obj || typeof obj !== "object") return out;
 
@@ -329,12 +356,9 @@
 
         if (hasUrl) {
           const photo = { id: key, ...value };
-          if (!photo.matchId && parentMatchId) {
-            photo.matchId = parentMatchId;
-          }
+          if (!photo.matchId && parentMatchId) photo.matchId = parentMatchId;
           out.push(photo);
         } else {
-          // assume this level is a matchId and recurse
           flattenPhotos(value, key, out);
         }
       }
@@ -346,13 +370,11 @@
       try {
         const d = new Date(ts);
         if (Number.isNaN(d.getTime())) return "";
-        const opts = {
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-        };
-        return d.toLocaleString([], opts);
+        const optsDate = { month: "short", day: "numeric" };
+        const optsTime = { hour: "numeric", minute: "2-digit" };
+        const dateStr = d.toLocaleDateString([], optsDate);
+        const timeStr = d.toLocaleTimeString([], optsTime);
+        return `${dateStr}, ${timeStr}`;
       } catch {
         return "";
       }
@@ -362,7 +384,8 @@
       const m = matches[matchId];
       const teamNames = getTeamNames();
       const idNum = Number(matchId);
-      const type = m ? (m.type || (idNum <= 8 ? "front" : "back")) : (idNum <= 8 ? "front" : "front");
+      const type = m ? (m.type || (idNum <= 8 ? "front" : "back"))
+                     : (idNum <= 8 ? "front" : "front");
       const typeLabel = type === "back" ? "Back 9" : "Front 9";
 
       if (!m) {
@@ -393,6 +416,30 @@
 
       return { vsTitle, subLabel };
     }
+
+    function attachPhotoClickHandlers() {
+      const thumbs = photosContainer.querySelectorAll("[data-full-url]");
+      thumbs.forEach(el => {
+        el.addEventListener("click", () => {
+          const url = el.getAttribute("data-full-url");
+          if (!url) return;
+          lightboxImg.src = url;
+          lightbox.classList.add("open");
+        });
+      });
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("open");
+      lightboxImg.src = "";
+    }
+
+    lightboxClose.addEventListener("click", closeLightbox);
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
 
     function render() {
       if (!photosLoaded || !matchesLoaded || !playersLoaded || !settingsLoaded) {
@@ -433,8 +480,6 @@
         return bLatest - aLatest;
       });
 
-      const tag = "#ftkclassic";
-
       let html = "";
       for (const group of groupList) {
         // sort photos newest first inside group
@@ -465,22 +510,12 @@
 
           html += `
             <div class="photo-card">
-              <div class="photo-thumb-wrapper">
-                ${
-                  url
-                    ? `<img src="${url}" alt="${tag}" class="photo-thumb" loading="lazy" />`
-                    : ""
-                }
+              <div class="photo-thumb-wrapper" data-full-url="${url}">
+                ${url ? `<img src="${url}" alt="${holeLabel}" class="photo-thumb" loading="lazy" />` : ""}
               </div>
               <div class="photo-meta">
-                <div class="photo-top-row">
-                  <div class="photo-hole">${holeLabel} <span>${dtLabel ? "• " + dtLabel : ""}</span></div>
-                  <div class="photo-match">${matchSmall}</div>
-                </div>
-                <div class="photo-bottom-row">
-                  <div class="photo-timestamp"></div>
-                  <div class="photo-hashtag">${tag}</div>
-                </div>
+                <div class="photo-line"><strong>${holeLabel}</strong> • ${dtLabel}</div>
+                <div class="photo-line">${matchSmall}</div>
               </div>
             </div>
           `;
@@ -490,6 +525,7 @@
       }
 
       photosContainer.innerHTML = html;
+      attachPhotoClickHandlers();
     }
 
     onValue(settingsRef, (snap) => {
