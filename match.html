@@ -231,6 +231,13 @@
       color: var(--muted);
     }
 
+    /* header actions (camera + tag) */
+    .match-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
     .match-tag {
       font-size: 0.72rem;
       padding: 0.1rem 0.55rem;
@@ -238,6 +245,35 @@
       border: 1px solid #e5e7eb;
       background: #f3f4f6;
       white-space: nowrap;
+    }
+
+    /* camera button */
+    .camera-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fefce8;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .camera-btn span {
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-btn:hover {
+      background: #fef9c3;
+    }
+
+    .camera-btn:active {
+      transform: scale(0.97);
     }
 
     .score-line {
@@ -486,44 +522,48 @@
       margin-top: 0.25rem;
     }
 
-    /* Toast / "Nice win" */
+    /* POP-UP TOAST / MODAL */
 
     #toastContainer {
       position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
+      inset: 0;
+      display: none;            /* toggled via JS */
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.55);
       z-index: 100;
+      padding: 1rem;
+    }
+
+    #toastContainer.active {
       display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      pointer-events: none;
     }
 
     .toast {
-      pointer-events: auto;
-      background: var(--toast-bg);
-      color: #f9fafb;
-      padding: 0.6rem 0.75rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      background: #f9fafb;
+      color: #111827;
+      padding: 0.9rem 1rem;
+      border-radius: 0.9rem;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.55);
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.7rem;
       min-width: 260px;
-      max-width: 360px;
-      animation: toast-in 0.25s ease-out;
+      max-width: 380px;
+      width: 100%;
+      animation: toast-pop-in 0.22s ease-out;
     }
 
     .toast-icon {
-      width: 28px;
-      height: 28px;
+      width: 34px;
+      height: 34px;
       border-radius: 999px;
-      background: rgba(248,250,252,0.1);
+      background: #fef3c7;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
+      font-size: 1.3rem;
+      flex-shrink: 0;
     }
 
     .toast-content {
@@ -531,25 +571,26 @@
     }
 
     .toast-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 0.1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
     }
 
     .toast-body {
-      font-size: 0.75rem;
-      opacity: 0.9;
+      font-size: 0.8rem;
+      color: #4b5563;
     }
 
     .toast-actions {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.3rem;
+      margin-left: 0.4rem;
     }
 
     .toast-btn {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.55rem;
+      font-size: 0.78rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 999px;
       border: none;
       cursor: pointer;
@@ -562,14 +603,19 @@
     }
 
     .toast-btn.secondary {
-      background: transparent;
-      border: 1px solid rgba(249,250,251,0.3);
-      color: #e5e7eb;
+      background: #e5e7eb;
+      color: #374151;
     }
 
-    @keyframes toast-in {
-      from { opacity: 0; transform: translate(-50%, 12px); }
-      to   { opacity: 1; transform: translate(-50%, 0); }
+    @keyframes toast-pop-in {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
 
   </style>
@@ -607,7 +653,13 @@
             <div class="match-title-text" id="matchTitle">Match</div>
             <div class="match-subtitle-text" id="matchSubtitle">Front 9</div>
           </div>
-          <div class="match-tag" id="matchTag">On course</div>
+          <div class="match-header-actions">
+            <button id="cameraButton" class="camera-btn" type="button">
+              <span>📸</span>
+              <span>Selfie</span>
+            </button>
+            <div class="match-tag" id="matchTag">On course</div>
+          </div>
         </div>
 
         <div class="score-line">
@@ -639,6 +691,7 @@
     </section>
   </main>
 
+  <!-- POP-UP TOAST CONTAINER -->
   <div id="toastContainer"></div>
 
   <script type="module">
@@ -699,6 +752,7 @@
     const holesContainer = document.getElementById("holesContainer");
     const holesSectionTitle = document.getElementById("holesSectionTitle");
     const toastContainer = document.getElementById("toastContainer");
+    const cameraButton = document.getElementById("cameraButton");
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 },
@@ -951,7 +1005,6 @@
         }
       }
 
-      // Keep match.status in sync
       const desiredStatus =
         statusTag === "Final"
           ? "final"
@@ -1078,7 +1131,6 @@
       scoreCenterLabel.textContent = centerText;
       matchTagEl.textContent = statusTag;
 
-      // Slider fill – center at 50%, expand to show lead
       let pctOffset = 0.5;
       if (diff !== 0) {
         const maxShift = 0.35;
@@ -1093,7 +1145,6 @@
         scoreSliderFill.classList.add("blue-lead");
       }
 
-      // Pills row
       const pills = computeHolePills();
       scorePillsContainer.innerHTML = pills
         .map(p => {
@@ -1111,7 +1162,6 @@
         })
         .join("");
 
-      // Players row with mulligan toggles
       const mRed = red
         .map(p => {
           const mid = p.id || p.playerId || "";
@@ -1141,11 +1191,10 @@
         </div>
       `;
 
-      // Wire mulligan toggles
       Array.from(document.querySelectorAll("[data-mulligan-toggle]")).forEach(el => {
         el.addEventListener("click", () => {
           const playerId = el.getAttribute("data-player-id");
-          const type = el.getAttribute("data-type"); // "m" or "rm"
+          const type = el.getAttribute("data-type");
           toggleMulligan(playerId, type);
         });
       });
@@ -1204,7 +1253,6 @@
 
       holesContainer.innerHTML = html;
 
-      // wire up buttons
       Array.from(document.querySelectorAll(".pill-btn")).forEach(btn => {
         btn.addEventListener("click", () => {
           const idx = Number(btn.getAttribute("data-hole"));
@@ -1219,7 +1267,6 @@
 
       const oldValue = matchData.holes?.[holeIndex] || "none";
       if (oldValue === result) {
-        // no change
         return;
       }
 
@@ -1233,20 +1280,16 @@
         updatedAt: Date.now(),
       }).catch(console.error);
 
-      // If this is a win (red / blue), prompt for photo for that HOLE
       if (result === "red" || result === "blue") {
         const holeNumber = holeConfigs[holeIndex]?.num ?? (holeIndex + 1);
         handleHoleWin(result, holeNumber);
       }
 
-      // Haptic feedback
       try {
         if (navigator.vibrate) {
           navigator.vibrate([15, 40, 20]);
         }
-      } catch (e) {
-        // ignore if unsupported
-      }
+      } catch (e) {}
 
       renderMain();
     }
@@ -1256,7 +1299,8 @@
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
-        input.capture = "environment";
+        // HINT: use selfie / front camera
+        input.capture = "user";
 
         const file = await new Promise((resolve, reject) => {
           input.onchange = () => resolve(input.files[0]);
@@ -1274,7 +1318,7 @@
         const photosRef = ref(db, "photos");
         const photoMeta = {
           matchId,
-          holeNumber,           // freeze the hole at capture time
+          holeNumber: holeNumber || null,
           createdAt: Date.now(),
           url: downloadURL,
         };
@@ -1297,6 +1341,9 @@
     }
 
     function showWinToast(teamLabel, holeNumber, onTakePhoto) {
+      toastContainer.innerHTML = "";
+      toastContainer.classList.add("active");
+
       const toast = document.createElement("div");
       toast.className = "toast";
 
@@ -1305,11 +1352,11 @@
         <div class="toast-content">
           <div class="toast-title">Nice win!</div>
           <div class="toast-body">
-            ${teamLabel} wins Hole ${holeNumber}. Want to capture the moment?
+            ${teamLabel} wins Hole ${holeNumber}. Snap a quick celebration selfie?
           </div>
         </div>
         <div class="toast-actions">
-          <button class="toast-btn primary">Take photo</button>
+          <button class="toast-btn primary">Take selfie</button>
           <button class="toast-btn secondary">Dismiss</button>
         </div>
      `;
@@ -1318,22 +1365,67 @@
       const secondaryBtn = toast.querySelector(".toast-btn.secondary");
 
       const removeToast = () => {
-        if (!toast.parentNode) return;
-        toast.parentNode.removeChild(toast);
+        toastContainer.classList.remove("active");
+        toastContainer.innerHTML = "";
       };
 
-      primaryBtn.addEventListener("click", () => {
+      primaryBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         removeToast();
         if (typeof onTakePhoto === "function") {
           onTakePhoto();
         }
       });
 
-      secondaryBtn.addEventListener("click", removeToast);
+      secondaryBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeToast();
+      });
+
+      toastContainer.onclick = (e) => {
+        if (e.target === toastContainer) {
+          removeToast();
+        }
+      };
 
       toastContainer.appendChild(toast);
 
-      setTimeout(removeToast, 6000);
+      setTimeout(() => {
+        if (toastContainer.classList.contains("active")) {
+          removeToast();
+        }
+      }, 7000);
+    }
+
+    /* manual camera button handler */
+    function manualPhotoUpload() {
+      if (!matchId) return;
+
+      let holeNumber = null;
+
+      const type = matchData?.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const segmentHoles = holeConfigs.slice(start, end);
+      const minHole = segmentHoles[0]?.num;
+      const maxHole = segmentHoles[segmentHoles.length - 1]?.num;
+
+      const input = window.prompt(
+        `This will open your front (selfie) camera.\n\nEnter hole number for this selfie (${minHole}–${maxHole}), or leave blank for a general match selfie:`,
+        ""
+      );
+
+      if (input && input.trim() !== "") {
+        const parsed = parseInt(input.trim(), 10);
+        const validNums = segmentHoles.map(h => h.num);
+        if (!Number.isNaN(parsed) && validNums.includes(parsed)) {
+          holeNumber = parsed;
+        } else {
+          alert("That hole number is not in this 9. Saving as a general match selfie instead.");
+        }
+      }
+
+      captureAndUploadPhoto(matchId, holeNumber);
     }
 
     /* ---------- MAIN RENDER SWITCH ---------- */
@@ -1346,14 +1438,12 @@
       }
 
       if (!hasMatchParam) {
-        // LIST MODE
         headerSubtitleEl.textContent = "Match admin – select a match";
         matchListCard.style.display = "block";
         scoreWrapper.style.display = "none";
         holesCard.style.display = "none";
         renderMatchList();
       } else {
-        // ADMIN MODE
         headerSubtitleEl.textContent = "Match scoring (admin)";
         matchListCard.style.display = "none";
         scoreWrapper.style.display = "block";
@@ -1371,6 +1461,12 @@
 
         renderScoreBubble();
         renderHoles();
+
+        if (cameraButton) {
+          cameraButton.onclick = () => {
+            manualPhotoUpload();
+          };
+        }
       }
     }
   </script>
