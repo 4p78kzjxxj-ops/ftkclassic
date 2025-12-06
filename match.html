@@ -19,6 +19,7 @@
       --muted: #6b7280;
       --border: #d1d5db;
       --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --tap-target: 44px; /* recommended iOS tap size */
     }
 
     * {
@@ -28,11 +29,20 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
 
-    body {
+    html, body {
+      -webkit-text-size-adjust: 100%;
       background: var(--bg);
       color: var(--text);
+    }
+
+    body {
       min-height: 100vh;
       padding: 0.75rem;
+      touch-action: manipulation;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
     }
 
     @media (min-width: 768px) {
@@ -45,6 +55,7 @@
     a {
       color: inherit;
       text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .site-header {
@@ -58,6 +69,7 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
+      min-width: 0;
     }
 
     .site-logo {
@@ -66,33 +78,37 @@
       border-radius: 0.45rem;
       object-fit: cover;
       background: #e5e7eb;
+      flex-shrink: 0;
     }
 
     .site-title {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .site-subtitle {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: var(--muted);
+      white-space: nowrap;
     }
 
     .nav-links {
       margin-left: auto;
       display: flex;
       gap: 0.4rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .nav-btn {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       border-radius: 999px;
-      padding: 0.25rem 0.7rem;
+      padding: 0.3rem 0.9rem;
       border: 1px solid var(--border);
       background: #ffffff;
       text-decoration: none;
       color: var(--text);
+      white-space: nowrap;
     }
 
     .nav-btn.secondary {
@@ -103,13 +119,13 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      padding-bottom: 2rem;
+      padding-bottom: 2.5rem;
     }
 
     .card {
       background: var(--card);
       border-radius: 0.9rem;
-      padding: 0.75rem;
+      padding: 0.9rem;
       border: 1px solid var(--border);
       box-shadow: var(--shadow-soft);
     }
@@ -120,7 +136,7 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.45rem;
       border-bottom: 1px solid #e5e7eb;
       padding-bottom: 0.25rem;
     }
@@ -134,16 +150,16 @@
     .match-list-container {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
 
     .match-list-item {
       border-radius: 0.8rem;
       border: 1px solid #e5e7eb;
       background: #f9fafb;
-      padding: 0.55rem 0.6rem;
+      padding: 0.65rem 0.7rem;
       display: flex;
-      gap: 0.5rem;
+      gap: 0.6rem;
       align-items: center;
     }
 
@@ -153,19 +169,19 @@
     }
 
     .match-list-title {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.15rem;
     }
 
     .match-list-subtitle {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--muted);
     }
 
     .match-list-status {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 999px;
       border: 1px solid #e5e7eb;
       background: #ffffff;
@@ -191,7 +207,7 @@
     }
 
     .match-list-chevron {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       color: #9ca3af;
     }
 
@@ -199,7 +215,7 @@
 
     .score-wrapper {
       position: sticky;
-      top: 0.25rem;
+      top: 0;
       z-index: 40;
       display: none;
     }
@@ -208,14 +224,14 @@
       border-radius: 1rem;
       border: 1px solid #e5e7eb;
       background: #f9fafb;
-      padding: 0.6rem 0.7rem 0.55rem;
+      padding: 0.75rem 0.8rem 0.7rem;
       box-shadow: 0 12px 25px rgba(15,23,42,0.18);
     }
 
     /* BIG GROUP PHOTO BOX */
 
     .group-photo-area {
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.65rem;
     }
 
     .group-photo-big-button {
@@ -223,11 +239,12 @@
       border-radius: 0.85rem;
       border: 1.5px dashed #d4d4d8;
       background: #fefce8;
-      padding: 0.55rem 0.6rem;
+      padding: 0.6rem 0.7rem;
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.6rem;
       cursor: pointer;
+      min-height: var(--tap-target);
     }
 
     .group-photo-big-button:hover {
@@ -240,14 +257,14 @@
     }
 
     .group-photo-icon {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 999px;
       background: #facc15;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       flex-shrink: 0;
     }
 
@@ -259,12 +276,12 @@
     }
 
     .group-photo-title {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 700;
     }
 
     .group-photo-subtitle {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: #4b5563;
     }
 
@@ -272,58 +289,58 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.1rem;
-      margin-bottom: 0.25rem;
+      gap: 0.15rem;
+      margin-bottom: 0.3rem;
     }
 
     .match-title-text {
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 700;
     }
 
     .match-subtitle-text {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--muted);
     }
 
     .match-actions-row {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 0.35rem;
+      justify-content: space-between;
+      gap: 0.4rem;
       flex-wrap: wrap;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.35rem;
     }
 
     .match-header-actions {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      flex-wrap: wrap;
+      gap: 0.3rem;
+      flex-wrap: nowrap;
       justify-content: flex-end;
     }
 
     .match-tag {
-      font-size: 0.72rem;
-      padding: 0.1rem 0.55rem;
+      font-size: 0.78rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 999px;
       border: 1px solid #e5e7eb;
       background: #f3f4f6;
       white-space: nowrap;
-      margin-right: auto;
     }
 
     .camera-btn {
       border-radius: 999px;
       border: 1px solid var(--border);
       background: #fefce8;
-      padding: 0.15rem 0.55rem;
-      font-size: 0.8rem;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.85rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.3rem;
       cursor: pointer;
       white-space: nowrap;
+      min-height: var(--tap-target);
     }
 
     .camera-btn span {
@@ -352,9 +369,10 @@
     .score-line {
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.3rem;
+      gap: 0.5rem;
     }
 
     .score-line span {
@@ -371,11 +389,11 @@
 
     .score-slider {
       position: relative;
-      height: 10px;
+      height: 14px;
       border-radius: 999px;
       background: #e5e7eb;
       overflow: hidden;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
     }
 
     .score-slider-fill {
@@ -388,10 +406,10 @@
     .pill-row {
       display: flex;
       flex-wrap: nowrap;
-      gap: 0.25rem;
+      gap: 0.3rem;
       overflow-x: auto;
-      padding-top: 0.15rem;
-      padding-bottom: 0.1rem;
+      padding-top: 0.2rem;
+      padding-bottom: 0.15rem;
     }
 
     .pill-row::-webkit-scrollbar {
@@ -405,14 +423,18 @@
 
     .score-pill {
       flex: 0 0 auto;
-      font-size: 0.7rem;
-      padding: 0.12rem 0.45rem;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 999px;
       border: 1px solid #e5e7eb;
       background: #f9fafb;
       color: #4b5563;
-      min-width: 32px;
+      min-width: 36px;
       text-align: center;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .score-pill.red {
@@ -434,24 +456,25 @@
     }
 
     .score-pill.empty {
-      opacity: 0.3;
+      opacity: 0.35;
     }
 
     .players-row {
       display: flex;
       justify-content: space-between;
-      gap: 0.5rem;
-      margin-bottom: 0.35rem;
+      gap: 0.75rem;
+      margin-bottom: 0.1rem;
+      margin-top: 0.3rem;
     }
 
     .team-col {
       flex: 1;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     .team-name {
       font-weight: 600;
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.15rem;
     }
 
     .team-name.red {
@@ -463,7 +486,7 @@
     }
 
     .player-name {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     .player-line {
@@ -471,22 +494,29 @@
       align-items: center;
       justify-content: flex-start;
       gap: 0.25rem;
-      margin-top: 0.1rem;
+      margin-top: 0.12rem;
+      min-height: var(--tap-target);
     }
 
     .player-mulligans {
       display: flex;
-      gap: 0.2rem;
-      margin-left: 0.1rem;
+      gap: 0.25rem;
+      margin-left: 0.15rem;
     }
 
     .m-pill {
-      font-size: 0.65rem;
-      padding: 0.05rem 0.35rem;
+      font-size: 0.75rem;
+      padding: 0.18rem 0.6rem;
       border-radius: 999px;
       border: 1px solid #e5e7eb;
       cursor: pointer;
       user-select: none;
+      min-width: 34px;
+      text-align: center;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .m-pill.m-on {
@@ -508,7 +538,7 @@
 
     .hole-row {
       border-top: 1px solid #e5e7eb;
-      padding: 0.4rem 0.1rem 0.45rem;
+      padding: 0.5rem 0.1rem 0.55rem;
       transition: background-color 0.2s ease;
     }
 
@@ -529,28 +559,36 @@
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.35rem;
     }
 
     .hole-label {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
     }
 
     .hole-meta {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--muted);
+      text-align: right;
     }
 
     .hole-buttons {
       display: grid;
-      grid-template-columns: 1.6fr 0.7fr 1.6fr 0.7fr;
-      gap: 0.25rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    /* On wider screens, go back to 4 across */
+    @media (min-width: 600px) {
+      .hole-buttons {
+        grid-template-columns: 1.6fr 0.7fr 1.6fr 0.7fr;
+      }
     }
 
     .pill-btn {
-      font-size: 0.78rem;
-      padding: 0.3rem 0.25rem;
+      font-size: 0.9rem;
+      padding: 0.35rem 0.3rem;
       border-radius: 999px;
       border: 1px solid #e5e7eb;
       background: #ffffff;
@@ -558,6 +596,10 @@
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
+      min-height: var(--tap-target);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .pill-btn.red-active {
@@ -579,15 +621,12 @@
     }
 
     .pill-btn.halved {
-      padding: 0.18rem 0.25rem;
-      font-size: 0.72rem;
+      font-size: 0.85rem;
     }
 
     .pill-btn.clear {
-      padding: 0.1rem 0.2rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      align-self: center;
-      justify-self: center;
     }
 
     .subtext {
@@ -629,14 +668,14 @@
     }
 
     .toast-icon {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 999px;
       background: #fef3c7;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       flex-shrink: 0;
     }
 
@@ -645,13 +684,13 @@
     }
 
     .toast-title {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 700;
       margin-bottom: 0.15rem;
     }
 
     .toast-body {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: #4b5563;
     }
 
@@ -663,12 +702,16 @@
     }
 
     .toast-btn {
-      font-size: 0.78rem;
-      padding: 0.25rem 0.6rem;
+      font-size: 0.82rem;
+      padding: 0.3rem 0.7rem;
       border-radius: 999px;
       border: none;
       cursor: pointer;
       white-space: nowrap;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .toast-btn.primary {
@@ -1259,8 +1302,6 @@
         const shift = maxShift * (margin / targetWins); // 0..40
 
         centerPct = diff > 0 ? 50 + shift : 50 - shift;
-        // Example: diff = -4 => centerPct = 50 - (40 * 4/5) = 18 ≈ 20
-        // That makes ~80% of the bar blue.
       }
 
       const redColor = leader === "red" || (leaderWins >= targetWins && diff > 0)
