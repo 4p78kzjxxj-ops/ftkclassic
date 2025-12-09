@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Tournament Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --red: #b91c1c;
+      --red-soft: #fee2e2;
+      --blue: #1d4ed8;
+      --blue-soft: #dbeafe;
+      --half: #6b7280;
+      --half-soft: #e5e7eb;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --tap-target: 44px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    html, body {
+      -webkit-text-size-adjust: 100%;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Header */
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .site-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .site-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .nav-btn.secondary {
+      background: #f3f4f6;
+    }
+
+    .nav-btn.current {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .section-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .section-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .clear-feed-btn {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .clear-feed-btn:hover {
+      background: #fee2e2;
+    }
+
+    .clear-feed-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Feed list */
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .feed-empty {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 1.2rem 0.5rem;
+    }
+
+    .feed-item {
+      border-radius: 0.9rem;
+      padding: 0.65rem 0.7rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .feed-item.red {
+      background: var(--red-soft);
+      border-color: #fecaca;
+    }
+
+    .feed-item.blue {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+    }
+
+    .feed-item.half {
+      background: var(--half-soft);
+      border-color: #d4d4d8;
+    }
+
+    .feed-top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .feed-match-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .feed-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .feed-message {
+      font-size: 0.9rem;
+    }
+
+    .feed-overall {
+      font-size: 0.8rem;
+      color: #374151;
+    }
+
+    .feed-overall span {
+      font-weight: 600;
+    }
+
+    .feed-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      align-items: center;
+      margin-top: 0.1rem;
+    }
+
+    .feed-hole-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .feed-match-link {
+      font-size: 0.75rem;
+      color: #1d4ed8;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+
+    .hint-text {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Tournament feed</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="photos.html" class="nav-btn secondary">Photos</a>
+      <a href="tournament_feed.html" class="nav-btn current">Feed</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-title">Live updates</div>
+          <div class="section-subtitle">
+            Every time a hole is completed, it appears here with the overall match score.
+          </div>
+        </div>
+        <button id="clearFeedBtn" class="clear-feed-btn" type="button">
+          <span>🧹</span>
+          <span>Clear feed</span>
+        </button>
+      </div>
+
+      <div id="feedList" class="feed-list">
+        <div class="feed-empty">Loading tournament feed…</div>
+      </div>
+
+      <div class="hint-text">
+        Admins can clear the feed with a code. Spectators will only see updates as they happen.
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      set
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const feedListEl = document.getElementById("feedList");
+    const clearFeedBtn = document.getElementById("clearFeedBtn");
+
+    const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+    const tournamentFeedRef = ref(db, "tournamentFeed");
+
+    let settingsData = {};
+    let playersData = {};
+    let matchesData = {};
+    let feedData = [];
+
+    let settingsLoaded = false;
+    let playersLoaded = false;
+    let matchesLoaded = false;
+    let feedLoaded = false;
+
+    function getTeamNames() {
+      const t = settingsData.teamNames || {};
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function getMatchPlayersFor(matchObj) {
+      if (!matchObj) return { red: [], blue: [] };
+
+      const details = matchObj.playerDetails || {};
+      const redIds = matchObj.red?.players || [];
+      const blueIds = matchObj.blue?.players || [];
+
+      const redPlayers = redIds.map(id => {
+        const basePlayer = playersData[id] || { name: "Red Player" };
+        const overrides = details[id] || {};
+        return { id, ...basePlayer, ...overrides };
+      });
+
+      const bluePlayers = blueIds.map(id => {
+        const basePlayer = playersData[id] || { name: "Blue Player" };
+        const overrides = details[id] || {};
+        return { id, ...basePlayer, ...overrides };
+      });
+
+      return { red: redPlayers, blue: bluePlayers };
+    }
+
+    function computeMatchSummary(matchId, matchObj) {
+      if (!matchObj) {
+        return {
+          overallText: "Match data unavailable",
+        };
+      }
+
+      const teamNames = getTeamNames();
+      const holes = matchObj.holes || Array(18).fill("none");
+      const type = matchObj.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+
+      let redWins = 0;
+      let blueWins = 0;
+      let halves = 0;
+
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      const totalHoles = end - start;
+      const holesPlayed = redWins + blueWins + halves;
+      const diff = redWins - blueWins;
+
+      const { red, blue } = getMatchPlayersFor(matchObj);
+      const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+      const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+      const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+      const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+      let overallText = "Match not started";
+
+      if (holesPlayed === 0) {
+        overallText = "Match not started";
+      } else if (diff === 0) {
+        overallText = "Match halved";
+      } else {
+        const up = Math.abs(diff);
+        const leaderNames = diff > 0 ? redLabel : blueLabel;
+        overallText = `${leaderNames} ${up}up`;
+      }
+
+      return {
+        overallText,
+      };
+    }
+
+    function formatTime(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      } catch {
+        return "";
+      }
+    }
+
+    function formatDate(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        return d.toLocaleDateString([], { month: "short", day: "numeric" });
+      } catch {
+        return "";
+      }
+    }
+
+    function renderFeed() {
+      if (!feedLoaded) {
+        feedListEl.innerHTML = '<div class="feed-empty">Loading tournament feed…</div>';
+        return;
+      }
+
+      if (!feedData.length) {
+        feedListEl.innerHTML = '<div class="feed-empty">No updates yet. As holes are completed, they’ll appear here.</div>';
+        return;
+      }
+
+      const entries = [...feedData].sort((a, b) => {
+        const ta = a.createdAt || 0;
+        const tb = b.createdAt || 0;
+        return tb - ta; // newest first
+      });
+
+      let html = "";
+
+      for (const entry of entries) {
+        const matchId = entry.matchId || "?";
+        const holeNumber = entry.holeNumber != null ? entry.holeNumber : null;
+        const msg = entry.message || "";
+        const ts = entry.createdAt || null;
+        const result = entry.result || "none"; // red / blue / half
+
+        const matchObj = matchesData[matchId] || null;
+        const { overallText } = computeMatchSummary(matchId, matchObj);
+
+        const type = matchObj?.type || (Number(matchId) > 8 ? "back" : "front");
+        const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+        const dateLabel = ts ? `${formatDate(ts)} · ${formatTime(ts)}` : "";
+        const holeLabel = holeNumber ? `Hole ${holeNumber}` : "";
+
+        // Shade bubble based on who won THIS hole
+        const colorClass =
+          result === "red"
+            ? "red"
+            : result === "blue"
+            ? "blue"
+            : result === "half"
+            ? "half"
+            : "";
+
+        html += `
+          <article class="feed-item ${colorClass}">
+            <div class="feed-top-row">
+              <div class="feed-match-label">Match ${matchId} · ${typeLabel}</div>
+              <div class="feed-time">${dateLabel}</div>
+            </div>
+            <div class="feed-message">${msg}</div>
+            <div class="feed-overall">
+              Overall: <span>${overallText}</span>
+            </div>
+            <div class="feed-meta-row">
+              <div class="feed-hole-label">
+                ${holeLabel}
+              </div>
+              <a class="feed-match-link" href="match_spectator.html?match=${matchId}">
+                View scoreboard
+              </a>
+            </div>
+          </article>
+        `;
+      }
+
+      feedListEl.innerHTML = html;
+    }
+
+    // Live listeners
+    onValue(settingsRef, (snap) => {
+      settingsData = snap.val() || {};
+      settingsLoaded = true;
+      renderFeed();
+    });
+
+    onValue(playersRef, (snap) => {
+      playersData = snap.val() || {};
+      playersLoaded = true;
+      renderFeed();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matchesData = snap.val() || {};
+      matchesLoaded = true;
+      renderFeed();
+    });
+
+    onValue(tournamentFeedRef, (snap) => {
+      const arr = [];
+      snap.forEach((child) => {
+        const val = child.val() || {};
+        arr.push({
+          id: child.key,
+          ...val,
+        });
+      });
+      feedData = arr;
+      feedLoaded = true;
+      renderFeed();
+    });
+
+    // Clear feed with code 3618
+    clearFeedBtn.addEventListener("click", async () => {
+      const code = window.prompt("Enter admin code to clear the tournament feed:");
+      if (code === null) return; // cancelled
+
+      if (code.trim() !== "3618") {
+        alert("Incorrect code.");
+        return;
+      }
+
+      const confirmClear = window.confirm(
+        "Are you sure you want to clear ALL tournament feed entries?"
+      );
+      if (!confirmClear) return;
+
+      try {
+        await set(tournamentFeedRef, null);
+        alert("Tournament feed cleared.");
+      } catch (err) {
+        console.error("Failed to clear tournament feed", err);
+        alert("Unable to clear feed. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>

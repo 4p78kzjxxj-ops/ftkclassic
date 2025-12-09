@@ -1542,12 +1542,55 @@
       });
     }
 
+    function logTournamentFeed(holeIndex, result, oldValue) {
+      if (!matchId || !matchData) return;
+
+      // Only log when a hole is being completed for the first time
+      if (oldValue !== "none") return;
+      if (result !== "red" && result !== "blue" && result !== "half") return;
+
+      try {
+        const holeNumber = holeConfigs[holeIndex]?.num ?? (holeIndex + 1);
+        const matchNum = matchId;
+
+        let message = "";
+        if (result === "half") {
+          message = `Match ${matchNum} update - hole ${holeNumber} was halved`;
+        } else {
+          const { red, blue } = getMatchPlayersFor(matchData || {});
+          const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
+          const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
+          const teamLabel = result === "red" ? redLasts : blueLasts;
+
+          message = `Match ${matchNum} update - ${teamLabel} won hole ${holeNumber}`;
+        }
+
+        const feedRef = ref(db, "tournamentFeed");
+        const entryRef = push(feedRef);
+        set(entryRef, {
+          matchId: matchId,
+          holeIndex: holeIndex,
+          holeNumber: holeNumber,
+          result: result,
+          message: message,
+          createdAt: Date.now(),
+        }).catch(console.error);
+      } catch (e) {
+        console.error("Failed to log tournament feed event", e);
+      }
+    }
+
     function setHoleResult(holeIndex, result) {
       if (!matchData || !matchId) return;
 
       const oldValue = matchData.holes?.[holeIndex] || "none";
       if (oldValue === result) {
         return;
+      }
+
+      // Log to tournament feed when a hole is completed
+      if (result === "red" || result === "blue" || result === "half") {
+        logTournamentFeed(holeIndex, result, oldValue);
       }
 
       const holes = (matchData.holes || Array(18).fill("none")).slice();

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Player Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --red: #b91c1c;
+      --red-soft: #fee2e2;
+      --blue: #1d4ed8;
+      --blue-soft: #dbeafe;
+      --half: #6b7280;
+      --half-soft: #e5e7eb;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0.75rem;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid #ddd;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .layout {
+        flex-direction: row;
+      }
+      .col {
+        flex: 1;
+      }
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    /* Tournament feed panel */
+
+    #feedPanel {
+      background: #f9fafb;
+      border-radius: 0.6rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.6rem 0.65rem;
+      height: 420px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    .feed-empty {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0.8rem 0.5rem;
+    }
+
+    .feed-item {
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.5rem;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      margin-bottom: 0.45rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .feed-item.red {
+      background: var(--red-soft);
+      border-color: #fecaca;
+    }
+
+    .feed-item.blue {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+    }
+
+    .feed-item.half {
+      background: var(--half-soft);
+      border-color: #d4d4d8;
+    }
+
+    .feed-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .feed-msg {
+      font-size: 0.86rem;
+    }
+
+    .feed-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .reply-btn {
+      border-radius: 999px;
+      border: none;
+      background: #e5e7eb;
+      padding: 0.18rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .reply-btn:hover {
+      background: #d4d4d8;
+    }
+
+    /* Chat panel */
+
+    #chatMessages {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      height: 260px;
+      overflow-y: auto;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    .msg {
+      padding: 0.45rem 0.55rem;
+      margin-bottom: 0.45rem;
+      border-radius: 0.55rem;
+      background: #e5e7eb;
+      border-left: 4px solid #9ca3af;
+    }
+
+    .msg.red {
+      background: var(--red-soft);
+      border-left-color: var(--red);
+    }
+
+    .msg.blue {
+      background: var(--blue-soft);
+      border-left-color: var(--blue);
+    }
+
+    .msg.neutral {
+      background: #e5e7eb;
+      border-left-color: #9ca3af;
+    }
+
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .name {
+      font-weight: 700;
+    }
+
+    .timestamp {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .reply-context {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.1rem;
+      font-style: italic;
+    }
+
+    .msg-text {
+      font-size: 0.9rem;
+    }
+
+    #replyBanner {
+      display: none;
+      font-size: 0.8rem;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      color: #374151;
+      border-radius: 0.5rem;
+      padding: 0.3rem 0.4rem;
+      margin-bottom: 0.4rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    #replyText {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #cancelReply {
+      border: none;
+      background: transparent;
+      color: #4b5563;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    #inputRow {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.65rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 0.65rem 1rem;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #sendBtn {
+      background: #1d4ed8;
+      color: white;
+    }
+
+    #clearBtn {
+      background: #dc2626;
+      color: white;
+    }
+
+    .small-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Player Chat</h2>
+    <div class="subtitle">
+      Chat with other players, react to hole updates, and reply directly to tournament feed messages.
+    </div>
+
+    <div class="layout">
+      <!-- Tournament feed column -->
+      <div class="col">
+        <div class="panel-title">Tournament feed</div>
+        <div id="feedPanel">
+          <div class="feed-empty">Loading tournament feed…</div>
+        </div>
+      </div>
+
+      <!-- Chat column -->
+      <div class="col">
+        <div class="panel-title">Chat</div>
+
+        <div id="chatMessages">Loading chat…</div>
+
+        <div id="replyBanner">
+          <div id="replyText"></div>
+          <button id="cancelReply" type="button">✕</button>
+        </div>
+
+        <div id="inputRow">
+          <input type="text" id="chatInput" placeholder="Type a message…" />
+          <button id="sendBtn">Send</button>
+          <button id="clearBtn" type="button">Clear</button>
+        </div>
+        <div class="small-hint">
+          Bubbles are colored by team (Red / Blue). Clear chat requires admin code.
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const chatRef = ref(db, "chatMessages");
+    const tournamentFeedRef = ref(db, "tournamentFeed");
+
+    const chatMessagesEl = document.getElementById("chatMessages");
+    const chatInput = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const feedPanelEl = document.getElementById("feedPanel");
+    const replyBanner = document.getElementById("replyBanner");
+    const replyTextEl = document.getElementById("replyText");
+    const cancelReplyBtn = document.getElementById("cancelReply");
+
+    // ---- PLAYER NAME + TEAM PROMPTS ----
+    let playerName = localStorage.getItem("ftkChatName");
+    if (!playerName) {
+      playerName = prompt("Enter your name:") || "Player";
+      playerName = playerName.trim() || "Player";
+      localStorage.setItem("ftkChatName", playerName);
+    }
+
+    let playerTeam = localStorage.getItem("ftkChatTeam");
+    if (!playerTeam) {
+      const teamInput = prompt("What team are you on? Type 'red' or 'blue'. Leave blank if none.");
+      const val = (teamInput || "").toLowerCase().trim();
+      if (val === "red" || val === "blue") {
+        playerTeam = val;
+      } else {
+        playerTeam = "neutral";
+      }
+      localStorage.setItem("ftkChatTeam", playerTeam);
+    }
+
+    // ---- REPLY STATE ----
+    let currentReply = null; // { feedId, message }
+
+    function setReplyTarget(feedId, message) {
+      currentReply = { feedId, message };
+      replyTextEl.textContent = "Replying to: " + message;
+      replyBanner.style.display = "flex";
+    }
+
+    function clearReplyTarget() {
+      currentReply = null;
+      replyBanner.style.display = "none";
+      replyTextEl.textContent = "";
+    }
+
+    cancelReplyBtn.addEventListener("click", () => {
+      clearReplyTarget();
+    });
+
+    // ---- FORMATTERS ----
+    function formatTime(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      } catch {
+        return "";
+      }
+    }
+
+    function formatDate(ts) {
+      if (!ts) return "";
+      try {
+        const d = new Date(ts);
+        return d.toLocaleDateString([], { month: "short", day: "numeric" });
+      } catch {
+        return "";
+      }
+    }
+
+    // ---- LOAD TOURNAMENT FEED ----
+    onValue(tournamentFeedRef, (snap) => {
+      const entries = [];
+      snap.forEach((child) => {
+        const val = child.val() || {};
+        entries.push({
+          id: child.key,
+          ...val,
+        });
+      });
+
+      if (!entries.length) {
+        feedPanelEl.innerHTML = '<div class="feed-empty">No tournament updates yet.</div>';
+        return;
+      }
+
+      entries.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+      let html = "";
+      for (const entry of entries) {
+        const matchId = entry.matchId || "?";
+        const holeNumber = entry.holeNumber != null ? entry.holeNumber : null;
+        const msg = entry.message || "";
+        const ts = entry.createdAt || null;
+        const result = entry.result || "none"; // red / blue / half
+
+        const dateLabel = ts ? `${formatDate(ts)} · ${formatTime(ts)}` : "";
+        const holeLabel = holeNumber ? `Hole ${holeNumber}` : "";
+
+        const colorClass =
+          result === "red" ? "red"
+          : result === "blue" ? "blue"
+          : result === "half" ? "half"
+          : "";
+
+        html += `
+          <div class="feed-item ${colorClass}">
+            <div class="feed-top">
+              <span>Match ${matchId}</span>
+              <span>${dateLabel}</span>
+            </div>
+            <div class="feed-msg">${msg}</div>
+            <div class="feed-meta">
+              <span>${holeLabel}</span>
+              <button class="reply-btn" type="button"
+                      data-reply-feed-id="${entry.id}"
+                      data-reply-feed-message="${msg.replace(/"/g, '&quot;')}">
+                Reply
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      feedPanelEl.innerHTML = html;
+
+      // wire reply buttons
+      Array.from(feedPanelEl.querySelectorAll(".reply-btn")).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const feedId = btn.getAttribute("data-reply-feed-id");
+          const message = btn.getAttribute("data-reply-feed-message") || "";
+          setReplyTarget(feedId, message);
+          chatInput.focus();
+        });
+      });
+    });
+
+    // ---- LOAD CHAT MESSAGES ----
+    onValue(chatRef, (snap) => {
+      chatMessagesEl.innerHTML = "";
+      const msgs = [];
+      snap.forEach(child => {
+        const val = child.val();
+        msgs.push(val);
+      });
+
+      msgs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+      for (const msg of msgs) {
+        const div = document.createElement("div");
+        const team = msg.team || "neutral";
+        div.className = "msg " + team;
+
+        const ts = msg.createdAt ? formatTime(msg.createdAt) : "";
+        const replySnippet = msg.replyToFeedMessage || null;
+
+        div.innerHTML = `
+          <div class="msg-header">
+            <span class="name">${msg.name || "Player"}</span>
+            <span class="timestamp">${ts}</span>
+          </div>
+          ${
+            replySnippet
+              ? `<div class="reply-context">↪ ${replySnippet}</div>`
+              : ""
+          }
+          <div class="msg-text">${msg.text || ""}</div>
+        `;
+
+        chatMessagesEl.appendChild(div);
+      }
+
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    });
+
+    // ---- SEND MESSAGE ----
+    sendBtn.onclick = () => {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      const msgRef = push(chatRef);
+      const payload = {
+        name: playerName,
+        team: playerTeam,
+        text,
+        createdAt: Date.now()
+      };
+
+      if (currentReply) {
+        payload.replyToFeedId = currentReply.feedId;
+        payload.replyToFeedMessage = currentReply.message;
+      }
+
+      set(msgRef, payload);
+
+      chatInput.value = "";
+      clearReplyTarget();
+    };
+
+    chatInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+
+    // ---- CLEAR CHAT (ADMIN CODE 3618) ----
+    clearBtn.onclick = () => {
+      const code = prompt("Enter admin code to clear chat:");
+
+      if (code === null) return;
+
+      if (code.trim() !== "3618") {
+        alert("Incorrect code.");
+        return;
+      }
+
+      const confirmWipe = confirm("Are you sure you want to clear ALL chat messages?");
+      if (!confirmWipe) return;
+
+      set(chatRef, null)
+        .then(() => alert("Chat cleared."))
+        .catch(err => alert("Failed to clear chat."));
+    };
+  </script>
+
+</body>
+</html>
