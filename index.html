@@ -255,23 +255,47 @@
     </section>
   </main>
 
-  <!-- MATCH CODE MODAL -->
+  <!-- PLAYER CODE MODAL -->
   <div id="modalOverlay">
     <div id="modalBox">
-      <h3 style="font-size: 1rem; margin-bottom: 0.6rem; font-weight: 700;">Enter Match Code</h3>
+      <h3 style="font-size: 1rem; margin-bottom: 0.6rem; font-weight: 700;">Enter Player Code</h3>
 
-      <input id="modalCodeInput" type="text" placeholder="Match code…" />
+      <input id="modalCodeInput" type="text" placeholder="Player code…" />
+
+      <!-- Welcome message + 9 selection (hidden until code is valid) -->
+      <div id="welcomeMessage" style="display:none; margin-bottom:0.6rem; font-size:0.9rem;"></div>
 
       <button id="modalSubmit">Continue</button>
+      <button id="front9Btn" style="display:none;">Front 9</button>
+      <button id="back9Btn" style="display:none;">Back 9</button>
       <button id="modalCancel">Cancel</button>
     </div>
   </div>
 
   <script>
+    // Player code → name mapping
+    const PLAYER_CODES = {
+      "3601": "David Wolf",
+      "3602": "Jake Smith",
+      "3603": "Jon Wall",
+      "3604": "Justin Vaughn",
+      "3605": "Will Miller",
+      "3606": "Ivan Bolds",
+      "3607": "Taylor Harbin",
+      "3608": "Eric Tomeo"
+    };
+
+    let currentPlayerName = null;
+
     // Show modal
     function openMatchModal() {
       document.getElementById("modalOverlay").style.display = "flex";
       document.getElementById("modalCodeInput").value = "";
+      document.getElementById("modalCodeInput").style.display = "block";
+      document.getElementById("modalSubmit").style.display = "block";
+      document.getElementById("welcomeMessage").style.display = "none";
+      document.getElementById("front9Btn").style.display = "none";
+      document.getElementById("back9Btn").style.display = "none";
       document.getElementById("modalCodeInput").focus();
     }
 
@@ -280,44 +304,147 @@
       document.getElementById("modalOverlay").style.display = "none";
     }
 
-    // Code → Match mapping
-    const codeMap = {
-      "3601": 1, "3602": 2, "3603": 3, "3604": 4,
-      "3605": 5, "3606": 6, "3607": 7, "3608": 8,
-      "3609": 9, "3610": 10, "3611": 11, "3612": 12,
-      "3613": 13, "3614": 14, "3615": 15, "3616": 16
-    };
-
     // "I'm a spectator" → spectator page
     document.getElementById('spectatorBtn').addEventListener('click', function () {
       window.location.href = 'spectator.html';
     });
 
-    // "I'm a player" → open match code modal
+    // "I'm a player" → open player code modal
     document.getElementById('playerBtn').addEventListener('click', openMatchModal);
-
-    // Admin link now just uses its href (no JS needed)
 
     // MODAL BUTTONS
     document.getElementById('modalCancel').addEventListener('click', closeMatchModal);
 
     document.getElementById('modalSubmit').addEventListener('click', function () {
       const code = document.getElementById('modalCodeInput').value.trim();
+      const name = PLAYER_CODES[code];
 
-      if (codeMap[code]) {
-        window.location.href = `match.html?match=${codeMap[code]}`;
-      } else {
+      if (!name) {
         alert("Invalid code.");
-        closeMatchModal();
+        return;
       }
+
+      currentPlayerName = name;
+
+      // Show welcome message + 9 selection, hide code input/continue
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      welcomeMessage.textContent = "Welcome " + name + "! Which 9 are you playing?";
+      welcomeMessage.style.display = "block";
+
+      document.getElementById('modalCodeInput').style.display = "none";
+      document.getElementById('modalSubmit').style.display = "none";
+      document.getElementById('front9Btn').style.display = "block";
+      document.getElementById('back9Btn').style.display = "block";
     });
 
-    // ENTER KEY SUBMITS
+    function handleNineSelection(whichNine) {
+      if (!currentPlayerName) {
+        alert("Please enter your player code first.");
+        return;
+      }
+      if (window.handlePlayerMatchLookup) {
+        window.handlePlayerMatchLookup(currentPlayerName, whichNine);
+        closeMatchModal();
+      } else {
+        alert("Unable to look up your match right now. Please try again.");
+      }
+    }
+
+    document.getElementById('front9Btn').addEventListener('click', function () {
+      handleNineSelection("front");
+    });
+
+    document.getElementById('back9Btn').addEventListener('click', function () {
+      handleNineSelection("back");
+    });
+
+    // ENTER KEY SUBMITS (code step)
     document.getElementById('modalCodeInput').addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         document.getElementById('modalSubmit').click();
       }
     });
+  </script>
+
+  <!-- Firebase + player→match lookup -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      get
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function normalizeName(name) {
+      if (!name) return "";
+      return String(name).trim().toLowerCase();
+    }
+
+    // name: "David Wolf", whichNine: "front" | "back"
+    window.handlePlayerMatchLookup = async function(name, whichNine) {
+      const wantBack = (whichNine === "back");
+
+      try {
+        const [playersSnap, matchesSnap] = await Promise.all([
+          get(ref(db, "players")),
+          get(ref(db, "matches"))
+        ]);
+
+        const players = playersSnap.exists() ? playersSnap.val() : {};
+        const matches = matchesSnap.exists() ? matchesSnap.val() : {};
+
+        const targetName = normalizeName(name);
+        let foundMatchId = null;
+
+        for (const mid of Object.keys(matches)) {
+          const m = matches[mid];
+          if (!m) continue;
+
+          const type = m.type || (Number(mid) > 8 ? "back" : "front");
+          const isBack = (type === "back");
+          if (wantBack && !isBack) continue;
+          if (!wantBack && isBack) continue;
+
+          const redIds = (m.red && m.red.players) || [];
+          const blueIds = (m.blue && m.blue.players) || [];
+          const ids = [...redIds, ...blueIds];
+
+          for (const pid of ids) {
+            const p = players[pid];
+            if (!p || !p.name) continue;
+            if (normalizeName(p.name) === targetName) {
+              foundMatchId = mid;
+              break;
+            }
+          }
+
+          if (foundMatchId) break;
+        }
+
+        if (!foundMatchId) {
+          alert("We couldn't find a match for you. Please check with the tournament admin.");
+          return;
+        }
+
+        window.location.href = "match.html?match=" + foundMatchId;
+      } catch (err) {
+        console.error("Error looking up player match", err);
+        alert("There was a problem looking up your match. Please try again.");
+      }
+    };
   </script>
 
 </body>
