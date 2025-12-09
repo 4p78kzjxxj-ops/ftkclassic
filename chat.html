@@ -48,21 +48,6 @@
       margin-bottom: 0.7rem;
     }
 
-    .layout {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    @media (min-width: 768px) {
-      .layout {
-        flex-direction: row;
-      }
-      .col {
-        flex: 1;
-      }
-    }
-
     .panel-title {
       font-size: 0.85rem;
       font-weight: 600;
@@ -72,9 +57,9 @@
       margin-bottom: 0.35rem;
     }
 
-    /* Tournament feed panel */
+    /* Single combined stream window */
 
-    #feedPanel {
+    #streamWindow {
       background: #f9fafb;
       border-radius: 0.6rem;
       border: 1px solid #e5e7eb;
@@ -82,14 +67,17 @@
       height: 420px;
       overflow-y: auto;
       font-size: 0.85rem;
+      margin-bottom: 0.5rem;
     }
 
-    .feed-empty {
+    .stream-empty {
       font-size: 0.8rem;
       color: var(--muted);
       text-align: center;
       padding: 0.8rem 0.5rem;
     }
+
+    /* Tournament feed style (inside stream) */
 
     .feed-item {
       border-radius: 0.6rem;
@@ -151,18 +139,7 @@
       background: #d4d4d8;
     }
 
-    /* Chat panel */
-
-    #chatMessages {
-      background: #fafafa;
-      border: 1px solid #ddd;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      height: 260px;
-      overflow-y: auto;
-      margin-bottom: 0.4rem;
-      font-size: 0.9rem;
-    }
+    /* Chat bubbles (inside same stream) */
 
     .msg {
       padding: 0.45rem 0.55rem;
@@ -215,8 +192,9 @@
       font-size: 0.9rem;
     }
 
+    /* Reply banner under stream */
+
     #replyBanner {
-      display: none;
       font-size: 0.8rem;
       background: #eef2ff;
       border: 1px solid #c7d2fe;
@@ -244,6 +222,8 @@
       font-size: 0.85rem;
       cursor: pointer;
     }
+
+    /* Input row */
 
     #inputRow {
       display: flex;
@@ -288,38 +268,28 @@
   <div class="card">
     <h2>Player Chat</h2>
     <div class="subtitle">
-      Chat with other players, react to hole updates, and reply directly to tournament feed messages.
+      Tournament updates and live player chat in one stream. Reply directly to hole updates.
     </div>
 
-    <div class="layout">
-      <!-- Tournament feed column -->
-      <div class="col">
-        <div class="panel-title">Tournament feed</div>
-        <div id="feedPanel">
-          <div class="feed-empty">Loading tournament feed…</div>
-        </div>
-      </div>
+    <div class="panel-title">Tournament feed + chat</div>
 
-      <!-- Chat column -->
-      <div class="col">
-        <div class="panel-title">Chat</div>
+    <!-- Single combined window -->
+    <div id="streamWindow">
+      <div class="stream-empty">Loading…</div>
+    </div>
 
-        <div id="chatMessages">Loading chat…</div>
+    <div id="replyBanner">
+      <div id="replyText"></div>
+      <button id="cancelReply" type="button">✕</button>
+    </div>
 
-        <div id="replyBanner">
-          <div id="replyText"></div>
-          <button id="cancelReply" type="button">✕</button>
-        </div>
-
-        <div id="inputRow">
-          <input type="text" id="chatInput" placeholder="Type a message…" />
-          <button id="sendBtn">Send</button>
-          <button id="clearBtn" type="button">Clear</button>
-        </div>
-        <div class="small-hint">
-          Bubbles are colored by team (Red / Blue). Clear chat requires admin code.
-        </div>
-      </div>
+    <div id="inputRow">
+      <input type="text" id="chatInput" placeholder="Type a message…" />
+      <button id="sendBtn">Send</button>
+      <button id="clearBtn" type="button">Clear</button>
+    </div>
+    <div class="small-hint">
+      Bubbles are colored by team (Red / Blue). Clear chat requires admin code.
     </div>
   </div>
 
@@ -350,12 +320,11 @@
     const chatRef = ref(db, "chatMessages");
     const tournamentFeedRef = ref(db, "tournamentFeed");
 
-    const chatMessagesEl = document.getElementById("chatMessages");
+    const streamEl = document.getElementById("streamWindow");
     const chatInput = document.getElementById("chatInput");
     const sendBtn = document.getElementById("sendBtn");
     const clearBtn = document.getElementById("clearBtn");
 
-    const feedPanelEl = document.getElementById("feedPanel");
     const replyBanner = document.getElementById("replyBanner");
     const replyTextEl = document.getElementById("replyText");
     const cancelReplyBtn = document.getElementById("cancelReply");
@@ -420,6 +389,111 @@
       }
     }
 
+    // ---- DATA ARRAYS ----
+    let feedEntries = [];  // from tournamentFeed
+    let chatEntries = [];  // from chatMessages
+
+    function renderStream() {
+      if (!feedEntries.length && !chatEntries.length) {
+        streamEl.innerHTML = '<div class="stream-empty">No messages yet. As holes are completed and players chat, updates will appear here.</div>';
+        return;
+      }
+
+      const combined = [];
+
+      for (const f of feedEntries) {
+        combined.push({
+          kind: "feed",
+          createdAt: f.createdAt || 0,
+          data: f,
+        });
+      }
+
+      for (const c of chatEntries) {
+        combined.push({
+          kind: "chat",
+          createdAt: c.createdAt || 0,
+          data: c,
+        });
+      }
+
+      combined.sort((a, b) => a.createdAt - b.createdAt);
+
+      let html = "";
+
+      for (const item of combined) {
+        if (item.kind === "feed") {
+          const entry = item.data;
+          const matchId = entry.matchId || "?";
+          const holeNumber = entry.holeNumber != null ? entry.holeNumber : null;
+          const msg = entry.message || "";
+          const ts = entry.createdAt || null;
+          const result = entry.result || "none"; // red / blue / half
+
+          const dateLabel = ts ? `${formatDate(ts)} · ${formatTime(ts)}` : "";
+          const holeLabel = holeNumber ? `Hole ${holeNumber}` : "";
+
+          const colorClass =
+            result === "red" ? "red"
+            : result === "blue" ? "blue"
+            : result === "half" ? "half"
+            : "";
+
+          html += `
+            <div class="feed-item ${colorClass}">
+              <div class="feed-top">
+                <span>Match ${matchId}</span>
+                <span>${dateLabel}</span>
+              </div>
+              <div class="feed-msg">${msg}</div>
+              <div class="feed-meta">
+                <span>${holeLabel}</span>
+                <button class="reply-btn" type="button"
+                        data-reply-feed-id="${entry.id}"
+                        data-reply-feed-message="${msg.replace(/"/g, '&quot;')}">
+                  Reply
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          const msg = item.data;
+          const team = msg.team || "neutral";
+          const ts = msg.createdAt ? formatTime(msg.createdAt) : "";
+          const replySnippet = msg.replyToFeedMessage || null;
+
+          html += `
+            <div class="msg ${team}">
+              <div class="msg-header">
+                <span class="name">${msg.name || "Player"}</span>
+                <span class="timestamp">${ts}</span>
+              </div>
+              ${
+                replySnippet
+                  ? `<div class="reply-context">↪ ${replySnippet}</div>`
+                  : ""
+              }
+              <div class="msg-text">${msg.text || ""}</div>
+            </div>
+          `;
+        }
+      }
+
+      streamEl.innerHTML = html;
+
+      // Wire reply buttons each render
+      Array.from(streamEl.querySelectorAll(".reply-btn")).forEach(btn => {
+        btn.addEventListener("click", () => {
+          const feedId = btn.getAttribute("data-reply-feed-id");
+          const message = btn.getAttribute("data-reply-feed-message") || "";
+          setReplyTarget(feedId, message);
+          chatInput.focus();
+        });
+      });
+
+      streamEl.scrollTop = streamEl.scrollHeight;
+    }
+
     // ---- LOAD TOURNAMENT FEED ----
     onValue(tournamentFeedRef, (snap) => {
       const entries = [];
@@ -430,99 +504,19 @@
           ...val,
         });
       });
-
-      if (!entries.length) {
-        feedPanelEl.innerHTML = '<div class="feed-empty">No tournament updates yet.</div>';
-        return;
-      }
-
-      entries.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-      let html = "";
-      for (const entry of entries) {
-        const matchId = entry.matchId || "?";
-        const holeNumber = entry.holeNumber != null ? entry.holeNumber : null;
-        const msg = entry.message || "";
-        const ts = entry.createdAt || null;
-        const result = entry.result || "none"; // red / blue / half
-
-        const dateLabel = ts ? `${formatDate(ts)} · ${formatTime(ts)}` : "";
-        const holeLabel = holeNumber ? `Hole ${holeNumber}` : "";
-
-        const colorClass =
-          result === "red" ? "red"
-          : result === "blue" ? "blue"
-          : result === "half" ? "half"
-          : "";
-
-        html += `
-          <div class="feed-item ${colorClass}">
-            <div class="feed-top">
-              <span>Match ${matchId}</span>
-              <span>${dateLabel}</span>
-            </div>
-            <div class="feed-msg">${msg}</div>
-            <div class="feed-meta">
-              <span>${holeLabel}</span>
-              <button class="reply-btn" type="button"
-                      data-reply-feed-id="${entry.id}"
-                      data-reply-feed-message="${msg.replace(/"/g, '&quot;')}">
-                Reply
-              </button>
-            </div>
-          </div>
-        `;
-      }
-
-      feedPanelEl.innerHTML = html;
-
-      // wire reply buttons
-      Array.from(feedPanelEl.querySelectorAll(".reply-btn")).forEach(btn => {
-        btn.addEventListener("click", () => {
-          const feedId = btn.getAttribute("data-reply-feed-id");
-          const message = btn.getAttribute("data-reply-feed-message") || "";
-          setReplyTarget(feedId, message);
-          chatInput.focus();
-        });
-      });
+      feedEntries = entries;
+      renderStream();
     });
 
     // ---- LOAD CHAT MESSAGES ----
     onValue(chatRef, (snap) => {
-      chatMessagesEl.innerHTML = "";
       const msgs = [];
       snap.forEach(child => {
-        const val = child.val();
+        const val = child.val() || {};
         msgs.push(val);
       });
-
-      msgs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-      for (const msg of msgs) {
-        const div = document.createElement("div");
-        const team = msg.team || "neutral";
-        div.className = "msg " + team;
-
-        const ts = msg.createdAt ? formatTime(msg.createdAt) : "";
-        const replySnippet = msg.replyToFeedMessage || null;
-
-        div.innerHTML = `
-          <div class="msg-header">
-            <span class="name">${msg.name || "Player"}</span>
-            <span class="timestamp">${ts}</span>
-          </div>
-          ${
-            replySnippet
-              ? `<div class="reply-context">↪ ${replySnippet}</div>`
-              : ""
-          }
-          <div class="msg-text">${msg.text || ""}</div>
-        `;
-
-        chatMessagesEl.appendChild(div);
-      }
-
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      chatEntries = msgs;
+      renderStream();
     });
 
     // ---- SEND MESSAGE ----
