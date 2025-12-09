@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --red: #b91c1c;
+      --blue: #1d4ed8;
+      --red-soft: #fee2e2;
+      --blue-soft: #dbeafe;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --accent: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* HEADER / NAV */
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .site-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .site-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .nav-btn.current {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr);
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 799px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    /* PLAYER CARD */
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .player-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .player-team-badge {
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      white-space: nowrap;
+    }
+
+    .player-team-badge.red {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: #7f1d1d;
+    }
+
+    .player-team-badge.blue {
+      background: var(--blue-soft);
+      border-color: #93c5fd;
+      color: #1e3a8a;
+    }
+
+    .player-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    @media (max-width: 480px) {
+      .player-meta {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .player-meta-item {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .player-meta-label {
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+
+    .player-meta-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 0.08rem;
+    }
+
+    .player-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    .player-note strong {
+      color: var(--text);
+    }
+
+    .small-label {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    /* ACHIEVEMENTS */
+
+    .player-achievements {
+      margin-top: 0.55rem;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 0.45rem;
+    }
+
+    .player-achievements-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .player-achievements-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .player-achievement-badge {
+      font-size: 0.78rem;
+      border-radius: 999px;
+      padding: 0.22rem 0.6rem;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .player-achievement-badge span.trophy {
+      font-size: 0.9rem;
+    }
+
+    /* MATCHES LIST */
+
+    .matches-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .match-item {
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 0.6rem;
+      background: #f9fafb;
+    }
+
+    .match-item-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.4rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .match-item-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .match-item-type {
+      font-size: 0.7rem;
+      color: var(--muted);
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      padding: 0.08rem 0.4rem;
+      white-space: nowrap;
+      background: #ffffff;
+    }
+
+    .match-item-line {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      margin-top: 0.1rem;
+    }
+
+    .match-item-status {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 0.08rem 0.45rem;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
+    .match-item-status.live {
+      border-color: #22c55e;
+      background: #ecfdf3;
+      color: #166534;
+    }
+
+    .match-item-status.final {
+      border-color: #4b5563;
+      background: #111827;
+      color: #e5e7eb;
+    }
+
+    .match-item-status.upcoming {
+      border-style: dashed;
+    }
+
+    .match-item-footer {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .match-item-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .match-link {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      padding: 0.18rem 0.55rem;
+      background: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .match-link.admin {
+      border-color: #1d4ed8;
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+
+    .match-link span.icon {
+      font-size: 0.85rem;
+    }
+
+    .empty-state {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+    }
+
+    .error-text {
+      font-size: 0.85rem;
+      color: #b91c1c;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle" id="headerSubtitle">Player profile</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="spectator.html" class="nav-btn">Scores</a>
+      <a href="photos.html" class="nav-btn">Photos</a>
+      <a href="chat.html" class="nav-btn">Chat</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="layout">
+      <!-- LEFT: Player summary -->
+      <section class="card">
+        <div class="card-title">Player</div>
+        <div class="player-header">
+          <div class="player-name" id="playerName">Loading player…</div>
+          <div class="player-team-badge" id="playerTeamBadge" style="display:none;"></div>
+        </div>
+
+        <div id="playerError" class="error-text" style="display:none;"></div>
+
+        <div class="player-meta">
+          <div class="player-meta-item">
+            <div class="player-meta-label">Team</div>
+            <div class="player-meta-value" id="playerTeam">—</div>
+          </div>
+          <div class="player-meta-item">
+            <div class="player-meta-label">Handicap</div>
+            <div class="player-meta-value" id="playerHandicap">—</div>
+          </div>
+          <div class="player-meta-item">
+            <div class="player-meta-label">Player code</div>
+            <div class="player-meta-value" id="playerCode">—</div>
+          </div>
+          <div class="player-meta-item">
+            <div class="player-meta-label">Matches found</div>
+            <div class="player-meta-value" id="playerMatchCount">—</div>
+          </div>
+        </div>
+
+        <!-- NEW: Holes won / lost / halved line -->
+        <div id="playerStats" class="player-note" style="margin-top:0.5rem;"></div>
+
+        <div id="playerAchievementsSection" class="player-achievements" style="display:none;">
+          <div class="player-achievements-title">Achievements</div>
+          <ul id="playerAchievementsList" class="player-achievements-list"></ul>
+        </div>
+      </section>
+
+      <!-- RIGHT: Matches for this player -->
+      <section class="card">
+        <div class="card-title">Matches</div>
+        <div class="card-subtitle">Every FTK Classic match this player is in.</div>
+        <div id="matchesList" class="matches-list">
+          <div class="empty-state">Loading matches…</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+
+    const PLAYER_CODES = {
+      "3601": "David Wolf",
+      "3602": "Jake Smith",
+      "3603": "Jon Wall",
+      "3604": "Justin Vaughn",
+      "3605": "Will Miller",
+      "3606": "Ivan Bolds",
+      "3607": "Taylor Harbin",
+      "3608": "Eric Tomeo"
+    };
+
+    const PLAYER_ACHIEVEMENTS = {
+      "david wolf": [
+        "Fall 2025 FTK Classic champion – Dawgleg GC"
+      ],
+      "jon wall": [
+        "Fall 2025 FTK Classic champion – Dawgleg GC"
+      ],
+      "ivan bolds": [
+        "Fall 2025 FTK Classic champion – Dawgleg GC"
+      ],
+      "will miller": [
+        "Fall 2025 FTK Classic champion – Dawgleg GC"
+      ]
+    };
+
+    function getCodeForName(name) {
+      if (!name) return null;
+      const target = normalizeName(name);
+      for (const [code, nm] of Object.entries(PLAYER_CODES)) {
+        if (normalizeName(nm) === target) return code;
+      }
+      return null;
+    }
+
+    function normalizeName(s) {
+      return String(s || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      const out = {};
+      for (const [k, v] of params.entries()) out[k] = v;
+      return out;
+    }
+
+    const headerSubtitleEl = document.getElementById("headerSubtitle");
+    const playerNameEl = document.getElementById("playerName");
+    const playerTeamBadgeEl = document.getElementById("playerTeamBadge");
+    const playerTeamEl = document.getElementById("playerTeam");
+    const playerHandicapEl = document.getElementById("playerHandicap");
+    const playerCodeEl = document.getElementById("playerCode");
+    const playerMatchCountEl = document.getElementById("playerMatchCount");
+    const matchesListEl = document.getElementById("matchesList");
+    const playerErrorEl = document.getElementById("playerError");
+    const playerAchievementsSectionEl = document.getElementById("playerAchievementsSection");
+    const playerAchievementsListEl = document.getElementById("playerAchievementsList");
+    const playerStatsEl = document.getElementById("playerStats");
+
+    let settings = {};
+    let players = {};
+    let matches = {};
+
+    let settingsLoaded = false;
+    let playersLoaded = false;
+    let matchesLoaded = false;
+
+    const urlParams = getQueryParams();
+    const requestedCode = urlParams.code || null;
+    const requestedId = urlParams.id || urlParams.playerId || null;
+    const requestedName = urlParams.name || null;
+    const requestedNine = urlParams.nine || null; // "front" or "back"
+
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
+    }
+
+    function resolvePlayerId() {
+      if (requestedId && players[requestedId]) return requestedId;
+
+      if (requestedCode) {
+        const nameFromCode = PLAYER_CODES[requestedCode];
+        if (nameFromCode) {
+          const target = normalizeName(nameFromCode);
+          const entries = Object.entries(players || {});
+          for (const [pid, p] of entries) {
+            if (normalizeName(p.name || "") === target) {
+              return pid;
+            }
+          }
+        }
+      }
+
+      if (requestedName) {
+        const target = normalizeName(requestedName);
+        const entries = Object.entries(players || {});
+        for (const [pid, p] of entries) {
+          if (normalizeName(p.name || "") === target) {
+            return pid;
+          }
+        }
+      }
+
+      const ids = Object.keys(players || {});
+      if (ids.length === 1) return ids[0];
+
+      return null;
+    }
+
+    function computeMatchType(mid, m) {
+      if (m && m.type) return m.type;
+      const n = Number(mid);
+      if (!Number.isFinite(n)) return "front";
+      return n > 8 ? "back" : "front";
+    }
+
+    function computeMatchStatus(mid, m) {
+      if (!m) {
+        return {
+          statusTag: "upcoming",
+          statusText: "Not started",
+          detailText: ""
+        };
+      }
+
+      const type = computeMatchType(mid, m);
+      const holes = m.holes || Array(18).fill("none");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+
+      let diff = 0;
+      let played = 0;
+      let lastHole = null;
+
+      for (let i = start; i < end; i++) {
+        const res = holes[i];
+        if (!res || res === "none") continue;
+        played++;
+        lastHole = i + 1;
+        if (res === "red") diff++;
+        else if (res === "blue") diff--;
+      }
+
+      const totalHoles = end - start;
+      const holesRemaining = totalHoles - played;
+      const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+      if (played === 0) {
+        return {
+          statusTag: "upcoming",
+          statusText: "Not started",
+          detailText: typeLabel
+        };
+      }
+
+      const absDiff = Math.abs(diff);
+      const side = diff > 0 ? "Red" : diff < 0 ? "Blue" : null;
+
+      if (absDiff > holesRemaining) {
+        if (diff === 0) {
+          return {
+            statusTag: "final",
+            statusText: "Final – Halved",
+            detailText: typeLabel
+          };
+        }
+        return {
+          statusTag: "final",
+          statusText: `Final – ${side} wins ${absDiff}&${holesRemaining}`,
+          detailText: typeLabel
+        };
+      }
+
+      if (diff === 0) {
+        return {
+          statusTag: "live",
+          statusText: `All square thru ${lastHole}`,
+          detailText: typeLabel
+        };
+      }
+
+      return {
+        statusTag: "live",
+        statusText: `${side} ${absDiff} up thru ${lastHole}`,
+        detailText: typeLabel
+      };
+    }
+
+    function getMatchesForPlayer(playerId) {
+      const out = [];
+      const entries = Object.entries(matches || {});
+      for (const [mid, m] of entries) {
+        const redIds = (m.red && m.red.players) || [];
+        const blueIds = (m.blue && m.blue.players) || [];
+        const isRed = redIds.includes(playerId);
+        const isBlue = blueIds.includes(playerId);
+        if (!isRed && !isBlue) continue;
+
+        const type = computeMatchType(mid, m);
+        out.push({ id: mid, match: m, side: isRed ? "red" : "blue", type });
+      }
+
+      out.sort((a, b) => Number(a.id) - Number(b.id));
+
+      if (requestedNine === "front" || requestedNine === "back") {
+        const target = requestedNine;
+        out.sort((a, b) => {
+          const ta = a.type === target ? 0 : 1;
+          const tb = b.type === target ? 0 : 1;
+          if (ta !== tb) return ta - tb;
+          return Number(a.id) - Number(b.id);
+        });
+      }
+
+      return out;
+    }
+
+    function renderAchievements(fullName) {
+      const key = normalizeName(fullName);
+      const list = PLAYER_ACHIEVEMENTS[key] || [];
+      if (!list.length) {
+        playerAchievementsSectionEl.style.display = "none";
+        playerAchievementsListEl.innerHTML = "";
+        return;
+      }
+
+      playerAchievementsSectionEl.style.display = "block";
+      playerAchievementsListEl.innerHTML = list
+        .map(text => `
+          <li>
+            <span class="player-achievement-badge">
+              <span class="trophy">🏆</span>
+              <span>${text}</span>
+            </span>
+          </li>
+        `)
+        .join("");
+    }
+
+    function render() {
+      if (!settingsLoaded || !playersLoaded || !matchesLoaded) return;
+
+      const playerId = resolvePlayerId();
+
+      if (!playerId) {
+        playerNameEl.textContent = "Player not found";
+        playerErrorEl.textContent =
+          "We couldn't match this URL to a player. Try linking with ?code=3601 or ?name=First%20Last.";
+        playerErrorEl.style.display = "block";
+        playerTeamBadgeEl.style.display = "none";
+        matchesListEl.innerHTML =
+          '<div class="empty-state">No matches to show.</div>';
+        playerTeamEl.textContent = "—";
+        playerHandicapEl.textContent = "—";
+        playerCodeEl.textContent = "—";
+        playerMatchCountEl.textContent = "—";
+        headerSubtitleEl.textContent = "Player profile";
+        renderAchievements("");
+        if (playerStatsEl) playerStatsEl.textContent = "";
+        return;
+      }
+
+      const p = players[playerId] || {};
+      const fullName = p.name || "Player";
+      const team = p.team || "red";
+      const handicap = p.handicap ?? "—";
+      const teamNames = getTeamNames();
+
+      const codeForPlayer = getCodeForName(fullName);
+
+      playerNameEl.textContent = fullName;
+      headerSubtitleEl.textContent = `Player profile – ${fullName}`;
+      playerErrorEl.style.display = "none";
+
+      const teamLabel =
+        team === "blue" ? `${teamNames.blue} team` : `${teamNames.red} team`;
+      playerTeamEl.textContent = teamLabel;
+      playerHandicapEl.textContent = handicap === "—" ? "—" : String(handicap);
+      playerCodeEl.textContent = codeForPlayer || "—";
+
+      playerTeamBadgeEl.style.display = "inline-flex";
+      playerTeamBadgeEl.textContent =
+        team === "blue" ? teamNames.blue : teamNames.red;
+      playerTeamBadgeEl.className =
+        "player-team-badge " + (team === "blue" ? "blue" : "red");
+
+      renderAchievements(fullName);
+
+      const playerMatches = getMatchesForPlayer(playerId);
+      playerMatchCountEl.textContent = String(playerMatches.length);
+
+      // NEW: aggregate holes won / lost / halved for this player
+      let holesWon = 0;
+      let holesLost = 0;
+      let holesHalved = 0;
+
+      for (const pm of playerMatches) {
+        const m = pm.match;
+        const side = pm.side; // "red" or "blue"
+        const type = pm.type; // "front" or "back"
+
+        const holes = m.holes || Array(18).fill("none");
+        const start = type === "back" ? 9 : 0;
+        const end = start + 9;
+
+        for (let i = start; i < end; i++) {
+          const res = holes[i];
+          if (!res || res === "none") continue;
+
+          if (res === "half" || res === "halved") {
+            holesHalved++;
+          } else if (res === "red" || res === "blue") {
+            if (res === side) {
+              holesWon++;
+            } else {
+              holesLost++;
+            }
+          }
+        }
+      }
+
+      if (playerStatsEl) {
+        const totalPlayed = holesWon + holesLost + holesHalved;
+        if (totalPlayed === 0) {
+          playerStatsEl.textContent = "Holes so far: no holes recorded yet.";
+        } else {
+          playerStatsEl.textContent =
+            "Holes so far: " +
+            holesWon + " won · " +
+            holesLost + " lost · " +
+            holesHalved + " halved";
+        }
+      }
+
+      if (!playerMatches.length) {
+        matchesListEl.innerHTML =
+          '<div class="empty-state">This player is not currently assigned to any matches.</div>';
+        return;
+      }
+
+      const html = playerMatches
+        .map(({ id: mid, match: m, side, type }) => {
+          const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+          const redIds = (m.red && m.red.players) || [];
+          const blueIds = (m.blue && m.blue.players) || [];
+          const redNames = redIds
+            .map((pid) => players[pid]?.name)
+            .filter(Boolean)
+            .map(getLastName);
+          const blueNames = blueIds
+            .map((pid) => players[pid]?.name)
+            .filter(Boolean)
+            .map(getLastName);
+
+          const redPair = redNames.length ? redNames.join(" / ") : "Red pair";
+          const bluePair = blueNames.length ? blueNames.join(" / ") : "Blue pair";
+
+          const { statusTag, statusText, detailText } = computeMatchStatus(
+            mid,
+            m
+          );
+
+          const statusClass =
+            statusTag === "final"
+              ? "match-item-status final"
+              : statusTag === "live"
+              ? "match-item-status live"
+              : "match-item-status upcoming";
+
+          const youSideLabel = side === "red" ? "You are on Red" : "You are on Blue";
+
+          const adminHref = codeForPlayer
+            ? `match.html?code=${encodeURIComponent(codeForPlayer)}&match=${encodeURIComponent(mid)}`
+            : `match.html?match=${encodeURIComponent(mid)}`;
+
+          return `
+            <div class="match-item">
+              <div class="match-item-header">
+                <div class="match-item-title">Match ${mid}</div>
+                <div class="match-item-type">${typeLabel}</div>
+              </div>
+              <div class="match-item-line">
+                <span>${redPair} vs ${bluePair}</span>
+                <span class="${statusClass}">${statusText}</span>
+              </div>
+              <div class="match-item-footer">
+                <div>${detailText || ""}${detailText ? " • " : ""}${youSideLabel}</div>
+                <div class="match-item-links">
+                  <a href="match_spectator.html?id=${mid}" class="match-link">
+                    <span class="icon">📊</span>
+                    <span>Scores</span>
+                  </a>
+                  <a href="${adminHref}" class="match-link admin">
+                    <span class="icon">🛠️</span>
+                    <span>Match admin</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+
+      matchesListEl.innerHTML = html;
+    }
+
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      settingsLoaded = true;
+      render();
+    });
+
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      playersLoaded = true;
+      render();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      matchesLoaded = true;
+      render();
+    });
+  </script>
+</body>
+</html>
