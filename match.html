@@ -881,8 +881,30 @@
     const db = getDatabase(app);
     const storage = getStorage(app);
 
+    // --- Player code protection + mapping to match IDs ---
     const params = new URLSearchParams(window.location.search);
+
+    // Map player codes to their match admin pages
+    const CODE_TO_MATCH = {
+      "3601": "1", // David Wolf
+      "3602": "2", // Jake Smith
+      "3603": "3", // Jon Wall
+      "3604": "4", // Justin Vaughn
+      "3605": "5", // Will Miller
+    };
+
     let matchId = params.get("match") || params.get("id") || null;
+    const playerCode = params.get("code");
+
+    if (playerCode) {
+      const mappedMatch = CODE_TO_MATCH[playerCode];
+      if (!mappedMatch) {
+        // Invalid code – send them back home
+        window.location.href = "index.html";
+      } else {
+        matchId = mappedMatch;
+      }
+    }
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
