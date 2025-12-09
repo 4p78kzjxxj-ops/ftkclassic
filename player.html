@@ -278,6 +278,42 @@
       font-size: 0.9rem;
     }
 
+    /* NEXT ACHIEVEMENT PROGRESS */
+
+    .player-next-achievement {
+      margin-top: 0.6rem;
+    }
+
+    .player-next-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .player-next-bar-outer {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+      margin-bottom: 0.25rem;
+    }
+
+    .player-next-bar-inner {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #1d4ed8, #b91c1c);
+      width: 0%;
+      transition: width 0.3s ease-out;
+    }
+
+    .player-next-text {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
     /* MATCHES LIST */
 
     .matches-list {
@@ -429,7 +465,8 @@
         <div id="playerError" class="error-text" style="display:none;"></div>
 
         <div class="player-meta">
-          <div class="player-meta-item">
+          <!-- Team row kept in DOM but hidden via JS -->
+          <div class="player-meta-item" id="playerTeamRow">
             <div class="player-meta-label">Team</div>
             <div class="player-meta-value" id="playerTeam">—</div>
           </div>
@@ -447,12 +484,21 @@
           </div>
         </div>
 
-        <!-- NEW: Holes won / lost / halved line -->
+        <!-- Holes won / lost / halved line -->
         <div id="playerStats" class="player-note" style="margin-top:0.5rem;"></div>
 
         <div id="playerAchievementsSection" class="player-achievements" style="display:none;">
           <div class="player-achievements-title">Achievements</div>
           <ul id="playerAchievementsList" class="player-achievements-list"></ul>
+
+          <!-- Next achievement progression -->
+          <div class="player-next-achievement" id="playerNextAchievement" style="display:none;">
+            <div class="player-next-title">Next achievement</div>
+            <div class="player-next-bar-outer">
+              <div class="player-next-bar-inner" id="playerNextAchievementBar"></div>
+            </div>
+            <div class="player-next-text" id="playerNextAchievementText"></div>
+          </div>
         </div>
       </section>
 
@@ -503,7 +549,8 @@
       "3608": "Eric Tomeo"
     };
 
-    const PLAYER_ACHIEVEMENTS = {
+    // Static champion achievements (from past winners page)
+    const STATIC_PLAYER_ACHIEVEMENTS = {
       "david wolf": [
         "Fall 2025 FTK Classic champion – Dawgleg GC"
       ],
@@ -517,6 +564,9 @@
         "Fall 2025 FTK Classic champion – Dawgleg GC"
       ]
     };
+
+    // Hole-win achievement thresholds
+    const HOLE_ACHIEVEMENT_THRESHOLDS = [3, 10, 20, 30];
 
     function getCodeForName(name) {
       if (!name) return null;
@@ -550,6 +600,7 @@
     const headerSubtitleEl = document.getElementById("headerSubtitle");
     const playerNameEl = document.getElementById("playerName");
     const playerTeamBadgeEl = document.getElementById("playerTeamBadge");
+    const playerTeamRowEl = document.getElementById("playerTeamRow");
     const playerTeamEl = document.getElementById("playerTeam");
     const playerHandicapEl = document.getElementById("playerHandicap");
     const playerCodeEl = document.getElementById("playerCode");
@@ -558,6 +609,9 @@
     const playerErrorEl = document.getElementById("playerError");
     const playerAchievementsSectionEl = document.getElementById("playerAchievementsSection");
     const playerAchievementsListEl = document.getElementById("playerAchievementsList");
+    const playerNextAchievementEl = document.getElementById("playerNextAchievement");
+    const playerNextAchievementBarEl = document.getElementById("playerNextAchievementBar");
+    const playerNextAchievementTextEl = document.getElementById("playerNextAchievementText");
     const playerStatsEl = document.getElementById("playerStats");
 
     let settings = {};
@@ -690,6 +744,49 @@
       };
     }
 
+    // Determine winner of a match (for this 9): "red", "blue", "half", or null (not decided yet)
+    function computeMatchWinner(mid, m) {
+      if (!m) return null;
+
+      const type = computeMatchType(mid, m);
+      const holes = m.holes || Array(18).fill("none");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+
+      let diff = 0;
+      let played = 0;
+
+      for (let i = start; i < end; i++) {
+        const res = holes[i];
+        if (!res || res === "none") continue;
+        played++;
+        if (res === "red") diff++;
+        else if (res === "blue") diff--;
+        // "half" / "halved" don't change diff
+      }
+
+      const totalHoles = end - start;
+      const holesRemaining = totalHoles - played;
+
+      if (played === 0) return null;
+
+      const absDiff = Math.abs(diff);
+
+      // All holes played: result is final
+      if (played === totalHoles) {
+        if (diff > 0) return "red";
+        if (diff < 0) return "blue";
+        return "half";
+      }
+
+      // Ended early because lead > holes remaining
+      if (absDiff > holesRemaining) {
+        return diff > 0 ? "red" : "blue";
+      }
+
+      return null; // still in progress
+    }
+
     function getMatchesForPlayer(playerId) {
       const out = [];
       const entries = Object.entries(matches || {});
@@ -719,32 +816,129 @@
       return out;
     }
 
-    function renderAchievements(fullName) {
-      const key = normalizeName(fullName);
-      const list = PLAYER_ACHIEVEMENTS[key] || [];
-      if (!list.length) {
-        playerAchievementsSectionEl.style.display = "none";
-        playerAchievementsListEl.innerHTML = "";
+    // Render achievements list + next achievement progress
+    function renderAchievements(fullName, holesWon, matchWins) {
+      const key = normalizeName(fullName || "");
+      const staticList = STATIC_PLAYER_ACHIEVEMENTS[key] || [];
+
+      // Build achievement objects { text, link }
+      const achievements = [];
+
+      // Champions (link to past winners)
+      for (const text of staticList) {
+        achievements.push({ text, link: "past_winners.html", trophy: true });
+      }
+
+      // Match win achievement
+      if (matchWins > 0) {
+        const text =
+          matchWins === 1
+            ? "Won a match at the FTK Classic"
+            : `Won ${matchWins} matches at the FTK Classic`;
+        achievements.push({ text, link: null, trophy: true });
+      }
+
+      // Hole win achievements
+      for (const threshold of HOLE_ACHIEVEMENT_THRESHOLDS) {
+        if (holesWon >= threshold) {
+          achievements.push({
+            text: `Won ${threshold}+ holes at the FTK Classic`,
+            link: null,
+            trophy: true
+          });
+        }
+      }
+
+      // Always show section
+      playerAchievementsSectionEl.style.display = "block";
+
+      if (!achievements.length) {
+        playerAchievementsListEl.innerHTML = `
+          <li>
+            <span class="player-achievement-badge">None</span>
+          </li>
+        `;
+      } else {
+        playerAchievementsListEl.innerHTML = achievements
+          .map((a) => {
+            const content = `
+              <span class="trophy">🏆</span>
+              <span>${a.text}</span>
+            `;
+            if (a.link) {
+              return `
+                <li>
+                  <a href="${a.link}" class="player-achievement-badge">
+                    ${content}
+                  </a>
+                </li>
+              `;
+            }
+            return `
+              <li>
+                <span class="player-achievement-badge">
+                  ${content}
+                </span>
+              </li>
+            `;
+          })
+          .join("");
+      }
+
+      // Next achievement progress bar (based on holesWon)
+      if (!playerNextAchievementEl || !playerNextAchievementBarEl || !playerNextAchievementTextEl) {
         return;
       }
 
-      playerAchievementsSectionEl.style.display = "block";
-      playerAchievementsListEl.innerHTML = list
-        .map(text => `
-          <li>
-            <span class="player-achievement-badge">
-              <span class="trophy">🏆</span>
-              <span>${text}</span>
-            </span>
-          </li>
-        `)
-        .join("");
+      playerNextAchievementEl.style.display = "block";
+
+      const thresholds = HOLE_ACHIEVEMENT_THRESHOLDS.slice().sort((a, b) => a - b);
+
+      let nextThreshold = null;
+      let prevThreshold = 0;
+
+      for (const t of thresholds) {
+        if (holesWon < t) {
+          nextThreshold = t;
+          break;
+        }
+        prevThreshold = t;
+      }
+
+      if (nextThreshold === null) {
+        // All thresholds reached
+        playerNextAchievementBarEl.style.width = "100%";
+        playerNextAchievementTextEl.textContent =
+          "All hole achievements unlocked.";
+        return;
+      }
+
+      const span = nextThreshold - prevThreshold;
+      const progressRaw = span > 0 ? (holesWon - prevThreshold) / span : 0;
+      const progress = Math.max(0, Math.min(1, progressRaw));
+      const pct = Math.round(progress * 100);
+
+      playerNextAchievementBarEl.style.width = pct + "%";
+
+      const holesNeeded = Math.max(0, nextThreshold - holesWon);
+      if (holesWon === 0) {
+        playerNextAchievementTextEl.textContent =
+          `Win ${holesNeeded} hole${holesNeeded === 1 ? "" : "s"} to unlock your first hole achievement (${nextThreshold} total).`;
+      } else {
+        playerNextAchievementTextEl.textContent =
+          `Win ${holesNeeded} more hole${holesNeeded === 1 ? "" : "s"} to unlock the next hole achievement (${nextThreshold} total).`;
+      }
     }
 
     function render() {
       if (!settingsLoaded || !playersLoaded || !matchesLoaded) return;
 
       const playerId = resolvePlayerId();
+
+      // Hide the Team row entirely (per request)
+      if (playerTeamRowEl) {
+        playerTeamRowEl.style.display = "none";
+      }
 
       if (!playerId) {
         playerNameEl.textContent = "Player not found";
@@ -754,12 +948,11 @@
         playerTeamBadgeEl.style.display = "none";
         matchesListEl.innerHTML =
           '<div class="empty-state">No matches to show.</div>';
-        playerTeamEl.textContent = "—";
-        playerHandicapEl.textContent = "—";
-        playerCodeEl.textContent = "—";
-        playerMatchCountEl.textContent = "—";
+        if (playerHandicapEl) playerHandicapEl.textContent = "—";
+        if (playerCodeEl) playerCodeEl.textContent = "—";
+        if (playerMatchCountEl) playerMatchCountEl.textContent = "—";
         headerSubtitleEl.textContent = "Player profile";
-        renderAchievements("");
+        renderAchievements("", 0, 0);
         if (playerStatsEl) playerStatsEl.textContent = "";
         return;
       }
@@ -776,9 +969,11 @@
       headerSubtitleEl.textContent = `Player profile – ${fullName}`;
       playerErrorEl.style.display = "none";
 
+      // Still compute team for badge, but hidden row
       const teamLabel =
         team === "blue" ? `${teamNames.blue} team` : `${teamNames.red} team`;
-      playerTeamEl.textContent = teamLabel;
+      if (playerTeamEl) playerTeamEl.textContent = teamLabel;
+
       playerHandicapEl.textContent = handicap === "—" ? "—" : String(handicap);
       playerCodeEl.textContent = codeForPlayer || "—";
 
@@ -788,15 +983,14 @@
       playerTeamBadgeEl.className =
         "player-team-badge " + (team === "blue" ? "blue" : "red");
 
-      renderAchievements(fullName);
-
       const playerMatches = getMatchesForPlayer(playerId);
       playerMatchCountEl.textContent = String(playerMatches.length);
 
-      // NEW: aggregate holes won / lost / halved for this player
+      // Aggregate holes + match wins
       let holesWon = 0;
       let holesLost = 0;
       let holesHalved = 0;
+      let matchWins = 0;
 
       for (const pm of playerMatches) {
         const m = pm.match;
@@ -821,6 +1015,11 @@
             }
           }
         }
+
+        const winner = computeMatchWinner(pm.id, m);
+        if (winner && winner === side) {
+          matchWins++;
+        }
       }
 
       if (playerStatsEl) {
@@ -835,6 +1034,9 @@
             holesHalved + " halved";
         }
       }
+
+      // Achievements & next achievement bar
+      renderAchievements(fullName, holesWon, matchWins);
 
       if (!playerMatches.length) {
         matchesListEl.innerHTML =
@@ -860,7 +1062,7 @@
           const redPair = redNames.length ? redNames.join(" / ") : "Red pair";
           const bluePair = blueNames.length ? blueNames.join(" / ") : "Blue pair";
 
-          const { statusTag, statusText, detailText } = computeMatchStatus(
+          const { statusTag, statusText } = computeMatchStatus(
             mid,
             m
           );
@@ -871,8 +1073,6 @@
               : statusTag === "live"
               ? "match-item-status live"
               : "match-item-status upcoming";
-
-          const youSideLabel = side === "red" ? "You are on Red" : "You are on Blue";
 
           const adminHref = codeForPlayer
             ? `match.html?code=${encodeURIComponent(codeForPlayer)}&match=${encodeURIComponent(mid)}`
@@ -889,7 +1089,6 @@
                 <span class="${statusClass}">${statusText}</span>
               </div>
               <div class="match-item-footer">
-                <div>${detailText || ""}${detailText ? " • " : ""}${youSideLabel}</div>
                 <div class="match-item-links">
                   <a href="match_spectator.html?id=${mid}" class="match-link">
                     <span class="icon">📊</span>
