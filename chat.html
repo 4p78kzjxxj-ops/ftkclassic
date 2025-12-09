@@ -27,6 +27,65 @@
       padding: 0.75rem;
     }
 
+    /* Header + nav (matching other pages / match.html style) */
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+
+    .site-title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .site-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      font-size: 0.8rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-btn.secondary {
+      background: #f3f4f6;
+    }
+
+    .nav-btn.current {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
     .card {
       background: var(--card);
       padding: 1rem;
@@ -58,7 +117,6 @@
     }
 
     /* Single combined stream window */
-
     #streamWindow {
       background: #f9fafb;
       border-radius: 0.6rem;
@@ -78,7 +136,6 @@
     }
 
     /* Tournament feed style (inside stream) */
-
     .feed-item {
       border-radius: 0.6rem;
       padding: 0.45rem 0.5rem;
@@ -140,7 +197,6 @@
     }
 
     /* Chat bubbles (inside same stream) */
-
     .msg {
       padding: 0.45rem 0.55rem;
       margin-bottom: 0.45rem;
@@ -193,7 +249,6 @@
     }
 
     /* Reply banner under stream */
-
     #replyBanner {
       font-size: 0.8rem;
       background: #eef2ff;
@@ -224,7 +279,6 @@
     }
 
     /* Input row */
-
     #inputRow {
       display: flex;
       gap: 0.5rem;
@@ -265,6 +319,22 @@
 </head>
 <body>
 
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Player chat</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="photos.html" class="nav-btn secondary">Photos</a>
+      <a href="tournament_feed.html" class="nav-btn secondary">Feed</a>
+      <a href="chat.html" class="nav-btn current">Chat</a>
+    </div>
+  </header>
+
   <div class="card">
     <h2>Player Chat</h2>
     <div class="subtitle">
@@ -289,10 +359,9 @@
       <button id="clearBtn" type="button">Clear</button>
     </div>
     <div class="small-hint">
-      Bubbles are colored by team (Red / Blue). Clear chat requires admin code.
+      Clear stream (chat + feed) requires the admin code.
     </div>
   </div>
-
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -549,9 +618,9 @@
       }
     });
 
-    // ---- CLEAR CHAT (ADMIN CODE 3618) ----
-    clearBtn.onclick = () => {
-      const code = prompt("Enter admin code to clear chat:");
+    // ---- CLEAR CHAT + TOURNAMENT FEED (ADMIN CODE 3618) ----
+    clearBtn.onclick = async () => {
+      const code = prompt("Enter admin code to clear chat and tournament feed:");
 
       if (code === null) return;
 
@@ -560,12 +629,19 @@
         return;
       }
 
-      const confirmWipe = confirm("Are you sure you want to clear ALL chat messages?");
+      const confirmWipe = confirm("Are you sure you want to clear ALL chat messages and ALL tournament feed updates?");
       if (!confirmWipe) return;
 
-      set(chatRef, null)
-        .then(() => alert("Chat cleared."))
-        .catch(err => alert("Failed to clear chat."));
+      try {
+        await Promise.all([
+          set(chatRef, null),
+          set(tournamentFeedRef, null)
+        ]);
+        alert("Chat and tournament feed cleared.");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to clear chat and feed.");
+      }
     };
   </script>
 
