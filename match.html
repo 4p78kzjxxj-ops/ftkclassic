@@ -64,6 +64,26 @@
       gap: 0.6rem;
       margin-bottom: 0.5rem;
     }
+    /* Fix nav overlap on mobile */
+@media (max-width: 700px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-links {
+    margin-left: 0;
+    margin-top: 0.4rem;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .nav-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
 
     .site-header-left {
       display: flex;
