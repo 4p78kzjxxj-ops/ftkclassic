@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic 2025 – Historical Player Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --red: #b91c1c;
+      --red-soft: #fee2e2;
+      --blue: #1d4ed8;
+      --blue-soft: #dbeafe;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --tap-target: 44px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    html, body {
+      -webkit-text-size-adjust: 100%;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 0.75rem;
+      touch-action: manipulation;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Header (mirrors match admin/spectator style) */
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .site-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .site-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .nav-btn.secondary {
+      background: #f3f4f6;
+    }
+
+    .nav-btn.current {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .status-text {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    .status-text strong {
+      color: #111827;
+    }
+
+    .status-text.success {
+      color: #166534;
+    }
+
+    .status-text.error {
+      color: #b91c1c;
+    }
+
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.2rem;
+    }
+
+    .player-card {
+      border-radius: 0.8rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.6rem 0.65rem 0.65rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .player-header-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .player-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .player-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+    }
+
+    .badge.red {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: var(--red);
+    }
+
+    .badge.blue {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+      color: var(--blue);
+    }
+
+    .player-input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.1rem;
+    }
+
+    .field {
+      flex: 1 1 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      font-size: 0.78rem;
+    }
+
+    .field label {
+      color: var(--muted);
+    }
+
+    .field input[type="number"] {
+      border-radius: 0.6rem;
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.45rem;
+      font-size: 0.85rem;
+      background: #ffffff;
+    }
+
+    .field input[type="number"]:focus {
+      outline: none;
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.2);
+    }
+
+    .controls-row {
+      margin-top: 0.6rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+
+    .btn-primary {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .empty-state {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+    }
+
+    /* AUTH OVERLAY */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1.25rem;
+    }
+
+    .auth-dialog {
+      background: #f9fafb;
+      border-radius: 0.9rem;
+      padding: 1rem 1.1rem 1rem 1.1rem;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.7);
+      max-width: 360px;
+      width: 100%;
+    }
+
+    .auth-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .auth-message {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .auth-input {
+      width: 100%;
+      border-radius: 0.7rem;
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.25);
+    }
+
+    .auth-error {
+      font-size: 0.78rem;
+      color: #b91c1c;
+      min-height: 1em;
+      margin-bottom: 0.45rem;
+    }
+
+    .auth-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.4rem;
+    }
+
+    .auth-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+
+    .auth-btn.primary {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    .auth-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Historical player stats (manual)</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="competitors.html" class="nav-btn secondary">Competitors</a>
+      <a href="match.html" class="nav-btn secondary">Match admin</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">Historical data</div>
+      <div class="section-subtitle">
+        Use this page to record manual totals for each player:
+        <strong>holes won all-time</strong> and <strong>matches won all-time</strong>.
+        These numbers are stored separately from live 2025 scoring so you can keep long-term records.
+      </div>
+
+      <div class="controls-row">
+        <button id="saveAllBtn" type="button" class="btn btn-primary">
+          💾 Save all changes
+        </button>
+      </div>
+
+      <div id="statusText" class="status-text">Loading players…</div>
+
+      <div id="playersList" class="player-list">
+        <!-- Player cards will be injected here -->
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display:none;">
+        No players found yet. Add players from the main Admin page, then return here to enter stats.
+      </div>
+    </section>
+  </main>
+
+  <!-- AUTH OVERLAY (admin123) -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-dialog">
+      <div class="auth-title">Admin access</div>
+      <p class="auth-message">
+        Enter the admin password to view and edit historical player stats.
+      </p>
+      <input
+        id="authPasswordInput"
+        type="password"
+        class="auth-input"
+        placeholder="Admin password"
+        autocomplete="off"
+      />
+      <div id="authError" class="auth-error"></div>
+      <div class="auth-actions">
+        <button id="authCancelBtn" type="button" class="auth-btn">
+          Cancel
+        </button>
+        <button id="authSubmitBtn" type="button" class="auth-btn primary">
+          Enter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      update
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const playersRef = ref(db, "players");
+    const statsRef = ref(db, "manualStats/players");
+
+    const playersListEl = document.getElementById("playersList");
+    const emptyStateEl = document.getElementById("emptyState");
+    const statusTextEl = document.getElementById("statusText");
+    const saveAllBtn = document.getElementById("saveAllBtn");
+
+    let players = {};
+    let manualStats = {};
+    let playersLoaded = false;
+    let statsLoaded = false;
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = String(fullName).trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function renderPlayers() {
+      if (!playersLoaded || !statsLoaded) return;
+
+      const ids = Object.keys(players || {});
+      if (!ids.length) {
+        playersListEl.innerHTML = "";
+        emptyStateEl.style.display = "block";
+        statusTextEl.textContent = "No players found.";
+        return;
+      }
+
+      emptyStateEl.style.display = "none";
+
+      ids.sort((a, b) => {
+        const na = getLastName(players[a]?.name || "").toLowerCase();
+        const nb = getLastName(players[b]?.name || "").toLowerCase();
+        if (na < nb) return -1;
+        if (na > nb) return 1;
+        return 0;
+      });
+
+      let html = "";
+
+      for (const id of ids) {
+        const p = players[id] || {};
+        const stats = manualStats[id] || {};
+        const team = p.team || p.side || "";
+        const hcp = p.handicap ?? p.hcp ?? "";
+
+        const holeWins = Number(stats.holeWins ?? 0);
+        const matchWins = Number(stats.matchWins ?? 0);
+
+        const teamBadgeClass =
+          team === "red" ? "badge red" : team === "blue" ? "badge blue" : "badge";
+
+        const teamLabel =
+          team === "red" ? "Red" : team === "blue" ? "Blue" : "No team";
+
+        const handicapLabel =
+          hcp === "" || hcp === null || isNaN(Number(hcp))
+            ? "Handicap: —"
+            : `Handicap: ${hcp}`;
+
+        html += `
+          <div class="player-card" data-player-id="${id}">
+            <div class="player-header-row">
+              <div class="player-name">${p.name || "Unknown player"}</div>
+            </div>
+            <div class="player-meta">
+              <span class="${teamBadgeClass}">${teamLabel}</span>
+              <span>${handicapLabel}</span>
+            </div>
+            <div class="player-input-row">
+              <div class="field">
+                <label for="holes-${id}">Historical holes won (total)</label>
+                <input
+                  id="holes-${id}"
+                  type="number"
+                  min="0"
+                  inputmode="numeric"
+                  data-player-id="${id}"
+                  data-field="holeWins"
+                  value="${holeWins}"
+                />
+              </div>
+              <div class="field">
+                <label for="matches-${id}">Historical matches won (total)</label>
+                <input
+                  id="matches-${id}"
+                  type="number"
+                  min="0"
+                  inputmode="numeric"
+                  data-player-id="${id}"
+                  data-field="matchWins"
+                  value="${matchWins}"
+                />
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      playersListEl.innerHTML = html;
+      statusTextEl.textContent = "Edit the values and tap “Save all changes” when you’re done.";
+    }
+
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      playersLoaded = true;
+      renderPlayers();
+    });
+
+    onValue(statsRef, (snap) => {
+      manualStats = snap.val() || {};
+      statsLoaded = true;
+      renderPlayers();
+    });
+
+    saveAllBtn.addEventListener("click", async () => {
+      const inputs = Array.from(
+        document.querySelectorAll("input[data-player-id][data-field]")
+      );
+
+      if (!inputs.length) {
+        statusTextEl.textContent = "Nothing to save.";
+        statusTextEl.classList.remove("success", "error");
+        return;
+      }
+
+      const updates = {};
+      const touchedPlayers = new Set();
+
+      inputs.forEach((input) => {
+        const playerId = input.getAttribute("data-player-id");
+        const field = input.getAttribute("data-field");
+        let value = parseInt(input.value, 10);
+
+        if (isNaN(value) || value < 0) value = 0;
+
+        updates[`${playerId}/${field}`] = value;
+        touchedPlayers.add(playerId);
+      });
+
+      statusTextEl.textContent = "Saving…";
+      statusTextEl.classList.remove("success", "error");
+
+      try {
+        await update(statsRef, updates);
+        statusTextEl.textContent =
+          "Saved manual stats for " + touchedPlayers.size + " player(s).";
+        statusTextEl.classList.add("success");
+      } catch (err) {
+        console.error(err);
+        statusTextEl.textContent =
+          "Error saving stats. Please try again.";
+        statusTextEl.classList.add("error");
+      }
+    });
+  </script>
+
+  <!-- Auth overlay logic (admin123) -->
+  <script>
+    (function () {
+      const ADMIN_PASSWORD = "admin123";
+
+      const overlay = document.getElementById("authOverlay");
+      const pwdInput = document.getElementById("authPasswordInput");
+      const submitBtn = document.getElementById("authSubmitBtn");
+      const cancelBtn = document.getElementById("authCancelBtn");
+      const errorEl = document.getElementById("authError");
+
+      function unlock() {
+        overlay.style.display = "none";
+      }
+
+      function handleSubmit() {
+        const value = (pwdInput.value || "").trim();
+        if (!value) {
+          errorEl.textContent = "Please enter the admin password.";
+          return;
+        }
+        if (value === ADMIN_PASSWORD) {
+          errorEl.textContent = "";
+          unlock();
+        } else {
+          errorEl.textContent = "Incorrect password. Try again.";
+        }
+      }
+
+      function handleCancel() {
+        // Kick them back to home if they cancel
+        window.location.href = "index.html";
+      }
+
+      submitBtn.addEventListener("click", handleSubmit);
+      cancelBtn.addEventListener("click", handleCancel);
+      pwdInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          handleSubmit();
+        }
+      });
+
+      // Focus the field shortly after load
+      setTimeout(() => {
+        try {
+          pwdInput.focus();
+        } catch (e) {}
+      }, 80);
+    })();
+  </script>
+</body>
+</html>
