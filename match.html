@@ -341,6 +341,7 @@
       cursor: pointer;
       white-space: nowrap;
       min-height: var(--tap-target);
+      justify-content: center;
     }
 
     .camera-btn span {
@@ -355,6 +356,57 @@
     }
 
     .camera-btn:active {
+      transform: scale(0.97);
+    }
+
+    .match-timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .match-timer-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+    }
+
+    .match-timer-value {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .match-timer-value.timer-done {
+      color: var(--red);
+    }
+
+    .match-timer-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .match-timer-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .match-timer-btn:active {
       transform: scale(0.97);
     }
 
@@ -580,7 +632,6 @@
       gap: 0.4rem;
     }
 
-    /* On wider screens, go back to 4 across */
     @media (min-width: 600px) {
       .hole-buttons {
         grid-template-columns: 1.6fr 0.7fr 1.6fr 0.7fr;
@@ -830,6 +881,17 @@
           </div>
         </div>
 
+        <div class="match-timer-row">
+          <div>
+            <div class="match-timer-label">Pace of play timer</div>
+          </div>
+          <div class="match-timer-controls">
+            <span id="matchTimer" class="match-timer-value">1:00</span>
+            <button type="button" id="matchTimerStart" class="match-timer-btn">Start</button>
+            <button type="button" id="matchTimerReset" class="match-timer-btn">Reset</button>
+          </div>
+        </div>
+
         <div class="score-line">
           <span id="scoreRedLabel">Red</span>
           <span id="scoreCenterLabel">All square</span>
@@ -935,6 +997,67 @@
     const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
     const groupPhotoArea = document.getElementById("groupPhotoArea");
     const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
+    const matchTimerEl = document.getElementById("matchTimer");
+    const matchTimerStartBtn = document.getElementById("matchTimerStart");
+    const matchTimerResetBtn = document.getElementById("matchTimerReset");
+
+    let timerInterval = null;
+    let timerRemainingSeconds = 60;
+
+    function formatTimer(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m + ":" + String(s).padStart(2, "0");
+    }
+
+    function updateMatchTimerDisplay() {
+      if (!matchTimerEl) return;
+      matchTimerEl.textContent = formatTimer(timerRemainingSeconds);
+    }
+
+    function resetMatchTimer() {
+      if (!matchTimerEl) return;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRemainingSeconds = 60;
+      matchTimerEl.classList.remove("timer-done");
+      updateMatchTimerDisplay();
+    }
+
+    function startMatchTimer() {
+      if (!matchId || !matchTimerEl) return;
+      if (timerInterval) return; // already running
+      if (timerRemainingSeconds <= 0 || timerRemainingSeconds > 60) {
+        timerRemainingSeconds = 60;
+      }
+      matchTimerEl.classList.remove("timer-done");
+      updateMatchTimerDisplay();
+      timerInterval = setInterval(() => {
+        timerRemainingSeconds -= 1;
+        if (timerRemainingSeconds <= 0) {
+          timerRemainingSeconds = 0;
+          updateMatchTimerDisplay();
+          matchTimerEl.classList.add("timer-done");
+          clearInterval(timerInterval);
+          timerInterval = null;
+          return;
+        }
+        updateMatchTimerDisplay();
+      }, 1000);
+    }
+
+    if (matchTimerStartBtn) {
+      matchTimerStartBtn.addEventListener("click", startMatchTimer);
+    }
+
+    if (matchTimerResetBtn) {
+      matchTimerResetBtn.addEventListener("click", resetMatchTimer);
+    }
+
+    if (matchTimerEl) {
+      timerRemainingSeconds = 60;
+      updateMatchTimerDisplay();
+    }
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 },
@@ -1173,13 +1296,14 @@
           statusTag: "Not started",
           totalHoles: 9,
           holesPlayed: 0,
+          holesRemaining: 9,
         };
       }
 
-      const holes = matchData.holes || Array(18).fill("none");
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
+      const holes = matchData.holes || Array(18).fill("none");
 
       let redWins = 0;
       let blueWins = 0;
@@ -1188,119 +1312,88 @@
       for (let i = start; i < end; i++) {
         const h = holes[i];
         if (h === "red") redWins++;
-        if (h === "blue") blueWins++;
-        if (h === "half") halves++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
       }
 
-      const totalHoles = end - start;
+      const total = end - start;
       const holesPlayed = redWins + blueWins + halves;
-      const holesRemaining = totalHoles - holesPlayed;
+      const holesRemaining = total - holesPlayed;
       const diff = redWins - blueWins;
 
       let leader = null;
       if (diff > 0) leader = "red";
-      if (diff < 0) leader = "blue";
+      else if (diff < 0) leader = "blue";
 
-      let centerText = "All square";
-      let statusTag = "On course";
-
-      if (diff === 0 && holesPlayed === 0) {
+      let centerText = "Ready to start";
+      if (holesPlayed === 0) {
         centerText = "Ready to start";
-        statusTag = "Not started";
-      } else if (diff === 0 && holesRemaining > 0) {
-        centerText = "All square";
-        statusTag = "Live";
-      } else if (diff === 0 && holesRemaining === 0) {
-        centerText = "Halved";
-        statusTag = "Final";
-      } else if (leader === "red") {
-        const up = Math.abs(diff);
-        if (holesRemaining === 0) {
-          centerText = "Red wins " + up + " up";
-          statusTag = "Final";
-        } else if (up > holesRemaining) {
-          centerText = "Red wins " + up + "&" + holesRemaining;
-          statusTag = "Final";
-        } else {
-          centerText = "Red " + up + " up";
-          statusTag = "Live";
-        }
-      } else if (leader === "blue") {
-        const up = Math.abs(diff);
-        if (holesRemaining === 0) {
-          centerText = "Blue wins " + up + " up";
-          statusTag = "Final";
-        } else if (up > holesRemaining) {
-          centerText = "Blue wins " + up + "&" + holesRemaining;
-          statusTag = "Final";
-        } else {
-          centerText = "Blue " + up + " up";
-          statusTag = "Live";
-        }
+      } else if (holesRemaining === 0) {
+        if (diff === 0) centerText = "Halved";
+        else if (diff > 0) centerText = `Red wins ${Math.abs(diff)} up`;
+        else centerText = `Blue wins ${Math.abs(diff)} up`;
+      } else {
+        if (diff === 0) centerText = "All square";
+        else if (diff > 0) centerText = `Red ${Math.abs(diff)} up`;
+        else centerText = `Blue ${Math.abs(diff)} up`;
       }
 
-      const desiredStatus =
-        statusTag === "Final"
-          ? "final"
-          : holesPlayed === 0
-          ? "upcoming"
-          : "live";
+      let statusTag = "On course";
+      if (holesPlayed === 0) statusTag = "Not started";
+      else if (holesRemaining === 0) statusTag = "Final";
 
-      if (matchData && matchId && matchData.status !== desiredStatus) {
-        update(ref(db, "matches/" + matchId), { status: desiredStatus }).catch(
-          console.error
-        );
-      }
-
-      return { leader, diff, centerText, statusTag, totalHoles, holesPlayed };
+      return {
+        leader,
+        diff: Math.abs(diff),
+        centerText,
+        statusTag,
+        totalHoles: total,
+        holesPlayed,
+        holesRemaining,
+      };
     }
 
-    function computeHolePills() {
-      if (!matchData || !matchId) return [];
+    function updateScoreUI() {
+      const { red, blue } = getMatchPlayersFor(matchData || {});
+      const teamNames = getTeamNames();
+      const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+      const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
 
-      const holes = matchData.holes || Array(18).fill("none");
+      const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+      const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+      scoreRedLabel.textContent = redLabel;
+      scoreBlueLabel.textContent = blueLabel;
+
+      const summary = computeScoreSummary();
+      scoreCenterLabel.textContent = summary.centerText;
+      matchTagEl.textContent = summary.statusTag;
+
+      if (summary.centerText.includes("Red wins") || summary.centerText.startsWith("Red ")) {
+        scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 65%, var(--blue-soft) 65%, var(--blue-soft) 100%)";
+      } else if (summary.centerText.includes("Blue wins") || summary.centerText.startsWith("Blue ")) {
+        scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 35%, var(--blue-soft) 35%, var(--blue-soft) 100%)";
+      } else {
+        scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 50%, var(--blue-soft) 50%, var(--blue-soft) 100%)";
+      }
+
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
+      const holes = matchData.holes || Array(18).fill("none");
+      let pillsHtml = "";
 
-      let redWins = 0;
-      let blueWins = 0;
-      const pills = [];
-
-      for (let idx = start; idx < end; idx++) {
-        const h = holes[idx];
-        if (h === "red") redWins++;
-        if (h === "blue") blueWins++;
-
-        const diff = redWins - blueWins;
-        const holeNum = holeConfigs[idx]?.num ?? (idx + 1);
-        const played = h && h !== "none";
-
-        let label = "";
-        let tone = "empty";
-
-        if (!played) {
-          label = "";
-          tone = "empty";
-        } else if (diff === 0) {
-          label = "AS";
-          tone = "half";
-        } else if (diff > 0) {
-          label = diff + "up";
-          tone = "red";
-        } else if (diff < 0) {
-          label = Math.abs(diff) + "up";
-          tone = "blue";
-        }
-
-        pills.push({
-          holeNum,
-          label,
-          tone,
-        });
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        let pillClass = "score-pill empty";
+        let label = (i - start + 1);
+        if (h === "red") pillClass = "score-pill red";
+        else if (h === "blue") pillClass = "score-pill blue";
+        else if (h === "half") pillClass = "score-pill half";
+        pillsHtml += `<div class="${pillClass}">H${label}</div>`;
       }
 
-      return pills;
+      scorePillsContainer.innerHTML = pillsHtml;
     }
 
     function playerMulliganRow(playerId, name, side, mUsed, rmUsed) {
@@ -1353,87 +1446,11 @@
       renderScoreBubble();
     }
 
-    function renderScoreBubble() {
+    function renderPlayersRow() {
       if (!matchData || !matchId) return;
 
       const { red, blue } = getMatchPlayersFor(matchData);
       const teamNames = getTeamNames();
-
-      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || teamNames.red;
-      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || teamNames.blue;
-
-      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
-      const matchLabel = "Match " + matchId;
-      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
-
-      matchTitleEl.textContent = redLasts + " vs " + blueLasts;
-      matchSubtitleEl.textContent = typeLabel + " · " + matchLabel;
-
-      const { leader, diff, centerText, statusTag } = computeScoreSummary();
-
-      scoreRedLabel.textContent = redLasts;
-      scoreBlueLabel.textContent = blueLasts;
-      scoreCenterLabel.textContent = centerText;
-      matchTagEl.textContent = statusTag;
-
-      // --- Race to 5 slider logic ---
-      const holes = matchData.holes || Array(18).fill("none");
-      const start = type === "back" ? 9 : 0;
-      const end = start + 9;
-
-      let redWins = 0;
-      let blueWins = 0;
-      for (let i = start; i < end; i++) {
-        const h = holes[i];
-        if (h === "red") redWins++;
-        if (h === "blue") blueWins++;
-      }
-
-      const targetWins = 5;
-      const leaderWins = Math.max(redWins, blueWins);
-
-      let centerPct = 50;
-
-      if (redWins === blueWins) {
-        centerPct = 50;
-      } else if (leaderWins >= targetWins) {
-        centerPct = diff > 0 ? 100 : 0;
-      } else if (diff !== 0) {
-        const margin = Math.min(targetWins, Math.abs(diff));
-        const maxShift = 40;
-        const shift = maxShift * (margin / targetWins);
-        centerPct = diff > 0 ? 50 + shift : 50 - shift;
-      }
-
-      const redColor = leader === "red" || (leaderWins >= targetWins && diff > 0)
-        ? "var(--red)"
-        : "var(--red-soft)";
-      const blueColor = leader === "blue" || (leaderWins >= targetWins && diff < 0)
-        ? "var(--blue)"
-        : "var(--blue-soft)";
-
-      scoreSliderFill.style.background =
-        "linear-gradient(to right, " +
-        redColor + " 0%, " +
-        redColor + " " + centerPct + "%, " +
-        blueColor + " " + centerPct + "%, " +
-        blueColor + " 100%)";
-
-      const pills = computeHolePills();
-      scorePillsContainer.innerHTML = pills
-        .map(p => {
-          const cls = "score-pill " +
-            (p.tone === "red"
-              ? "red"
-              : p.tone === "blue"
-              ? "blue"
-              : p.tone === "half"
-              ? "half"
-              : "empty");
-          const label = p.label || p.holeNum;
-          return '<div class="' + cls + '" title="Hole ' + p.holeNum + '">' + label + "</div>";
-        })
-        .join("");
 
       const mRed = red
         .map(p => {
@@ -1484,381 +1501,345 @@
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
-      segmentStart = start;
-      segmentEnd = end;
 
-      const segment = type === "back" ? "Back 9" : "Front 9";
-      const totalInSegment = end - start;
+      holesSectionTitle.textContent = type === "back"
+        ? "Hole-by-hole – Back 9"
+        : "Hole-by-hole – Front 9";
 
-      holesSectionTitle.textContent = "Hole-by-hole (" + segment + ")";
+      let html = "";
 
-      const { red, blue } = getMatchPlayersFor(matchData);
-      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
-      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
+      const redName = scoreRedLabel.textContent || "Red";
+      const blueName = scoreBlueLabel.textContent || "Blue";
 
-      const idx = Math.min(Math.max(currentHoleIndex ?? start, start), end - 1);
-      const config = holeConfigs[idx];
-      const value = holes[idx] || "none";
-      const holeNum = config?.num ?? (idx + 1);
-      const par = config?.par ?? "–";
-      const yards = config?.yards ?? "–";
+      const currentIndex = currentHoleIndex ?? start;
+      const prevDisabled = currentIndex <= start;
+      const nextDisabled = currentIndex >= end - 1;
 
-      let rowClass = "hole-row";
-      if (value === "red") rowClass += " hole-row-red";
-      else if (value === "blue") rowClass += " hole-row-blue";
-      else if (value === "half") rowClass += " hole-row-half";
-
-      const holeNumberInSegment = idx - start + 1;
-
-      let holeHtml = `
+      html += `
         <div class="hole-nav">
-          <button class="hole-nav-btn" data-nav="back" ${idx === start ? "disabled" : ""}>
-            ◀ Back
+          <button class="hole-nav-btn" id="prevHoleBtn" ${prevDisabled ? "disabled" : ""}>
+            ◀ Prev
           </button>
           <div class="hole-meta-count">
-            Hole ${holeNumberInSegment} of ${totalInSegment}
+            Hole ${currentIndex - start + 1} of 9
           </div>
-        </div>
-        <div class="${rowClass}">
-          <div class="hole-header-line">
-            <div class="hole-label">Hole ${holeNum}</div>
-            <div class="hole-meta">Par ${par} · ${yards} yds</div>
-          </div>
-          <div class="hole-buttons">
-            <div class="pill-btn ${value === "red" ? "red-active" : ""}"
-                 data-hole="${idx}" data-result="red">
-              ${redLasts}
-            </div>
-            <div class="pill-btn halved ${value === "half" ? "half-active" : ""}"
-                 data-hole="${idx}" data-result="half">
-              Halved
-            </div>
-            <div class="pill-btn ${value === "blue" ? "blue-active" : ""}"
-                 data-hole="${idx}" data-result="blue">
-              ${blueLasts}
-            </div>
-            <div class="pill-btn clear ${value === "none" ? "half-active" : ""}"
-                 data-hole="${idx}" data-result="none">
-              Clear
-            </div>
-          </div>
+          <button class="hole-nav-btn" id="nextHoleBtn" ${nextDisabled ? "disabled" : ""}>
+            Next ▶
+          </button>
         </div>
       `;
 
-      holesContainer.innerHTML = holeHtml;
+      for (let idx = start; idx < end; idx++) {
+        const config = holeConfigs[idx] || null;
+        const value = holes[idx] || "none";
+        const holeNum = config?.num ?? (idx + 1);
+        const par = config?.par ?? "–";
+        const yards = config?.yards ?? "–";
 
-      const backBtn = document.querySelector("[data-nav='back']");
-      if (backBtn) {
-        backBtn.addEventListener("click", () => {
-          if (currentHoleIndex > segmentStart) {
-            currentHoleIndex--;
-            renderHoles();
-          }
-        });
+        let rowClass = "hole-row";
+        if (value === "red") rowClass += " hole-row-red";
+        else if (value === "blue") rowClass += " hole-row-blue";
+        else if (value === "half") rowClass += " hole-row-half";
+
+        const holeNumberInSegment = idx - start + 1;
+
+        let holeHtml = `
+          <div class="${rowClass}" data-hole-index="${idx}" ${idx === currentIndex ? "" : 'style="display:none;"'}>
+            <div class="hole-header-line">
+              <div class="hole-label">Hole ${holeNum}</div>
+              <div class="hole-meta">
+                Par ${par} · ${yards} yds
+              </div>
+            </div>
+            <div class="hole-buttons">
+              <button class="pill-btn blue ${value === "blue" ? "blue-active" : ""}" data-hole="${idx}" data-result="blue">
+                ${blueName} wins
+              </button>
+              <button class="pill-btn halved ${value === "half" ? "half-active" : ""}" data-hole="${idx}" data-result="half">
+                Halved
+              </button>
+              <button class="pill-btn red ${value === "red" ? "red-active" : ""}" data-hole="${idx}" data-result="red">
+                ${redName} wins
+              </button>
+              <button class="pill-btn clear" data-hole="${idx}" data-result="none">
+                Clear
+              </button>
+            </div>
+          </div>
+        `;
+
+        html += holeHtml;
       }
 
-      Array.from(document.querySelectorAll(".pill-btn")).forEach(btn => {
+      holesContainer.innerHTML = html;
+
+      const prevBtn = document.getElementById("prevHoleBtn");
+      const nextBtn = document.getElementById("nextHoleBtn");
+
+      prevBtn.addEventListener("click", () => {
+        if (currentHoleIndex > start) {
+          currentHoleIndex--;
+          updateVisibleHoleRow();
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentHoleIndex < end - 1) {
+          currentHoleIndex++;
+          updateVisibleHoleRow();
+        }
+      });
+
+      holesContainer.querySelectorAll(".pill-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-          const holeIdx = Number(btn.getAttribute("data-hole"));
+          const holeIndex = Number(btn.getAttribute("data-hole"));
           const result = btn.getAttribute("data-result");
-          setHoleResult(holeIdx, result);
+          handleHoleClick(holeIndex, result);
         });
       });
     }
 
-    function logTournamentFeed(holeIndex, result, oldValue) {
-      if (!matchId || !matchData) return;
+    function updateVisibleHoleRow() {
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const currentIndex = currentHoleIndex ?? start;
 
-      // Only log when a hole is being completed for the first time
-      if (oldValue !== "none") return;
-      if (result !== "red" && result !== "blue" && result !== "half") return;
-
-      try {
-        const holeNumber = holeConfigs[holeIndex]?.num ?? (holeIndex + 1);
-        const matchNum = matchId;
-
-        let message = "";
-        if (result === "half") {
-          message = `Match ${matchNum} update - hole ${holeNumber} was halved`;
-        } else {
-          const { red, blue } = getMatchPlayersFor(matchData || {});
-          const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
-          const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
-          const teamLabel = result === "red" ? redLasts : blueLasts;
-
-          message = `Match ${matchNum} update - ${teamLabel} won hole ${holeNumber}`;
-        }
-
-        const feedRef = ref(db, "tournamentFeed");
-        const entryRef = push(feedRef);
-        set(entryRef, {
-          matchId: matchId,
-          holeIndex: holeIndex,
-          holeNumber: holeNumber,
-          result: result,
-          message: message,
-          createdAt: Date.now(),
-        }).catch(console.error);
-      } catch (e) {
-        console.error("Failed to log tournament feed event", e);
-      }
-    }
-
-    function setHoleResult(holeIndex, result) {
-      if (!matchData || !matchId) return;
-
-      const oldValue = matchData.holes?.[holeIndex] || "none";
-      if (oldValue === result) {
-        return;
+      const prevBtn = document.getElementById("prevHoleBtn");
+      const nextBtn = document.getElementById("nextHoleBtn");
+      if (prevBtn && nextBtn) {
+        prevBtn.disabled = currentIndex <= start;
+        nextBtn.disabled = currentIndex >= end - 1;
       }
 
-      // Log to tournament feed when a hole is completed
-      if (result === "red" || result === "blue" || result === "half") {
-        logTournamentFeed(holeIndex, result, oldValue);
-      }
-
-      const holes = (matchData.holes || Array(18).fill("none")).slice();
-      holes[holeIndex] = result;
-      matchData.holes = holes;
-
-      update(ref(db, "matches/" + matchId), {
-        holes,
-        updatedAt: Date.now(),
-      }).catch(console.error);
-
-      if (result === "red" || result === "blue") {
-        const holeNumber = holeConfigs[holeIndex]?.num ?? (holeIndex + 1);
-        handleHoleWin(result, holeNumber);
-      }
-
-      try {
-        if (navigator.vibrate) {
-          navigator.vibrate([15, 40, 20]);
-        }
-      } catch (e) {}
-
-      recalcCurrentHoleIndex();
-      renderScoreBubble();
-      renderHoles();
-    }
-
-    async function captureAndUploadPhoto(matchId, holeNumber, options = {}) {
-      try {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.capture = "environment";
-
-        const file = await new Promise((resolve, reject) => {
-          input.onchange = () => resolve(input.files[0]);
-          input.onerror = reject;
-          input.click();
-        });
-
-        if (!file) return null;
-
-        const imageId = Date.now() + "_" + Math.random().toString(36).slice(2, 8);
-        const storagePath = "matchPhotos/" + matchId + "/" + imageId;
-        const storageRef = sRef(storage, storagePath);
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-
-        const photosRef = ref(db, "photos");
-        const photoMeta = {
-          matchId,
-          holeNumber: holeNumber || null,
-          createdAt: Date.now(),
-          url: downloadURL,
-          type: options.group ? "group" : "regular",
-        };
-        await set(push(photosRef), photoMeta);
-
-        if (options.group) {
-          await update(ref(db, "matches/" + matchId), {
-            groupPhotoUrl: downloadURL,
-            groupPhotoTakenAt: Date.now(),
-          });
-        }
-
-        return downloadURL;
-      } catch (err) {
-        console.error("Photo upload failed", err);
-        alert("Photo upload failed: " + (err && err.message ? err.message : "Please try again."));
-        return null;
-      }
-    }
-
-    function handleHoleWin(team, holeNumber) {
-      const { red, blue } = getMatchPlayersFor(matchData || {});
-      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || "Red";
-      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || "Blue";
-      const teamLabel = team === "red" ? redLasts : blueLasts;
-
-      showWinToast(teamLabel, holeNumber, () => {
-        captureAndUploadPhoto(matchId, holeNumber);
+      holesContainer.querySelectorAll(".hole-row").forEach(row => {
+        const idx = Number(row.getAttribute("data-hole-index"));
+        row.style.display = idx === currentIndex ? "" : "none";
       });
+
+      const meta = holesContainer.querySelector(".hole-meta-count");
+      if (meta) {
+        meta.textContent = `Hole ${currentIndex - start + 1} of 9`;
+      }
     }
 
-    function showWinToast(teamLabel, holeNumber, onTakePhoto) {
-      toastContainer.innerHTML = "";
+    function handleHoleClick(holeIndex, result) {
+      if (!matchId || holeIndex == null) return;
+
+      const path = `matches/${matchId}/holes/${holeIndex}`;
+      const updates = {};
+      updates[path] = result;
+      update(ref(db), updates).catch(console.error);
+    }
+
+    function showToast({ title, body, primaryText, secondaryText, onPrimary }) {
+      toastContainer.innerHTML = `
+        <div class="toast">
+          <div class="toast-icon">⚠️</div>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-body">${body}</div>
+          </div>
+          <div class="toast-actions">
+            <button class="toast-btn primary" id="toastPrimaryBtn">${primaryText}</button>
+            <button class="toast-btn secondary" id="toastSecondaryBtn">${secondaryText}</button>
+          </div>
+        </div>
+      `;
       toastContainer.classList.add("active");
 
-      const toast = document.createElement("div");
-      toast.className = "toast";
+      const primaryBtn = document.getElementById("toastPrimaryBtn");
+      const secondaryBtn = document.getElementById("toastSecondaryBtn");
 
-      toast.innerHTML = `
-        <div class="toast-icon">🏆</div>
-        <div class="toast-content">
-          <div class="toast-title">Nice win!</div>
-          <div class="toast-body">
-            ${teamLabel} wins Hole ${holeNumber}. Want to grab a quick photo?
-          </div>
-        </div>
-        <div class="toast-actions">
-          <button class="toast-btn primary">Take photo</button>
-          <button class="toast-btn secondary">Dismiss</button>
-        </div>
-      `;
-
-      const primaryBtn = toast.querySelector(".toast-btn.primary");
-      const secondaryBtn = toast.querySelector(".toast-btn.secondary");
-
-      const removeToast = () => {
+      primaryBtn.addEventListener("click", () => {
         toastContainer.classList.remove("active");
         toastContainer.innerHTML = "";
-      };
+        if (onPrimary) onPrimary();
+      });
 
-      primaryBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        removeToast();
-        if (typeof onTakePhoto === "function") {
-          onTakePhoto();
+      secondaryBtn.addEventListener("click", () => {
+        toastContainer.classList.remove("active");
+        toastContainer.innerHTML = "";
+      });
+    }
+
+    function handleGroupPhotoClick() {
+      if (!matchId) return;
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+
+      input.addEventListener("change", async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const storagePath = `group_photos/match_${matchId}_${Date.now()}.jpg`;
+        const storageRef = sRef(storage, storagePath);
+
+        try {
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+
+          const photoRef = ref(db, "photos");
+          const newPhotoRef = push(photoRef);
+
+          const now = new Date().toISOString();
+          await set(newPhotoRef, {
+            matchId: matchId,
+            url,
+            timestamp: now,
+            type: "group",
+          });
+
+          await update(ref(db, `matches/${matchId}`), {
+            groupPhotoUrl: url,
+          });
+
+        } catch (err) {
+          console.error(err);
         }
       });
 
-      secondaryBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        removeToast();
+      input.click();
+    }
+
+    function handleCameraClick() {
+      if (!matchId) return;
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+
+      input.addEventListener("change", async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const storagePath = `match_photos/match_${matchId}_${Date.now()}.jpg`;
+        const storageRef = sRef(storage, storagePath);
+
+        try {
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+
+          const photoRef = ref(db, "photos");
+          const newPhotoRef = push(photoRef);
+
+          const now = new Date().toISOString();
+          await set(newPhotoRef, {
+            matchId: matchId,
+            url,
+            timestamp: now,
+            type: "match",
+          });
+
+        } catch (err) {
+          console.error(err);
+        }
       });
 
-      toastContainer.onclick = (e) => {
-        if (e.target === toastContainer) {
-          removeToast();
-        }
-      };
-
-      toastContainer.appendChild(toast);
-
-      setTimeout(() => {
-        if (toastContainer.classList.contains("active")) {
-          removeToast();
-        }
-      }, 7000);
+      input.click();
     }
 
-    function manualPhotoUpload() {
+    function handleClearMatchPhoto() {
       if (!matchId) return;
-      captureAndUploadPhoto(matchId, null);
+
+      showToast({
+        title: "Clear group photo?",
+        body: "This will clear the current group photo so a new one can be taken.",
+        primaryText: "Clear photo",
+        secondaryText: "Cancel",
+        onPrimary: async () => {
+          try {
+            await update(ref(db, `matches/${matchId}`), {
+              groupPhotoUrl: null,
+            });
+          } catch (err) {
+            console.error(err);
+          }
+        },
+      });
     }
 
-    async function matchGroupPhotoUpload() {
-      if (!matchId) return;
-
-      if (matchData && matchData.groupPhotoUrl) {
-        alert("There is already a group photo for this match. Clear it first to take another.");
+    function renderGroupPhotoState() {
+      if (!matchData || !matchId) {
+        groupPhotoArea.style.display = "block";
+        clearMatchPhotoButton.style.display = "none";
         return;
       }
 
-      const url = await captureAndUploadPhoto(matchId, null, { group: true });
-      if (url) {
-        if (!matchData) {
-          matchData = {
-            type: Number(matchId) > 8 ? "back" : "front",
-            holes: Array(18).fill("none"),
-          };
-        }
-        matchData.groupPhotoUrl = url;
-        matchData.groupPhotoTakenAt = Date.now();
-        renderMain();
+      const hasGroupPhoto = !!matchData.groupPhotoUrl;
+
+      if (hasGroupPhoto) {
+        groupPhotoArea.querySelector(".group-photo-title").textContent = "Group photo saved";
+        groupPhotoArea.querySelector(".group-photo-subtitle").textContent = "You can clear it to take a new one.";
+        clearMatchPhotoButton.style.display = "inline-flex";
+      } else {
+        groupPhotoArea.querySelector(".group-photo-title").textContent = "Take group photo";
+        groupPhotoArea.querySelector(".group-photo-subtitle").textContent = "Tap to capture a group photo for this match.";
+        clearMatchPhotoButton.style.display = "none";
       }
     }
 
-    async function clearMatchPhoto() {
-      if (!matchId) return;
+    function renderScoreBubble() {
+      if (!matchData || !matchId) return;
 
-      const confirmed = window.confirm(
-        "Are you sure you want to clear the group photo for this match?"
-      );
-      if (!confirmed) return;
+      const { red, blue } = getMatchPlayersFor(matchData);
+      const teamNames = getTeamNames();
 
-      try {
-        await update(ref(db, "matches/" + matchId), {
-          groupPhotoUrl: null,
-          groupPhotoTakenAt: null
-        });
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || teamNames.red;
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || teamNames.blue;
 
-        if (matchData) {
-          matchData.groupPhotoUrl = null;
-          matchData.groupPhotoTakenAt = null;
-        }
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const matchLabel = "Match " + matchId;
+      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
 
-        renderMain();
-      } catch (err) {
-        console.error("Failed to clear match photo", err);
-        alert("Could not clear the match photo. Try again.");
-      }
+      matchTitleEl.textContent = redLasts + " vs " + blueLasts;
+      matchSubtitleEl.textContent = typeLabel + " · " + matchLabel;
+
+      updateScoreUI();
+      renderPlayersRow();
+      renderHoles();
+      renderGroupPhotoState();
     }
 
     function renderMain() {
-      const hasMatchParam = !!matchId;
-
       if (!settingsLoaded || !playersLoaded || !matchesLoaded) {
         return;
       }
+
+      const hasMatchParam = !!matchId;
 
       if (!hasMatchParam) {
         headerSubtitleEl.textContent = "Match admin – select a match";
         matchListCard.style.display = "block";
         scoreWrapper.style.display = "none";
         holesCard.style.display = "none";
+
         renderMatchList();
-      } else {
-        headerSubtitleEl.textContent = "Match scoring (admin)";
-        matchListCard.style.display = "none";
-        scoreWrapper.style.display = "block";
-        holesCard.style.display = "block";
-
-        if (!matchData) {
-          matchData = {
-            type: Number(matchId) > 8 ? "back" : "front",
-            holes: Array(18).fill("none"),
-          };
-        }
-        if (!matchData.holes) {
-          matchData.holes = Array(18).fill("none");
-        }
-        if (currentHoleIndex === null) {
-          initCurrentHoleIndex();
-        }
-
-        renderScoreBubble();
-        renderHoles();
-
-        if (cameraButton) {
-          cameraButton.onclick = manualPhotoUpload;
-        }
-
-        if (groupPhotoBigButton && clearMatchPhotoButton && groupPhotoArea) {
-          const hasGroupPhoto = !!(matchData && matchData.groupPhotoUrl);
-
-          groupPhotoArea.style.display = hasGroupPhoto ? "none" : "block";
-          clearMatchPhotoButton.style.display = hasGroupPhoto ? "inline-flex" : "none";
-
-          groupPhotoBigButton.onclick = matchGroupPhotoUpload;
-          clearMatchPhotoButton.onclick = clearMatchPhoto;
-        }
+        return;
       }
+
+      matchListCard.style.display = "none";
+      scoreWrapper.style.display = "block";
+      holesCard.style.display = "block";
+
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+      headerSubtitleEl.textContent = `Match admin – Match ${matchId}`;
+
+      updateScoreUI();
+      renderPlayersRow();
+      renderHoles();
+      renderGroupPhotoState();
     }
+
+    groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
+    cameraButton.addEventListener("click", handleCameraClick);
+    clearMatchPhotoButton.addEventListener("click", handleClearMatchPhoto);
   </script>
 </body>
 </html>
