@@ -137,7 +137,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
-      margin-bottom: 0.45rem;
+      margin-bottom: 0.6rem;
     }
 
     .card-title {
@@ -148,72 +148,70 @@
       color: var(--muted);
     }
 
-    .card-subtitle {
-      font-size: 0.8rem;
-      color: var(--muted);
+    /* PLAYER LIST */
+
+    .players-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
     }
 
-    .card-subtitle strong {
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    .stats-table-wrapper {
-      margin-top: 0.6rem;
-      border-radius: 0.75rem;
+    .player-card {
+      border-radius: 0.8rem;
       border: 1px solid #e5e7eb;
-      overflow: hidden;
       background: #f9fafb;
+      padding: 0.55rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
+    .player-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
     }
 
-    .stats-table thead {
-      background: #e5e7eb;
+    .player-name-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
     }
 
-    .stats-table th,
-    .stats-table td {
-      padding: 0.45rem 0.6rem;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
+    .player-name-main {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .player-name-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #111827;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .stats-table th {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #4b5563;
-    }
-
-    .stats-table tbody tr:nth-child(every-odd) {
-      background: #f9fafb;
-    }
-
-    .stats-table tbody tr:nth-child(even) {
-      background: #f3f4f6;
-    }
-
-    .player-name-cell {
-      font-weight: 600;
-      color: #111827;
-    }
-
     .player-trophies {
-      margin-left: 0.25rem;
       font-size: 0.9rem;
+      flex-shrink: 0;
     }
 
-    .team-cell {
+    .team-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .team-dot {
@@ -221,14 +219,15 @@
       height: 8px;
       border-radius: 999px;
       background: #e5e7eb;
+      flex-shrink: 0;
     }
 
     .team-dot.red {
-      background: var(--red);
+      background: #b91c1c;
     }
 
     .team-dot.blue {
-      background: var(--blue);
+      background: #1d4ed8;
     }
 
     .team-text.red {
@@ -239,6 +238,37 @@
       color: #1e3a8a;
     }
 
+    .player-stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.1rem;
+    }
+
+    .stat-chip {
+      font-size: 0.78rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.7rem;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: #111827;
+      font-size: 0.78rem;
+    }
+
     .empty-state {
       padding: 0.75rem 0.6rem;
       font-size: 0.8rem;
@@ -246,14 +276,36 @@
       text-align: center;
     }
 
-    .stats-note {
-      margin-top: 0.5rem;
-      font-size: 0.76rem;
-      color: var(--muted);
-    }
+    /* Mobile tweaks */
+    @media (max-width: 640px) {
+      body {
+        padding: 0.6rem;
+      }
 
-    .stats-note strong {
-      color: var(--text);
+      .site-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+      }
+
+      .nav-links {
+        margin-left: 0;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+      }
+
+      .nav-btn {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.7rem;
+      }
+
+      .card {
+        padding: 0.7rem;
+      }
+
+      .player-card {
+        padding: 0.5rem 0.6rem;
+      }
     }
   </style>
 </head>
@@ -279,23 +331,8 @@
         <div class="card-title">Stats</div>
       </div>
 
-      <div class="stats-table-wrapper">
-        <table class="stats-table">
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Team</th>
-              <th>Holes won</th>
-              <th>Matches won</th>
-              <th>Tournaments won</th>
-            </tr>
-          </thead>
-          <tbody id="statsBody">
-            <tr>
-              <td colspan="5" class="empty-state">Loading stats…</td>
-            </tr>
-          </tbody>
-        </table>
+      <div id="playersList" class="players-list">
+        <div class="empty-state">Loading stats…</div>
       </div>
     </section>
   </main>
@@ -325,7 +362,7 @@
     const matchesRef = ref(db, "matches");
     const manualStatsRef = ref(db, "manualStats/players");
 
-    const statsBodyEl = document.getElementById("statsBody");
+    const playersListEl = document.getElementById("playersList");
 
     let players = {};
     let matches = {};
@@ -334,14 +371,6 @@
     let playersLoaded = false;
     let matchesLoaded = false;
     let manualStatsLoaded = false;
-
-    function normalizeName(s) {
-      return String(s || "")
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase();
-    }
 
     function getTeamNames(settings) {
       const t = (settings && settings.teamNames) || {};
@@ -379,13 +408,12 @@
 
       const entries = Object.entries(players || {});
       if (!entries.length) {
-        statsBodyEl.innerHTML =
-          '<tr><td colspan="5" class="empty-state">No players found.</td></tr>';
+        playersListEl.innerHTML =
+          '<div class="empty-state">No players found.</div>';
         return;
       }
 
       const matchEntries = Object.entries(matches || {});
-
       const rows = [];
 
       for (const [playerId, player] of entries) {
@@ -437,34 +465,29 @@
         });
       }
 
-     rows.sort((a, b) => {
-  // Sort by holes won DESC
-  if (b.holesWon !== a.holesWon) {
-    return b.holesWon - a.holesWon;
-  }
-  // If tied, sort by matches won DESC
-  if (b.matchesWon !== a.matchesWon) {
-    return b.matchesWon - a.matchesWon;
-  }
-  // If still tied, sort by tournaments won DESC
-  if (b.tournamentsWon !== a.tournamentsWon) {
-    return b.tournamentsWon - a.tournamentsWon;
-  }
-  // Final fallback: alphabetical
-  return a.name.localeCompare(b.name);
-});
+      // Sort by holes won DESC, then matches, then tournaments, then name
+      rows.sort((a, b) => {
+        if (b.holesWon !== a.holesWon) return b.holesWon - a.holesWon;
+        if (b.matchesWon !== a.matchesWon) return b.matchesWon - a.matchesWon;
+        if (b.tournamentsWon !== a.tournamentsWon) return b.tournamentsWon - a.tournamentsWon;
+        return a.name.localeCompare(b.name);
+      });
 
       if (!rows.length) {
-        statsBodyEl.innerHTML =
-          '<tr><td colspan="5" class="empty-state">No stats available.</td></tr>';
+        playersListEl.innerHTML =
+          '<div class="empty-state">No stats available.</div>';
         return;
       }
 
       const html = rows
         .map((row) => {
           const teamLabel = row.team ? getTeamLabel(row.team) : "—";
-          const teamClass = row.team === "blue" ? "blue" : row.team === "red" ? "red" : "";
-          const dotClass = row.team === "blue" ? "team-dot blue" : row.team === "red" ? "team-dot red" : "team-dot";
+          const teamTextClass =
+            row.team === "blue" ? "team-text blue" :
+            row.team === "red" ? "team-text red" : "team-text";
+          const dotClass =
+            row.team === "blue" ? "team-dot blue" :
+            row.team === "red" ? "team-dot red" : "team-dot";
 
           const trophies =
             row.tournamentsWon > 0
@@ -472,25 +495,39 @@
               : "";
 
           return `
-            <tr>
-              <td class="player-name-cell">
-                ${row.name}${trophies}
-              </td>
-              <td>
-                <span class="team-cell">
+            <article class="player-card">
+              <div class="player-card-header">
+                <div class="player-name-row">
+                  <div class="player-name-main">
+                    <span class="player-name-text">${row.name}</span>
+                    ${trophies}
+                  </div>
+                </div>
+                <div class="team-pill">
                   <span class="${dotClass}"></span>
-                  <span class="team-text ${teamClass}">${teamLabel}</span>
-                </span>
-              </td>
-              <td>${row.holesWon}</td>
-              <td>${row.matchesWon}</td>
-              <td>${row.tournamentsWon}</td>
-            </tr>
+                  <span class="${teamTextClass}">${teamLabel}</span>
+                </div>
+              </div>
+              <div class="player-stats-row">
+                <div class="stat-chip">
+                  <span class="stat-label">Holes</span>
+                  <span class="stat-value">${row.holesWon}</span>
+                </div>
+                <div class="stat-chip">
+                  <span class="stat-label">Matches</span>
+                  <span class="stat-value">${row.matchesWon}</span>
+                </div>
+                <div class="stat-chip">
+                  <span class="stat-label">Tournaments</span>
+                  <span class="stat-value">${row.tournamentsWon}</span>
+                </div>
+              </div>
+            </article>
           `;
         })
         .join("");
 
-      statsBodyEl.innerHTML = html;
+      playersListEl.innerHTML = html;
     }
 
     onValue(playersRef, (snap) => {
