@@ -12,10 +12,7 @@
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
-      --red: #b91c1c;
-      --blue: #1d4ed8;
       --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
-      --accent: #1d4ed8;
     }
 
     * {
@@ -39,18 +36,7 @@
       }
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* HEADER / NAV */
-
+    /* NAV / HEADER */
     .site-header {
       display: flex;
       align-items: center;
@@ -90,7 +76,6 @@
       margin-left: auto;
       display: flex;
       gap: 0.4rem;
-      flex-wrap: nowrap;
     }
 
     .nav-btn {
@@ -102,27 +87,13 @@
       color: var(--text);
       text-decoration: none;
       white-space: nowrap;
-      min-height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.25rem;
-    }
-
-    .nav-btn.secondary {
-      background: #f9fafb;
-    }
-
-    .nav-btn.current {
-      background: #111827;
-      color: #f9fafb;
-      border-color: #111827;
     }
 
     main {
       margin-top: 0.4rem;
     }
 
+    /* CARD */
     .card {
       background: var(--card);
       border-radius: 0.9rem;
@@ -131,23 +102,16 @@
       box-shadow: var(--shadow-soft);
     }
 
-    .card-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      margin-bottom: 0.6rem;
-    }
-
     .card-title {
       font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
+      margin-bottom: 0.6rem;
     }
 
-    /* PLAYER LIST */
-
+    /* PLAYER BUBBLES */
     .players-list {
       display: flex;
       flex-direction: column;
@@ -156,91 +120,39 @@
 
     .player-card {
       border-radius: 0.9rem;
-      border: 2px solid #9ca3af; /* outlined bubble */
+      border: 2px solid #9ca3af;
       background: #ffffff;
       padding: 0.6rem 0.7rem;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .player-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .player-name-row {
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
-      min-width: 0;
     }
 
     .player-name-main {
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      min-width: 0;
     }
 
     .player-name-text {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #111827;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .player-trophies {
       font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-
-    .team-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-size: 0.78rem;
-      padding: 0.18rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .team-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      flex-shrink: 0;
-    }
-
-    .team-dot.red {
-      background: var(--red);
-    }
-
-    .team-dot.blue {
-      background: var(--blue);
-    }
-
-    .team-text.red {
-      color: #7f1d1d;
-    }
-
-    .team-text.blue {
-      color: #1e3a8a;
     }
 
     .player-stats-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem;
-      margin-top: 0.1rem;
     }
 
     .stat-chip {
@@ -250,353 +162,227 @@
       border: 1px solid #e5e7eb;
       background: #f9fafb;
       display: inline-flex;
-      align-items: baseline;
       gap: 0.25rem;
     }
 
     .stat-label {
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
       font-size: 0.7rem;
     }
 
     .stat-value {
       font-weight: 600;
-      color: #111827;
       font-size: 0.78rem;
     }
 
     .empty-state {
-      padding: 0.75rem 0.6rem;
-      font-size: 0.8rem;
-      color: var(--muted);
+      padding: 1rem;
       text-align: center;
+      color: var(--muted);
     }
 
-    /* Mobile tweaks */
-    @media (max-width: 640px) {
-      body {
-        padding: 0.6rem;
-      }
-
-      .site-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.4rem;
-      }
-
-      .nav-links {
-        margin-left: 0;
-        flex-wrap: wrap;
-        gap: 0.3rem;
-      }
-
-      .nav-btn {
-        font-size: 0.78rem;
-        padding: 0.25rem 0.7rem;
-      }
-
-      .card {
-        padding: 0.7rem;
-      }
-
-      .player-card {
-        padding: 0.55rem 0.65rem;
-      }
-    }
   </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="site-header-left">
-      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
-      <div>
-        <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Player stats overview</div>
-      </div>
+
+<header class="site-header">
+  <div class="site-header-left">
+    <img src="IMG_7296.jpg" class="site-logo" />
+    <div>
+      <div class="site-title">FTK Classic</div>
+      <div class="site-subtitle">Player stats</div>
     </div>
-    <div class="nav-links">
-      <a href="index.html" class="nav-btn secondary">Home</a>
-      <a href="spectator.html" class="nav-btn secondary">Scores</a>
-      <a href="competitors.html" class="nav-btn">Competitors</a>
+  </div>
+
+  <div class="nav-links">
+    <a href="spectator.html" class="nav-btn">Scores</a>
+    <a href="competitors.html" class="nav-btn">Competitors</a>
+    <a href="player.html" class="nav-btn">Player</a>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <div class="card-title">Stats</div>
+
+    <div id="playersList" class="players-list">
+      <div class="empty-state">Loading…</div>
     </div>
-  </header>
+  </section>
+</main>
 
-  <main>
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">Stats</div>
-      </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    onValue
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-      <div id="playersList" class="players-list">
-        <div class="empty-state">Loading stats…</div>
-      </div>
-    </section>
-  </main>
+  const firebaseConfig = {
+    apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+    authDomain: "ftkclassicdb.firebaseapp.com",
+    databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+    projectId: "ftkclassicdb",
+    storageBucket: "ftkclassicdb.firebasestorage.app",
+    messagingSenderId: "963469808092",
+    appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+  };
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      onValue
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
-      authDomain: "ftkclassicdb.firebaseapp.com",
-      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
-      projectId: "ftkclassicdb",
-      storageBucket: "ftkclassicdb.firebasestorage.app",
-      messagingSenderId: "963469808092",
-      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
-    };
+  const playersRef = ref(db, "players");
+  const matchesRef = ref(db, "matches");
+  const manualStatsRef = ref(db, "manualStats/players");
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const playersListEl = document.getElementById("playersList");
 
-    const playersRef = ref(db, "players");
-    const matchesRef = ref(db, "matches");
-    const manualStatsRef = ref(db, "manualStats/players");
+  let players = {};
+  let matches = {};
+  let manualStats = {};
 
-    const playersListEl = document.getElementById("playersList");
+  let playersLoaded = false;
+  let matchesLoaded = false;
+  let manualStatsLoaded = false;
 
-    let players = {};
-    let matches = {};
-    let manualStats = {};
-
-    let playersLoaded = false;
-    let matchesLoaded = false;
-    let manualStatsLoaded = false;
-
-    function getTeamNames(settings) {
-      const t = (settings && settings.teamNames) || {};
-      return {
-        red: t.red || "Red",
-        blue: t.blue || "Blue",
-      };
+  function computeWinnerColor(matchObj) {
+    const holes = matchObj.holes || [];
+    let red = 0;
+    let blue = 0;
+    for (const h of holes) {
+      if (h === "red") red++;
+      if (h === "blue") blue++;
     }
+    if (red === blue) return null;
+    return red > blue ? "red" : "blue";
+  }
 
-    function getTeamLabel(team, settings) {
-      const names = getTeamNames(settings || {});
-      if (team === "blue") return names.blue;
-      if (team === "red") return names.red;
-      return team || "—";
-    }
+  function renderStats() {
+    if (!playersLoaded || !matchesLoaded || !manualStatsLoaded) return;
 
-    function computeMatchWinnerColor(matchObj) {
-      const holes = matchObj.holes || Array(18).fill("none");
-      let redUp = 0;
-      let blueUp = 0;
+    const rows = [];
+    const matchEntries = Object.entries(matches);
 
-      for (let i = 0; i < holes.length; i++) {
-        const res = holes[i];
-        if (!res || res === "none") continue;
-        if (res === "red") redUp++;
-        else if (res === "blue") blueUp++;
-      }
+    for (const [playerId, p] of Object.entries(players)) {
+      let holes = 0;
+      let wins = 0;
 
-      if (redUp === blueUp) return null;
-      return redUp > blueUp ? "red" : "blue";
-    }
+      for (const [id, m] of matchEntries) {
+        const redP = m.red?.players || [];
+        const blueP = m.blue?.players || [];
+        let side = null;
 
-    function renderStats() {
-      if (!playersLoaded || !matchesLoaded || !manualStatsLoaded) return;
+        if (redP.includes(playerId)) side = "red";
+        if (blueP.includes(playerId)) side = "blue";
+        if (!side) continue;
 
-      const entries = Object.entries(players || {});
-      if (!entries.length) {
-        playersListEl.innerHTML =
-          '<div class="empty-state">No players found.</div>';
-        return;
-      }
-
-      const matchEntries = Object.entries(matches || {});
-      const rows = [];
-
-      // Build per-player totals
-      for (const [playerId, player] of entries) {
-        const fullName = player.name || "Player";
-        const team = player.team || "";
-        let holesWonLive = 0;
-        let matchWinsLive = 0;
-
-        for (const [matchId, matchObj] of matchEntries) {
-          if (!matchObj || typeof matchObj !== "object") continue;
-
-          const redPlayers = (matchObj.red && matchObj.red.players) || [];
-          const bluePlayers = (matchObj.blue && matchObj.blue.players) || [];
-
-          let side = null;
-          if (redPlayers.includes(playerId)) side = "red";
-          else if (bluePlayers.includes(playerId)) side = "blue";
-          if (!side) continue;
-
-          const holes = matchObj.holes || Array(18).fill("none");
-          for (let i = 0; i < holes.length; i++) {
-            const res = holes[i];
-            if (!res || res === "none") continue;
-            if (res === side) {
-              holesWonLive++;
-            }
-          }
-
-          const winnerColor = computeMatchWinnerColor(matchObj);
-          if (winnerColor && winnerColor === side) {
-            matchWinsLive++;
-          }
+        for (const h of m.holes || []) {
+          if (h === side) holes++;
         }
 
-        const manual = (manualStats && manualStats[playerId]) || {};
-        const manualHoleWins = Number(manual.holeWins ?? 0) || 0;
-        const manualMatchWins = Number(manual.matchWins ?? 0) || 0;
-        const tournamentsWon = Number(manual.tournamentsWon ?? 0) || 0;
-
-        const totalHolesWon = holesWonLive + manualHoleWins;
-        const totalMatchesWon = matchWinsLive + manualMatchWins;
-
-        rows.push({
-          id: playerId,
-          name: fullName,
-          team,
-          holesWon: totalHolesWon,
-          matchesWon: totalMatchesWon,
-          tournamentsWon,
-        });
+        const w = computeWinnerColor(m);
+        if (w === side) wins++;
       }
 
-      // Sort by performance
-      rows.sort((a, b) => {
-        if (b.holesWon !== a.holesWon) return b.holesWon - a.holesWon;
-        if (b.matchesWon !== a.matchesWon) return b.matchesWon - a.matchesWon;
-        if (b.tournamentsWon !== a.tournamentsWon) return b.tournamentsWon - a.tournamentsWon;
-        return a.name.localeCompare(b.name);
+      const manual = manualStats[playerId] || {};
+      holes += manual.holeWins || 0;
+      wins += manual.matchWins || 0;
+      const tournaments = manual.tournamentsWon || 0;
+
+      rows.push({
+        id: playerId,
+        name: p.name,
+        holesWon: holes,
+        matchesWon: wins,
+        tournamentsWon: tournaments
       });
-
-      if (!rows.length) {
-        playersListEl.innerHTML =
-          '<div class="empty-state">No stats available.</div>';
-        return;
-      }
-
-      // Group ties (same holes, matches, tournaments)
-      const groups = [];
-      let currentGroup = [];
-
-      for (let i = 0; i < rows.length; i++) {
-        const p = rows[i];
-
-        if (i === 0) {
-          currentGroup.push(p);
-          continue;
-        }
-
-        const prev = rows[i - 1];
-        const isTie =
-          p.holesWon === prev.holesWon &&
-          p.matchesWon === prev.matchesWon &&
-          p.tournamentsWon === prev.tournamentsWon;
-
-        if (isTie) {
-          currentGroup.push(p);
-        } else {
-          groups.push(currentGroup);
-          currentGroup = [p];
-        }
-      }
-      if (currentGroup.length) {
-        groups.push(currentGroup);
-      }
-
-      const html = groups
-        .map((group) => {
-          const ref = group[0];
-
-          const teamLabel = ref.team ? getTeamLabel(ref.team) : "—";
-          const teamTextClass =
-            ref.team === "blue"
-              ? "team-text blue"
-              : ref.team === "red"
-              ? "team-text red"
-              : "team-text";
-          const dotClass =
-            ref.team === "blue"
-              ? "team-dot blue"
-              : ref.team === "red"
-              ? "team-dot red"
-              : "team-dot";
-
-          const playersHTML = group
-            .map((p) => {
-              const trophies =
-                p.tournamentsWon > 0
-                  ? `<span class="player-trophies">${"🏆".repeat(
-                      p.tournamentsWon
-                    )}</span>`
-                  : "";
-              return `
-                <div class="player-name-main">
-                  <span class="player-name-text">${p.name}</span>
-                  ${trophies}
-                </div>
-              `;
-            })
-            .join("");
-
-          const statsHTML = `
-            <div class="player-stats-row">
-              <div class="stat-chip">
-                <span class="stat-label">Holes Won</span>
-                <span class="stat-value">${ref.holesWon}</span>
-              </div>
-              <div class="stat-chip">
-                <span class="stat-label">Matches Won</span>
-                <span class="stat-value">${ref.matchesWon}</span>
-              </div>
-              <div class="stat-chip">
-                <span class="stat-label">Tournaments Won</span>
-                <span class="stat-value">${ref.tournamentsWon}</span>
-              </div>
-            </div>
-          `;
-
-          return `
-            <article class="player-card">
-              <div class="player-card-header">
-                <div class="player-name-row">
-                  ${playersHTML}
-                </div>
-                <div class="team-pill">
-                  <span class="${dotClass}"></span>
-                  <span class="${teamTextClass}">${teamLabel}</span>
-                </div>
-              </div>
-              ${statsHTML}
-            </article>
-          `;
-        })
-        .join("");
-
-      playersListEl.innerHTML = html;
     }
 
-    onValue(playersRef, (snap) => {
-      players = snap.val() || {};
-      playersLoaded = true;
-      renderStats();
+    rows.sort((a, b) => {
+      if (b.holesWon !== a.holesWon) return b.holesWon - a.holesWon;
+      if (b.matchesWon !== a.matchesWon) return b.matchesWon - a.matchesWon;
+      if (b.tournamentsWon !== a.tournamentsWon) return b.tournamentsWon - a.tournamentsWon;
+      return a.name.localeCompare(b.name);
     });
 
-    onValue(matchesRef, (snap) => {
-      matches = snap.val() || {};
-      matchesLoaded = true;
-      renderStats();
-    });
+    // Group ties
+    const groups = [];
+    let group = [];
 
-    onValue(manualStatsRef, (snap) => {
-      manualStats = snap.val() || {};
-      manualStatsLoaded = true;
-      renderStats();
-    });
-  </script>
+    for (let i = 0; i < rows.length; i++) {
+      if (i === 0) {
+        group.push(rows[i]);
+        continue;
+      }
+
+      const a = rows[i];
+      const b = rows[i - 1];
+
+      const tie =
+        a.holesWon === b.holesWon &&
+        a.matchesWon === b.matchesWon &&
+        a.tournamentsWon === b.tournamentsWon;
+
+      if (tie) {
+        group.push(a);
+      } else {
+        groups.push(group);
+        group = [a];
+      }
+    }
+    if (group.length) groups.push(group);
+
+    playersListEl.innerHTML = groups
+      .map(g => {
+        const ref = g[0];
+
+        const names = g
+          .map(p => {
+            const trophies = p.tournamentsWon ? "🏆".repeat(p.tournamentsWon) : "";
+            return `
+            <div class="player-name-main">
+              <span class="player-name-text">${p.name}</span>
+              <span class="player-trophies">${trophies}</span>
+            </div>`;
+          })
+          .join("");
+
+        return `
+        <article class="player-card">
+          <div class="player-name-row">
+            ${names}
+          </div>
+
+          <div class="player-stats-row">
+            <div class="stat-chip"><span class="stat-label">Holes Won</span><span class="stat-value">${ref.holesWon}</span></div>
+            <div class="stat-chip"><span class="stat-label">Matches Won</span><span class="stat-value">${ref.matchesWon}</span></div>
+            <div class="stat-chip"><span class="stat-label">Tournaments Won</span><span class="stat-value">${ref.tournamentsWon}</span></div>
+          </div>
+        </article>`;
+      })
+      .join("");
+  }
+
+  onValue(playersRef, snap => {
+    players = snap.val() || {};
+    playersLoaded = true;
+    renderStats();
+  });
+
+  onValue(matchesRef, snap => {
+    matches = snap.val() || {};
+    matchesLoaded = true;
+    renderStats();
+  });
+
+  onValue(manualStatsRef, snap => {
+    manualStats = snap.val() || {};
+    manualStatsLoaded = true;
+    renderStats();
+  });
+
+</script>
 </body>
 </html>
