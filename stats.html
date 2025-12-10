@@ -449,9 +449,22 @@
         });
       }
 
-      rows.sort((a, b) => {
-        return a.name.localeCompare(b.name);
-      });
+     rows.sort((a, b) => {
+  // Sort by holes won DESC
+  if (b.holesWon !== a.holesWon) {
+    return b.holesWon - a.holesWon;
+  }
+  // If tied, sort by matches won DESC
+  if (b.matchesWon !== a.matchesWon) {
+    return b.matchesWon - a.matchesWon;
+  }
+  // If still tied, sort by tournaments won DESC
+  if (b.tournamentsWon !== a.tournamentsWon) {
+    return b.tournamentsWon - a.tournamentsWon;
+  }
+  // Final fallback: alphabetical
+  return a.name.localeCompare(b.name);
+});
 
       if (!rows.length) {
         statsBodyEl.innerHTML =
