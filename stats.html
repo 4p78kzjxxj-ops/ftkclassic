@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --red: #b91c1c;
+      --blue: #1d4ed8;
+      --red-soft: #fee2e2;
+      --blue-soft: #dbeafe;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --accent: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* HEADER / NAV */
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .site-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .site-logo {
+      height: 32px;
+      width: auto;
+      border-radius: 0.45rem;
+      object-fit: cover;
+      background: #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .site-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .site-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      text-decoration: none;
+      white-space: nowrap;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .nav-btn.secondary {
+      background: #f9fafb;
+    }
+
+    .nav-btn.current {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    main {
+      margin-top: 0.4rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .card-subtitle strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .stats-table-wrapper {
+      margin-top: 0.6rem;
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      background: #f9fafb;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .stats-table thead {
+      background: #e5e7eb;
+    }
+
+    .stats-table th,
+    .stats-table td {
+      padding: 0.45rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+
+    .stats-table th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4b5563;
+    }
+
+    .stats-table tbody tr:nth-child(every-odd) {
+      background: #f9fafb;
+    }
+
+    .stats-table tbody tr:nth-child(even) {
+      background: #f3f4f6;
+    }
+
+    .player-name-cell {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .player-trophies {
+      margin-left: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .team-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    .team-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .team-dot.red {
+      background: var(--red);
+    }
+
+    .team-dot.blue {
+      background: var(--blue);
+    }
+
+    .team-text.red {
+      color: #7f1d1d;
+    }
+
+    .team-text.blue {
+      color: #1e3a8a;
+    }
+
+    .empty-state {
+      padding: 0.75rem 0.6rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .stats-note {
+      margin-top: 0.5rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .stats-note strong {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Player stats overview</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="competitors.html" class="nav-btn">Competitors</a>
+      <a href="player.html" class="nav-btn">Player</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">Stats</div>
+        <div class="card-subtitle">
+          Totals per player. <strong>Holes won</strong> and <strong>matches won</strong> include both live 2025
+          results and any manual history entered on the 2025 history page. <strong>Tournaments won</strong> comes
+          from a manual value per player.
+        </div>
+      </div>
+
+      <div class="stats-table-wrapper">
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Team</th>
+              <th>Holes won</th>
+              <th>Matches won</th>
+              <th>Tournaments won</th>
+            </tr>
+          </thead>
+          <tbody id="statsBody">
+            <tr>
+              <td colspan="5" class="empty-state">Loading stats…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="stats-note">
+        <strong>Holes won / matches won</strong> are calculated from all matches in Firebase, plus any manual
+        <code>holeWins</code> and <code>matchWins</code> you store under
+        <code>manualStats/players/{playerId}</code>. <strong>Tournaments won</strong> uses
+        <code>manualStats/players/{playerId}/tournamentsWon</code> (defaults to 0).
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+    const manualStatsRef = ref(db, "manualStats/players");
+
+    const statsBodyEl = document.getElementById("statsBody");
+
+    let players = {};
+    let matches = {};
+    let manualStats = {};
+
+    let playersLoaded = false;
+    let matchesLoaded = false;
+    let manualStatsLoaded = false;
+
+    function normalizeName(s) {
+      return String(s || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function getTeamNames(settings) {
+      const t = (settings && settings.teamNames) || {};
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
+    }
+
+    function getTeamLabel(team, settings) {
+      const names = getTeamNames(settings || {});
+      if (team === "blue") return names.blue;
+      if (team === "red") return names.red;
+      return team || "—";
+    }
+
+    function computeMatchWinnerColor(matchObj) {
+      const holes = matchObj.holes || Array(18).fill("none");
+      let redUp = 0;
+      let blueUp = 0;
+
+      for (let i = 0; i < holes.length; i++) {
+        const res = holes[i];
+        if (!res || res === "none") continue;
+        if (res === "red") redUp++;
+        else if (res === "blue") blueUp++;
+      }
+
+      if (redUp === blueUp) return null;
+      return redUp > blueUp ? "red" : "blue";
+    }
+
+    function renderStats() {
+      if (!playersLoaded || !matchesLoaded || !manualStatsLoaded) return;
+
+      const entries = Object.entries(players || {});
+      if (!entries.length) {
+        statsBodyEl.innerHTML =
+          '<tr><td colspan="5" class="empty-state">No players found.</td></tr>';
+        return;
+      }
+
+      const matchEntries = Object.entries(matches || {});
+
+      const rows = [];
+
+      for (const [playerId, player] of entries) {
+        const fullName = player.name || "Player";
+        const team = player.team || "";
+        let holesWonLive = 0;
+        let matchWinsLive = 0;
+
+        for (const [matchId, matchObj] of matchEntries) {
+          if (!matchObj || typeof matchObj !== "object") continue;
+
+          const redPlayers = (matchObj.red && matchObj.red.players) || [];
+          const bluePlayers = (matchObj.blue && matchObj.blue.players) || [];
+
+          let side = null;
+          if (redPlayers.includes(playerId)) side = "red";
+          else if (bluePlayers.includes(playerId)) side = "blue";
+          if (!side) continue;
+
+          const holes = matchObj.holes || Array(18).fill("none");
+          for (let i = 0; i < holes.length; i++) {
+            const res = holes[i];
+            if (!res || res === "none") continue;
+            if (res === side) {
+              holesWonLive++;
+            }
+          }
+
+          const winnerColor = computeMatchWinnerColor(matchObj);
+          if (winnerColor && winnerColor === side) {
+            matchWinsLive++;
+          }
+        }
+
+        const manual = (manualStats && manualStats[playerId]) || {};
+        const manualHoleWins = Number(manual.holeWins ?? 0) || 0;
+        const manualMatchWins = Number(manual.matchWins ?? 0) || 0;
+        const tournamentsWon = Number(manual.tournamentsWon ?? 0) || 0;
+
+        const totalHolesWon = holesWonLive + manualHoleWins;
+        const totalMatchesWon = matchWinsLive + manualMatchWins;
+
+        rows.push({
+          name: fullName,
+          team,
+          holesWon: totalHolesWon,
+          matchesWon: totalMatchesWon,
+          tournamentsWon,
+        });
+      }
+
+      rows.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+
+      if (!rows.length) {
+        statsBodyEl.innerHTML =
+          '<tr><td colspan="5" class="empty-state">No stats available.</td></tr>';
+        return;
+      }
+
+      const html = rows
+        .map((row) => {
+          const teamLabel = row.team ? getTeamLabel(row.team) : "—";
+          const teamClass = row.team === "blue" ? "blue" : row.team === "red" ? "red" : "";
+          const dotClass = row.team === "blue" ? "team-dot blue" : row.team === "red" ? "team-dot red" : "team-dot";
+
+          const trophies =
+            row.tournamentsWon > 0
+              ? `<span class="player-trophies">${"🏆".repeat(row.tournamentsWon)}</span>`
+              : "";
+
+          return `
+            <tr>
+              <td class="player-name-cell">
+                ${row.name}${trophies}
+              </td>
+              <td>
+                <span class="team-cell">
+                  <span class="${dotClass}"></span>
+                  <span class="team-text ${teamClass}">${teamLabel}</span>
+                </span>
+              </td>
+              <td>${row.holesWon}</td>
+              <td>${row.matchesWon}</td>
+              <td>${row.tournamentsWon}</td>
+            </tr>
+          `;
+        })
+        .join("");
+
+      statsBodyEl.innerHTML = html;
+    }
+
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      playersLoaded = true;
+      renderStats();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matches = snap.val() || {};
+      matchesLoaded = true;
+      renderStats();
+    });
+
+    onValue(manualStatsRef, (snap) => {
+      manualStats = snap.val() || {};
+      manualStatsLoaded = true;
+      renderStats();
+    });
+  </script>
+</body>
+</html>
