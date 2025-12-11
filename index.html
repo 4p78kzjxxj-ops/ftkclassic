@@ -2,47 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic 2025 – Home</title>
+  <title>FTK Classic – Match Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root {
+      --red: #b91c1c;
+      --red-soft: #fee2e2;
+      --blue: #1d4ed8;
+      --blue-soft: #dbeafe;
+      --half: #6b7280;
+      --half-soft: #e5e7eb;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
       --muted: #6b7280;
       --border: #d1d5db;
-      --accent: #1d4ed8;
-      --accent-soft: #dbeafe;
-      --accent-strong: #1e40af;
-      --danger: #b91c1c;
-      --danger-soft: #fee2e2;
-      --shadow-soft: 0 18px 45px rgba(15,23,42,0.18);
-      --radius-lg: 1.1rem;
-      --radius-md: 0.9rem;
-      --tap-target: 44px;
+      --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
+      --tap-target: 44px; /* recommended iOS tap size */
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","San Francisco","Segoe UI",sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
 
     html, body {
       -webkit-text-size-adjust: 100%;
       background: var(--bg);
       color: var(--text);
-      min-height: 100%;
     }
 
     body {
       min-height: 100vh;
-      padding: 0.9rem;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
+      padding: 0.75rem;
+      touch-action: manipulation;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
     }
 
     @media (min-width: 768px) {
@@ -53,11 +53,8 @@
     }
 
     a {
-      color: var(--accent-strong);
-      text-decoration: underline;
-    }
-
-    button {
+      color: inherit;
+      text-decoration: none;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -65,8 +62,28 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.5rem;
     }
+    /* Fix nav overlap on mobile */
+@media (max-width: 700px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-links {
+    margin-left: 0;
+    margin-top: 0.4rem;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .nav-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
 
     .site-header-left {
       display: flex;
@@ -76,193 +93,1819 @@
     }
 
     .site-logo {
-      height: 36px;
+      height: 32px;
       width: auto;
-      border-radius: 0.5rem;
+      border-radius: 0.45rem;
       object-fit: cover;
       background: #e5e7eb;
       flex-shrink: 0;
     }
 
-    .site-title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 0.08rem;
-    }
-
     .site-title {
-      font-size: 1.12rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .site-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--muted);
       white-space: nowrap;
     }
 
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      text-decoration: none;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .nav-btn.secondary {
+      background: #f3f4f6;
+    }
+
     main {
-      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      padding-bottom: 2.5rem;
     }
 
-    .hero-card {
-      background: #fff;
-      border-radius: 1rem;
-      padding: 1rem;
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.9rem;
       border: 1px solid var(--border);
-      text-align: center;
+      box-shadow: var(--shadow-soft);
     }
 
-    .hero-logo {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 999px;
-      margin-bottom: 0.75rem;
-      border: 2px solid var(--border);
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
     }
 
-    .hero-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.7rem;
+    /* Match list view */
+
+    #matchListCard {
+      display: none;
     }
 
-    .hero-btn,
-    .hero-btn-secondary {
-      width: 100%;
-      max-width: 260px;
-      margin: 0.35rem auto;
-      display: block;
-      padding: 0.6rem 1rem;
-      border-radius: 999px;
-      border: none;
+    .match-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .match-list-item {
+      border-radius: 0.8rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.65rem 0.7rem;
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .match-list-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .match-list-title {
       font-size: 0.95rem;
       font-weight: 600;
+      margin-bottom: 0.15rem;
     }
 
-    .hero-btn {
-      background: var(--accent);
-      color: #fff;
+    .match-list-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
     }
 
-    .hero-btn-secondary {
-      background: #e5e7eb;
+    .match-list-status {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
+    .match-list-status.live {
+      border-color: #22c55e;
+      background: #ecfdf3;
+      color: #15803d;
+    }
+
+    .match-list-status.final {
+      border-color: #4b5563;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    .match-list-status.upcoming {
+      border-color: #e5e7eb;
+      background: #f9fafb;
+      color: #6b7280;
+    }
+
+    .match-list-chevron {
+      font-size: 1.2rem;
+      color: #9ca3af;
+    }
+
+    /* Sticky score bubble (admin view) */
+
+    .score-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: none;
+    }
+
+    .score-bubble {
+      border-radius: 1rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.75rem 0.8rem 0.7rem;
+      box-shadow: 0 12px 25px rgba(15,23,42,0.18);
+    }
+
+    /* BIG GROUP PHOTO BOX */
+
+    .group-photo-area {
+      margin-bottom: 0.65rem;
+    }
+
+    .group-photo-big-button {
+      width: 100%;
+      border-radius: 0.85rem;
+      border: 1.5px dashed #d4d4d8;
+      background: #fefce8;
+      padding: 0.6rem 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+    }
+
+    .group-photo-big-button:hover {
+      background: #fef9c3;
+      border-color: #eab308;
+    }
+
+    .group-photo-big-button:active {
+      transform: scale(0.98);
+    }
+
+    .group-photo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: #facc15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .group-photo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      text-align: left;
+    }
+
+    .group-photo-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .group-photo-subtitle {
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+
+    .match-header-line {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.15rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .match-title-text {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .match-subtitle-text {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .match-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.35rem;
+    }
+
+    .match-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      flex-wrap: nowrap;
+      justify-content: flex-end;
+    }
+
+    .match-tag {
+      font-size: 0.78rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+      white-space: nowrap;
+    }
+
+    .camera-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fefce8;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      white-space: nowrap;
+      min-height: var(--tap-target);
+      justify-content: center;
+    }
+
+    .camera-btn span {
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-btn:hover {
+      background: #fef9c3;
+    }
+
+    .camera-btn:active {
+      transform: scale(0.97);
+    }
+
+    .match-timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .match-timer-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+    }
+
+    .match-timer-value {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
       color: var(--text);
     }
 
-    .hero-links-row {
-      margin-top: 0.75rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      font-size: 0.9rem;
+    .match-timer-value.timer-done {
+      color: var(--red);
     }
 
-    .hero-links-row a {
-      text-decoration: underline;
-      padding: 0;
-      background: none;
+    .match-timer-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .match-timer-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .match-timer-btn:active {
+      transform: scale(0.97);
+    }
+
+    .match-photo-btn {
+      background: #e0f2fe;
+    }
+
+    .match-photo-btn:hover {
+      background: #bfdbfe;
+    }
+
+    .score-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+      gap: 0.5rem;
+    }
+
+    .score-line span {
+      flex: 1;
+    }
+
+    .score-line span:nth-child(2) {
+      text-align: center;
+    }
+
+    .score-line span:last-child {
+      text-align: right;
+    }
+
+    .score-slider {
+      position: relative;
+      height: 14px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+      margin-bottom: 0.4rem;
+    }
+
+    .score-slider-fill {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      transition: background 0.25s ease;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.3rem;
+      overflow-x: auto;
+      padding-top: 0.2rem;
+      padding-bottom: 0.15rem;
+    }
+
+    .pill-row::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .pill-row::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 999px;
+    }
+
+    .score-pill {
+      flex: 0 0 auto;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: #4b5563;
+      min-width: 36px;
+      text-align: center;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-pill.red {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: var(--red);
+    }
+
+    .score-pill.blue {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+      color: var(--blue);
+    }
+
+    .score-pill.half {
+      background: var(--half-soft);
+      border-color: #d4d4d8;
+      color: var(--half);
+    }
+
+    .score-pill.empty {
+      opacity: 0.35;
+    }
+
+    .players-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.1rem;
+      margin-top: 0.3rem;
+    }
+
+    .team-col {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+
+    .team-name {
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .team-name.red {
+      color: var(--red);
+    }
+
+    .team-name.blue {
+      color: var(--blue);
+    }
+
+    .player-name {
+      font-size: 0.85rem;
+    }
+
+    .player-line {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.25rem;
+      margin-top: 0.12rem;
+      min-height: var(--tap-target);
+    }
+
+    .player-mulligans {
+      display: flex;
+      gap: 0.25rem;
+      margin-left: 0.15rem;
+    }
+
+    .m-pill {
+      font-size: 0.75rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      user-select: none;
+      min-width: 34px;
+      text-align: center;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .m-pill.m-on {
+      background: #bbf7d0;
+      border-color: #4ade80;
+      color: #166534;
+    }
+
+    .m-pill.m-off {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .holes-card {
+      margin-top: 0.2rem;
+      display: none;
+    }
+
+    .hole-row {
+      border-top: 1px solid #e5e7eb;
+      padding: 0.5rem 0.1rem 0.55rem;
+      transition: background-color 0.2s ease;
+      border-radius: 0.75rem;
+    }
+
+    .hole-row-red {
+      background: var(--red-soft);
+    }
+
+    .hole-row-blue {
+      background: var(--blue-soft);
+    }
+
+    .hole-row-half {
+      background: var(--half-soft);
+    }
+
+    .hole-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .hole-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .hole-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .hole-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    @media (min-width: 600px) {
+      .hole-buttons {
+        grid-template-columns: 1.6fr 0.7fr 1.6fr 0.7fr;
+      }
+    }
+
+    .pill-btn {
+      font-size: 0.9rem;
+      padding: 0.35rem 0.3rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      min-height: var(--tap-target);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-btn.red-active {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: var(--red);
+    }
+
+    .pill-btn.blue-active {
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+      color: var(--blue);
+    }
+
+    .pill-btn.half-active {
+      background: var(--half-soft);
+      border-color: #d4d4d8;
+      color: var(--half);
+    }
+
+    .pill-btn.halved {
+      font-size: 0.85rem;
+    }
+
+    .pill-btn.clear {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .hole-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hole-nav-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      min-height: var(--tap-target);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .hole-nav-btn[disabled] {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .hole-meta-count {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+      flex: 1;
+    }
+
+    .subtext {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* POP-UP TOAST / MODAL */
+
+    #toastContainer {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    #toastContainer.active {
+      display: flex;
+    }
+
+    .toast {
+      background: #f9fafb;
+      color: #111827;
+      padding: 0.9rem 1rem;
+      border-radius: 0.9rem;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.55);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      min-width: 260px;
+      max-width: 380px;
+      width: 100%;
+      animation: toast-pop-in 0.22s ease-out;
+    }
+
+    .toast-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: #fef3c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+
+    .toast-body {
+      font-size: 0.82rem;
+      color: #4b5563;
+    }
+
+    .toast-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-left: 0.4rem;
+    }
+
+    .toast-btn {
+      font-size: 0.82rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
       border: none;
-      color: var(--accent-strong);
+      cursor: pointer;
+      white-space: nowrap;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toast-btn.primary {
+      background: #fbbf24;
+      color: #111827;
+    }
+
+    .toast-btn.secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    @keyframes toast-pop-in {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-  
   <header class="site-header">
     <div class="site-header-left">
-      <img src="IMG_7296.jpg" class="site-logo" />
-      <div class="site-title-block">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Powdersville, SC</div>
+        <div class="site-subtitle">Match admin – select a match</div>
       </div>
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-btn secondary">Home</a>
+      <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      <a href="photos.html" class="nav-btn secondary">Photos</a>
+      <a href="tournament_feed.html" class="nav-btn secondary">Feed</a>
+      <a href="chat.html" class="nav-btn secondary">Chat</a>
     </div>
   </header>
 
   <main>
-    <section class="hero-card">
-      <img src="IMG_7296.jpg" class="hero-logo" />
-      <div class="hero-title">Welcome to the FTK Classic</div>
+    <!-- LIST VIEW -->
+    <section id="matchListCard" class="card">
+      <div class="section-title">Matches</div>
+      <div id="matchListContainer" class="match-list-container"></div>
+    </section>
 
-      <button id="playerBtn" class="hero-btn" type="button">I'm a player</button>
-      <button id="spectatorBtn" class="hero-btn-secondary" type="button">I'm a spectator</button>
-      <button id="interestBtn" class="hero-btn-secondary" type="button">I'm interested in playing</button>
+    <!-- ADMIN VIEW -->
+    <section id="scoreWrapper" class="score-wrapper">
+      <div class="score-bubble">
+        <!-- BIG GROUP PHOTO BOX -->
+        <div id="groupPhotoArea" class="group-photo-area">
+          <button id="groupPhotoBigButton" type="button" class="group-photo-big-button">
+            <div class="group-photo-icon">📸</div>
+            <div class="group-photo-text">
+              <div class="group-photo-title">Take group photo</div>
+              <div class="group-photo-subtitle">
+                Tap to capture a group photo for this match.
+              </div>
+            </div>
+          </button>
+        </div>
 
-      <!-- Bottom links now styled as hyperlinks -->
-      <div class="hero-links-row">
-        <a href="past_winners.html">Past winners</a>
-        <a href="#" id="adminLinkFooter">Admin</a>
+        <div class="match-header-line">
+          <div class="match-title-text" id="matchTitle">Match</div>
+          <div class="match-subtitle-text" id="matchSubtitle">Front 9</div>
+        </div>
+
+        <div class="match-actions-row">
+          <div class="match-tag" id="matchTag">On course</div>
+          <div class="match-header-actions">
+            <button id="clearMatchPhotoButton" class="camera-btn" style="display:none;" type="button">
+              <span>🗑️</span>
+              <span>Clear photo</span>
+            </button>
+            <button id="cameraButton" class="camera-btn" type="button">
+              <span>📷</span>
+              <span>Photo</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="match-timer-row">
+          <div>
+            <div class="match-timer-label">Pace of play timer</div>
+          </div>
+          <div class="match-timer-controls">
+            <span id="matchTimer" class="match-timer-value">1:00</span>
+            <button type="button" id="matchTimerStart" class="match-timer-btn">Start</button>
+            <button type="button" id="matchTimerReset" class="match-timer-btn">Reset</button>
+          </div>
+        </div>
+
+        <div class="score-line">
+          <span id="scoreRedLabel">Red</span>
+          <span id="scoreCenterLabel">All square</span>
+          <span id="scoreBlueLabel">Blue</span>
+        </div>
+        <div class="score-slider">
+          <div class="score-slider-fill" id="scoreSliderFill"></div>
+        </div>
+
+        <div class="pill-row" id="scorePills"></div>
+        <div class="players-row" id="playersRow"></div>
       </div>
+    </section>
+
+    <section id="holesCard" class="card holes-card">
+      <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
+      <div id="holesContainer"></div>
     </section>
   </main>
 
-  <script>
-    const PLAYER_CODES = {
-      "0369": "David Wolf",
-      "7022": "Jake Smith",
-      "7971": "Jon Wall",
-      "9611": "Justin Vaughn",
-      "8202": "Will Miller",
-      "7377": "Ivan Bolds",
-      "2838": "Taylor Harbin",
-      "3608": "Eric Tomeo",
-      "5327": "Matt Ruff",
-      "2303": "Eric Crowe",
-      "9724": "Brett Cooper",
-      "8817": "Jordan Fiedler",
-      "0296": "Michael Godwin",
-      "2374": "Tyler Huff",
-      "6441": "Phil Nelson",
-      "4861": "Steven Hopkins",
-      "2563": "Brett Robinson"
+  <div id="toastContainer"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      update,
+      push,
+      set
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import {
+      getStorage,
+      ref as sRef,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
     };
 
-    document.getElementById('spectatorBtn').addEventListener('click', function() {
-      window.location.href = 'spectator.html';
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    // 🔐 Anonymous auth to satisfy ".write": "auth != null"
+    const auth = getAuth(app);
+    signInAnonymously(auth).catch((error) => {
+      console.error("Anonymous auth failed:", error);
+    });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Signed in anonymously:", user.uid);
+      }
     });
 
-    document.getElementById('interestBtn').addEventListener('click', function() {
-      window.location.href =
-        'https://docs.google.com/forms/d/e/1FAIpQLSeLqfM3XcGEqDBMi6NQ5P8RlbAnYrKS3UnD1f9EdiMmFMbbaQ/viewform';
+    // --- Player code protection + mapping to match IDs ---
+    const params = new URLSearchParams(window.location.search);
+
+    // Map player codes to their match admin pages
+    const CODE_TO_MATCH = {
+      "3601": "1", // David Wolf
+      "3602": "2", // Jake Smith
+      "3603": "3", // Jon Wall
+      "3604": "4", // Justin Vaughn
+      "3605": "5", // Will Miller
+    };
+
+    let matchId = params.get("match") || params.get("id") || null;
+    const playerCode = params.get("code");
+
+    if (playerCode) {
+      const mappedMatch = CODE_TO_MATCH[playerCode];
+      if (!mappedMatch) {
+        // Invalid code – send them back home
+        window.location.href = "index.html";
+      } else {
+        matchId = mappedMatch;
+      }
+    }
+
+    const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+    const tournamentFeedRef = ref(db, "tournamentFeed");
+
+    const matchListCard = document.getElementById("matchListCard");
+    const matchListContainer = document.getElementById("matchListContainer");
+    const scoreWrapper = document.getElementById("scoreWrapper");
+    const holesCard = document.getElementById("holesCard");
+    const headerSubtitleEl = document.querySelector(".site-subtitle");
+
+    const matchTitleEl = document.getElementById("matchTitle");
+    const matchSubtitleEl = document.getElementById("matchSubtitle");
+    const matchTagEl = document.getElementById("matchTag");
+
+    const scoreRedLabel = document.getElementById("scoreRedLabel");
+    const scoreCenterLabel = document.getElementById("scoreCenterLabel");
+    const scoreBlueLabel = document.getElementById("scoreBlueLabel");
+    const scoreSliderFill = document.getElementById("scoreSliderFill");
+    const scorePillsContainer = document.getElementById("scorePills");
+    const playersRow = document.getElementById("playersRow");
+    const holesContainer = document.getElementById("holesContainer");
+    const holesSectionTitle = document.getElementById("holesSectionTitle");
+    const toastContainer = document.getElementById("toastContainer");
+    const cameraButton = document.getElementById("cameraButton");
+    const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
+    const groupPhotoArea = document.getElementById("groupPhotoArea");
+    const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
+    const matchTimerEl = document.getElementById("matchTimer");
+    const matchTimerStartBtn = document.getElementById("matchTimerStart");
+    const matchTimerResetBtn = document.getElementById("matchTimerReset");
+
+    let timerInterval = null;
+    let timerRemainingSeconds = 60;
+
+    function formatTimer(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m + ":" + String(s).padStart(2, "0");
+    }
+
+    function updateMatchTimerDisplay() {
+      if (!matchTimerEl) return;
+      matchTimerEl.textContent = formatTimer(timerRemainingSeconds);
+    }
+
+    function resetMatchTimer() {
+      if (!matchTimerEl) return;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRemainingSeconds = 60;
+      matchTimerEl.classList.remove("timer-done");
+      updateMatchTimerDisplay();
+    }
+
+    function startMatchTimer() {
+      if (!matchId || !matchTimerEl) return;
+      if (timerInterval) return; // already running
+      if (timerRemainingSeconds <= 0 || timerRemainingSeconds > 60) {
+        timerRemainingSeconds = 60;
+      }
+      matchTimerEl.classList.remove("timer-done");
+      updateMatchTimerDisplay();
+      timerInterval = setInterval(() => {
+        timerRemainingSeconds -= 1;
+        if (timerRemainingSeconds <= 0) {
+          timerRemainingSeconds = 0;
+          updateMatchTimerDisplay();
+          matchTimerEl.classList.add("timer-done");
+          clearInterval(timerInterval);
+          timerInterval = null;
+          return;
+        }
+        updateMatchTimerDisplay();
+      }, 1000);
+    }
+
+    if (matchTimerStartBtn) {
+      matchTimerStartBtn.addEventListener("click", startMatchTimer);
+    }
+
+    if (matchTimerResetBtn) {
+      matchTimerResetBtn.addEventListener("click", resetMatchTimer);
+    }
+
+    if (matchTimerEl) {
+      timerRemainingSeconds = 60;
+      updateMatchTimerDisplay();
+    }
+
+    const holeConfigs = [
+      { num: 1,  par: 5, yards: 474 },
+      { num: 2,  par: 4, yards: 340 },
+      { num: 3,  par: 4, yards: 360 },
+      { num: 4,  par: 3, yards: 180 },
+      { num: 5,  par: 5, yards: 455 },
+      { num: 6,  par: 4, yards: 390 },
+      { num: 7,  par: 3, yards: 145 },
+      { num: 8,  par: 4, yards: 400 },
+      { num: 9,  par: 4, yards: 270 },
+      { num: 10, par: 3, yards: 155 },
+      { num: 11, par: 4, yards: 335 },
+      { num: 12, par: 3, yards: 160 },
+      { num: 13, par: 4, yards: 385 },
+      { num: 14, par: 3, yards: 170 },
+      { num: 15, par: 5, yards: 500 },
+      { num: 16, par: 4, yards: 435 },
+      { num: 17, par: 4, yards: 355 },
+      { num: 18, par: 5, yards: 490 },
+    ];
+
+    let settings = {};
+    let players = {};
+    let matchesAll = {};
+    let matchData = null;
+
+    let settingsLoaded = false;
+    let playersLoaded = false;
+    let matchesLoaded = false;
+
+    // state: which absolute hole index (0–17) we’re on
+    let currentHoleIndex = null;
+    let segmentStart = 0;
+    let segmentEnd = 9;
+
+    function initCurrentHoleIndex() {
+      if (!matchData || !matchId) return;
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      segmentStart = type === "back" ? 9 : 0;
+      segmentEnd = segmentStart + 9;
+      const holes = matchData.holes || Array(18).fill("none");
+
+      let firstEmpty = -1;
+      for (let i = segmentStart; i < segmentEnd; i++) {
+        if (holes[i] === "none") {
+          firstEmpty = i;
+          break;
+        }
+      }
+      if (firstEmpty >= 0) {
+        currentHoleIndex = firstEmpty;
+      } else {
+        // all holes filled -> show last hole in the segment
+        currentHoleIndex = segmentEnd - 1;
+      }
+    }
+
+    function recalcCurrentHoleIndex() {
+      if (!matchData || !matchId) return;
+      const holes = matchData.holes || [];
+      let firstEmpty = -1;
+      for (let i = segmentStart; i < segmentEnd; i++) {
+        if (holes[i] === "none") {
+          firstEmpty = i;
+          break;
+        }
+      }
+      if (firstEmpty >= 0) {
+        currentHoleIndex = firstEmpty;
+      } else {
+        currentHoleIndex = segmentEnd - 1;
+      }
+    }
+
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      settingsLoaded = true;
+      renderMain();
     });
 
-    document.getElementById('playerBtn').addEventListener('click', function() {
-      const code = prompt("Enter your player code:");
-      if (!code) return;
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      playersLoaded = true;
+      renderMain();
+    });
 
-      const trimmed = code.trim();
+    onValue(matchesRef, (snap) => {
+      matchesAll = snap.val() || {};
+      matchesLoaded = true;
 
-      if (!PLAYER_CODES[trimmed]) {
-        alert("Invalid player code.");
+      if (matchId) {
+        matchData = matchesAll[matchId] || {
+          type: Number(matchId) > 8 ? "back" : "front",
+          holes: Array(18).fill("none"),
+        };
+        if (!matchData.holes) {
+          matchData.holes = Array(18).fill("none");
+        }
+        if (currentHoleIndex === null) {
+          initCurrentHoleIndex();
+        }
+      }
+      renderMain();
+    });
+
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function getMatchPlayersFor(matchObj) {
+      if (!matchObj) return { red: [], blue: [] };
+
+      const details = matchObj.playerDetails || {};
+      const redIds = matchObj.red?.players || [];
+      const blueIds = matchObj.blue?.players || [];
+
+      const redPlayers = redIds.map(id => {
+        const basePlayer = players[id] || { name: "Red Player" };
+        const overrides = details[id] || {};
+        return { id, ...basePlayer, ...overrides };
+      });
+
+      const bluePlayers = blueIds.map(id => {
+        const basePlayer = players[id] || { name: "Blue Player" };
+        const overrides = details[id] || {};
+        return { id, ...basePlayer, ...overrides };
+      });
+
+      return { red: redPlayers, blue: bluePlayers };
+    }
+
+    function summarizeMatchForList(m, mid) {
+      const type = m?.type || (Number(mid) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const holes = m?.holes || Array(18).fill("none");
+
+      let redWins = 0;
+      let blueWins = 0;
+      let halves = 0;
+
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      const total = end - start;
+      const holesPlayed = redWins + blueWins + halves;
+      const holesRemaining = total - holesPlayed;
+      const diff = redWins - blueWins;
+
+      let status = m?.status || "upcoming";
+      let summary = "Ready to start";
+
+      if (holesPlayed === 0) {
+        status = "upcoming";
+        summary = "Ready to start";
+      } else if (holesRemaining === 0) {
+        status = "final";
+        if (diff === 0) summary = "Halved";
+        else if (diff > 0) summary = "Red wins " + Math.abs(diff) + " up";
+        else summary = "Blue wins " + Math.abs(diff) + " up";
+      } else {
+        status = "live";
+        if (diff === 0) summary = "All square";
+        else if (diff > 0) summary = "Red " + Math.abs(diff) + " up";
+        else summary = "Blue " + Math.abs(diff) + " up";
+      }
+
+      return { status, summary, type };
+    }
+
+    function renderMatchList() {
+      if (!matchesLoaded || !playersLoaded || !settingsLoaded) return;
+
+      const teamNames = getTeamNames();
+      let html = "";
+
+      for (let i = 1; i <= 16; i++) {
+        const mid = String(i);
+        const m = matchesAll[mid] || null;
+        const { status, summary, type } = summarizeMatchForList(m, mid);
+        const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+        const { red, blue } = getMatchPlayersFor(m || {});
+
+        const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+        const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+        const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+        const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+        const vsTitle = redLabel + " vs " + blueLabel;
+        const subtitle = typeLabel + " · Match " + mid;
+
+        let statusClass = "upcoming";
+        if (status === "live") statusClass = "live";
+        if (status === "final") statusClass = "final";
+
+        html += `
+          <a class="match-list-item" href="match.html?match=${mid}">
+            <div class="match-list-main">
+              <div class="match-list-title">${vsTitle}</div>
+              <div class="match-list-subtitle">${subtitle} · ${summary}</div>
+            </div>
+            <div class="match-list-status ${statusClass}">
+              ${status === "final" ? "Final" : status === "live" ? "Live" : "Upcoming"}
+            </div>
+            <div class="match-list-chevron">›</div>
+          </a>
+        `;
+      }
+
+      matchListContainer.innerHTML = html;
+    }
+
+    function computeScoreSummary() {
+      if (!matchData || !matchId) {
+        return {
+          leader: null,
+          diff: 0,
+          centerText: "Ready to start",
+          statusTag: "Not started",
+          totalHoles: 9,
+          holesPlayed: 0,
+          holesRemaining: 9,
+        };
+      }
+
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const holes = matchData.holes || Array(18).fill("none");
+
+      let redWins = 0;
+      let blueWins = 0;
+      let halves = 0;
+
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      const total = end - start;
+      const holesPlayed = redWins + blueWins + halves;
+      const holesRemaining = total - holesPlayed;
+      const diff = redWins - blueWins;
+
+      let leader = null;
+      if (diff > 0) leader = "red";
+      else if (diff < 0) leader = "blue";
+
+      let centerText = "Ready to start";
+      if (holesPlayed === 0) {
+        centerText = "Ready to start";
+      } else if (holesRemaining === 0) {
+        if (diff === 0) centerText = "Halved";
+        else if (diff > 0) centerText = `Red wins ${Math.abs(diff)} up`;
+        else centerText = `Blue wins ${Math.abs(diff)} up`;
+      } else {
+        if (diff === 0) centerText = "All square";
+        else if (diff > 0) centerText = `Red ${Math.abs(diff)} up`;
+        else centerText = `Blue ${Math.abs(diff)} up`;
+      }
+
+      let statusTag = "On course";
+      if (holesPlayed === 0) statusTag = "Not started";
+      else if (holesRemaining === 0) statusTag = "Final";
+
+      return {
+        leader,
+        diff: Math.abs(diff),
+        centerText,
+        statusTag,
+        totalHoles: total,
+        holesPlayed,
+        holesRemaining,
+      };
+    }
+
+    function updateScoreUI() {
+      const { red, blue } = getMatchPlayersFor(matchData || {});
+      const teamNames = getTeamNames();
+      const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+      const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+      const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+      const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+      scoreRedLabel.textContent = redLabel;
+      scoreBlueLabel.textContent = blueLabel;
+
+      const summary = computeScoreSummary();
+      scoreCenterLabel.textContent = summary.centerText;
+      matchTagEl.textContent = summary.statusTag;
+
+      if (summary.centerText.includes("Red wins") || summary.centerText.startsWith("Red ")) {
+        scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 65%, var(--blue-soft) 65%, var(--blue-soft) 100%)";
+      } else if (summary.centerText.includes("Blue wins") || summary.centerText.startsWith("Blue ")) {
+        scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 35%, var(--blue-soft) 35%, var(--blue-soft) 100%)";
+      } else {
+        scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 50%, var(--blue-soft) 50%, var(--blue-soft) 100%)";
+      }
+
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const holes = matchData.holes || Array(18).fill("none");
+      let pillsHtml = "";
+
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        let pillClass = "score-pill empty";
+        let label = (i - start + 1);
+        if (h === "red") pillClass = "score-pill red";
+        else if (h === "blue") pillClass = "score-pill blue";
+        else if (h === "half") pillClass = "score-pill half";
+        pillsHtml += `<div class="${pillClass}">H${label}</div>`;
+      }
+
+      scorePillsContainer.innerHTML = pillsHtml;
+    }
+
+    function playerMulliganRow(playerId, name, side, mUsed, rmUsed) {
+      const last = getLastName(name || "");
+      const label = last || name || "Player";
+      return `
+        <div class="player-line">
+          <div class="player-name">${label}</div>
+          <div class="player-mulligans">
+            <div class="m-pill ${mUsed ? "m-off" : "m-on"}"
+                 data-mulligan-toggle
+                 data-player-id="${playerId}"
+                 data-type="m">
+              M
+            </div>
+            <div class="m-pill ${rmUsed ? "m-off" : "m-on"}"
+                 data-mulligan-toggle
+                 data-player-id="${playerId}"
+                 data-type="rm">
+              RM
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleMulligan(playerId, type) {
+      if (!playerId || !matchId) return;
+      const field = type === "rm" ? "reverseMulliganUsed" : "mulliganUsed";
+
+      const details = matchData.playerDetails || {};
+      const existing = details[playerId] || players[playerId] || {};
+      const newVal = !existing[field];
+
+      if (!matchData.playerDetails) {
+        matchData.playerDetails = {};
+      }
+      const localBase = matchData.playerDetails[playerId] || existing || {};
+      matchData.playerDetails[playerId] = {
+        ...localBase,
+        [field]: newVal,
+      };
+
+      const updatesObj = {};
+      updatesObj["players/" + playerId + "/" + field] = newVal;
+      updatesObj["matches/" + matchId + "/playerDetails/" + playerId + "/" + field] = newVal;
+
+      update(ref(db), updatesObj).catch(console.error);
+
+      renderScoreBubble();
+    }
+
+    function renderPlayersRow() {
+      if (!matchData || !matchId) return;
+
+      const { red, blue } = getMatchPlayersFor(matchData);
+      const teamNames = getTeamNames();
+
+      const mRed = red
+        .map(p => {
+          const mid = p.id || p.playerId || "";
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+          return playerMulliganRow(mid, p.name, "red", mUsed, rmUsed);
+        })
+        .join("");
+
+      const mBlue = blue
+        .map(p => {
+          const mid = p.id || p.playerId || "";
+          const mUsed = !!p.mulliganUsed;
+          const rmUsed = !!p.reverseMulliganUsed;
+          return playerMulliganRow(mid, p.name, "blue", mUsed, rmUsed);
+        })
+        .join("");
+
+      playersRow.innerHTML = `
+        <div class="team-col">
+          <div class="team-name red">${teamNames.red}</div>
+          ${mRed || '<div class="player-name">–</div>'}
+        </div>
+        <div class="team-col">
+          <div class="team-name blue">${teamNames.blue}</div>
+          ${mBlue || '<div class="player-name">–</div>'}
+        </div>
+      `;
+
+      Array.from(document.querySelectorAll("[data-mulligan-toggle]")).forEach(el => {
+        el.addEventListener("click", () => {
+          const playerId = el.getAttribute("data-player-id");
+          const type = el.getAttribute("data-type");
+          toggleMulligan(playerId, type);
+        });
+      });
+    }
+
+    function renderHoles() {
+      if (!matchData || !matchId) return;
+
+      if (currentHoleIndex === null) {
+        initCurrentHoleIndex();
+      }
+
+      const holes = matchData.holes || Array(18).fill("none");
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+
+      holesSectionTitle.textContent = type === "back"
+        ? "Hole-by-hole – Back 9"
+        : "Hole-by-hole – Front 9";
+
+      let html = "";
+
+      const redName = scoreRedLabel.textContent || "Red";
+      const blueName = scoreBlueLabel.textContent || "Blue";
+
+      const currentIndex = currentHoleIndex ?? start;
+      const prevDisabled = currentIndex <= start;
+      const nextDisabled = currentIndex >= end - 1;
+
+      html += `
+        <div class="hole-nav">
+          <button class="hole-nav-btn" id="prevHoleBtn" ${prevDisabled ? "disabled" : ""}>
+            ◀ Prev
+          </button>
+          <div class="hole-meta-count">
+            Hole ${currentIndex - start + 1} of 9
+          </div>
+          <button class="hole-nav-btn" id="nextHoleBtn" ${nextDisabled ? "disabled" : ""}>
+            Next ▶
+          </button>
+        </div>
+      `;
+
+      for (let idx = start; idx < end; idx++) {
+        const config = holeConfigs[idx] || null;
+        const value = holes[idx] || "none";
+        const holeNum = config?.num ?? (idx + 1);
+        const par = config?.par ?? "–";
+        const yards = config?.yards ?? "–";
+
+        let rowClass = "hole-row";
+        if (value === "red") rowClass += " hole-row-red";
+        else if (value === "blue") rowClass += " hole-row-blue";
+        else if (value === "half") rowClass += " hole-row-half";
+
+        const holeNumberInSegment = idx - start + 1;
+
+        let holeHtml = `
+          <div class="${rowClass}" data-hole-index="${idx}" ${idx === currentIndex ? "" : 'style="display:none;"'}>
+            <div class="hole-header-line">
+              <div class="hole-label">Hole ${holeNum}</div>
+              <div class="hole-meta">
+                Par ${par} · ${yards} yds
+              </div>
+            </div>
+            <div class="hole-buttons">
+              <button class="pill-btn blue ${value === "blue" ? "blue-active" : ""}" data-hole="${idx}" data-result="blue">
+                ${blueName} wins
+              </button>
+              <button class="pill-btn halved ${value === "half" ? "half-active" : ""}" data-hole="${idx}" data-result="half">
+                Halved
+              </button>
+              <button class="pill-btn red ${value === "red" ? "red-active" : ""}" data-hole="${idx}" data-result="red">
+                ${redName} wins
+              </button>
+              <button class="pill-btn clear" data-hole="${idx}" data-result="none">
+                Clear
+              </button>
+            </div>
+          </div>
+        `;
+
+        html += holeHtml;
+      }
+
+      holesContainer.innerHTML = html;
+
+      const prevBtn = document.getElementById("prevHoleBtn");
+      const nextBtn = document.getElementById("nextHoleBtn");
+
+      prevBtn.addEventListener("click", () => {
+        if (currentHoleIndex > start) {
+          currentHoleIndex--;
+          updateVisibleHoleRow();
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentHoleIndex < end - 1) {
+          currentHoleIndex++;
+          updateVisibleHoleRow();
+        }
+      });
+
+      holesContainer.querySelectorAll(".pill-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const holeIndex = Number(btn.getAttribute("data-hole"));
+          const result = btn.getAttribute("data-result");
+          handleHoleClick(holeIndex, result);
+        });
+      });
+    }
+
+    function updateVisibleHoleRow() {
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const currentIndex = currentHoleIndex ?? start;
+
+      const prevBtn = document.getElementById("prevHoleBtn");
+      const nextBtn = document.getElementById("nextHoleBtn");
+      if (prevBtn && nextBtn) {
+        prevBtn.disabled = currentIndex <= start;
+        nextBtn.disabled = currentIndex >= end - 1;
+      }
+
+      holesContainer.querySelectorAll(".hole-row").forEach(row => {
+        const idx = Number(row.getAttribute("data-hole-index"));
+        row.style.display = idx === currentIndex ? "" : "none";
+      });
+
+      const meta = holesContainer.querySelector(".hole-meta-count");
+      if (meta) {
+        meta.textContent = `Hole ${currentIndex - start + 1} of 9`;
+      }
+    }
+
+    function handleHoleClick(holeIndex, result) {
+      if (!matchId || holeIndex == null) return;
+
+      const path = `matches/${matchId}/holes/${holeIndex}`;
+      const updates = {};
+      updates[path] = result;
+      update(ref(db), updates).catch(console.error);
+
+      // Only send to feed when a winner/half is recorded
+      if (result === "none") return;
+
+      const teamNames = getTeamNames();
+      const config = holeConfigs[holeIndex] || {};
+      const holeNum = config.num ?? (holeIndex + 1);
+
+      let message;
+      if (result === "red") {
+        message = `${teamNames.red} wins Hole ${holeNum}`;
+      } else if (result === "blue") {
+        message = `${teamNames.blue} wins Hole ${holeNum}`;
+      } else if (result === "half") {
+        message = `Hole ${holeNum} halved`;
+      } else {
         return;
       }
 
-      try {
-        localStorage.setItem('playerCode', trimmed);
-        localStorage.setItem('playerName', PLAYER_CODES[trimmed]);
-      } catch (e) {
-        // ignore storage errors
-      }
+      const entry = {
+        matchId: String(matchId),
+        holeNumber: holeNum,
+        message,
+        createdAt: Date.now(),
+        result
+      };
 
-      window.location.href = 'player.html?code=' + encodeURIComponent(trimmed);
-    });
-
-    function goToAdmin() {
-      const pass = prompt("Admin password:");
-      if (pass === "3618") window.location.href = "admin.html";
+      const newFeedRef = push(tournamentFeedRef);
+      set(newFeedRef, entry).catch(console.error);
     }
 
-    document.getElementById('adminLinkFooter').addEventListener('click', function(e) {
-      e.preventDefault();
-      goToAdmin();
-    });
-  </script>
+    function showToast({ title, body, primaryText, secondaryText, onPrimary }) {
+      toastContainer.innerHTML = `
+        <div class="toast">
+          <div class="toast-icon">⚠️</div>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-body">${body}</div>
+          </div>
+          <div class="toast-actions">
+            <button class="toast-btn primary" id="toastPrimaryBtn">${primaryText}</button>
+            <button class="toast-btn secondary" id="toastSecondaryBtn">${secondaryText}</button>
+          </div>
+        </div>
+      `;
+      toastContainer.classList.add("active");
 
+      const primaryBtn = document.getElementById("toastPrimaryBtn");
+      const secondaryBtn = document.getElementById("toastSecondaryBtn");
+
+      primaryBtn.addEventListener("click", () => {
+        toastContainer.classList.remove("active");
+        toastContainer.innerHTML = "";
+        if (onPrimary) onPrimary();
+      });
+
+      secondaryBtn.addEventListener("click", () => {
+        toastContainer.classList.remove("active");
+        toastContainer.innerHTML = "";
+      });
+    }
+
+    function handleGroupPhotoClick() {
+      if (!matchId) return;
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+
+      input.addEventListener("change", async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const storagePath = `group_photos/match_${matchId}_${Date.now()}.jpg`;
+        const storageRef = sRef(storage, storagePath);
+
+        try {
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+
+          const photoRef = ref(db, "photos");
+          const newPhotoRef = push(photoRef);
+
+          const now = new Date().toISOString();
+          await set(newPhotoRef, {
+            matchId: matchId,
+            url,
+            timestamp: now,
+            type: "group",
+          });
+
+          await update(ref(db, `matches/${matchId}`), {
+            groupPhotoUrl: url,
+          });
+
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      input.click();
+    }
+
+    function handleCameraClick() {
+      if (!matchId) return;
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.capture = "environment";
+
+      input.addEventListener("change", async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const storagePath = `match_photos/match_${matchId}_${Date.now()}.jpg`;
+        const storageRef = sRef(storage, storagePath);
+
+        try {
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+
+          const photoRef = ref(db, "photos");
+          const newPhotoRef = push(photoRef);
+
+          const now = new Date().toISOString();
+          await set(newPhotoRef, {
+            matchId: matchId,
+            url,
+            timestamp: now,
+            type: "match",
+          });
+
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      input.click();
+    }
+
+    function handleClearMatchPhoto() {
+      if (!matchId) return;
+
+      showToast({
+        title: "Clear group photo?",
+        body: "This will clear the current group photo so a new one can be taken.",
+        primaryText: "Clear photo",
+        secondaryText: "Cancel",
+        onPrimary: async () => {
+          try {
+            await update(ref(db, `matches/${matchId}`), {
+              groupPhotoUrl: null,
+            });
+          } catch (err) {
+            console.error(err);
+          }
+        },
+      });
+    }
+
+    function renderGroupPhotoState() {
+      if (!matchData || !matchId) {
+        groupPhotoArea.style.display = "block";
+        clearMatchPhotoButton.style.display = "none";
+        return;
+      }
+
+      const hasGroupPhoto = !!matchData.groupPhotoUrl;
+
+      if (hasGroupPhoto) {
+        groupPhotoArea.querySelector(".group-photo-title").textContent = "Group photo saved";
+        groupPhotoArea.querySelector(".group-photo-subtitle").textContent = "You can clear it to take a new one.";
+        clearMatchPhotoButton.style.display = "inline-flex";
+      } else {
+        groupPhotoArea.querySelector(".group-photo-title").textContent = "Take group photo";
+        groupPhotoArea.querySelector(".group-photo-subtitle").textContent = "Tap to capture a group photo for this match.";
+        clearMatchPhotoButton.style.display = "none";
+      }
+    }
+
+    function renderScoreBubble() {
+      if (!matchData || !matchId) return;
+
+      const { red, blue } = getMatchPlayersFor(matchData);
+      const teamNames = getTeamNames();
+
+      const redLasts = red.map(p => getLastName(p.name)).join(" / ") || teamNames.red;
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ") || teamNames.blue;
+
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const matchLabel = "Match " + matchId;
+      const typeLabel = type === "back" ? "Back 9 match" : "Front 9 match";
+
+      matchTitleEl.textContent = redLasts + " vs " + blueLasts;
+      matchSubtitleEl.textContent = typeLabel + " · " + matchLabel;
+
+      updateScoreUI();
+      renderPlayersRow();
+      renderHoles();
+      renderGroupPhotoState();
+    }
+
+    function renderMain() {
+      if (!settingsLoaded || !playersLoaded || !matchesLoaded) {
+        return;
+      }
+
+      const hasMatchParam = !!matchId;
+
+      if (!hasMatchParam) {
+        headerSubtitleEl.textContent = "Match admin – select a match";
+        matchListCard.style.display = "block";
+        scoreWrapper.style.display = "none";
+        holesCard.style.display = "none";
+
+        renderMatchList();
+        return;
+      }
+
+      matchListCard.style.display = "none";
+      scoreWrapper.style.display = "block";
+      holesCard.style.display = "block";
+
+      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
+      const typeLabel = type === "back" ? "Back 9" : "Front 9";
+
+      headerSubtitleEl.textContent = `Match admin – Match ${matchId}`;
+
+      updateScoreUI();
+      renderPlayersRow();
+      renderHoles();
+      renderGroupPhotoState();
+    }
+
+    groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
+    cameraButton.addEventListener("click", handleCameraClick);
+    clearMatchPhotoButton.addEventListener("click", handleClearMatchPhoto);
+  </script>
 </body>
 </html>
