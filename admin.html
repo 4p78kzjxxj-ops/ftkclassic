@@ -629,7 +629,7 @@
             title: "Admin access",
             message: "Enter the admin password to manage players, teams, matches and photos.",
             onSuccess: function () {
-              sessionStorage.setItem("ftkAdminAuthorized", "true");
+              sessionStorage.setItem("ftkAdminAuthorized", "true";
               hideOverlay();
             },
             redirectHome: true,
@@ -659,6 +659,12 @@
       deleteObject,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
       authDomain: "ftkclassicdb.firebaseapp.com",
@@ -672,6 +678,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const storage = getStorage(app);
+    const auth = getAuth(app);
+
+    // Anonymous auth for secured DB rules
+    signInAnonymously(auth).catch((err) => {
+      console.error("Admin auth failed:", err);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.warn("Admin page: no Firebase user signed in.");
+      }
+    });
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
