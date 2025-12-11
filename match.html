@@ -950,6 +950,11 @@
       uploadBytes,
       getDownloadURL
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -964,6 +969,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const storage = getStorage(app);
+
+    // 🔐 Anonymous auth to satisfy ".write": "auth != null"
+    const auth = getAuth(app);
+    signInAnonymously(auth).catch((error) => {
+      console.error("Anonymous auth failed:", error);
+    });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Signed in anonymously:", user.uid);
+      }
+    });
 
     // --- Player code protection + mapping to match IDs ---
     const params = new URLSearchParams(window.location.search);
@@ -993,6 +1009,7 @@
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
+    const tournamentFeedRef = ref(db, "tournamentFeed");
 
     const matchListCard = document.getElementById("matchListCard");
     const matchListContainer = document.getElementById("matchListContainer");
@@ -1650,6 +1667,35 @@
       const updates = {};
       updates[path] = result;
       update(ref(db), updates).catch(console.error);
+
+      // Only send to feed when a winner/half is recorded
+      if (result === "none") return;
+
+      const teamNames = getTeamNames();
+      const config = holeConfigs[holeIndex] || {};
+      const holeNum = config.num ?? (holeIndex + 1);
+
+      let message;
+      if (result === "red") {
+        message = `${teamNames.red} wins Hole ${holeNum}`;
+      } else if (result === "blue") {
+        message = `${teamNames.blue} wins Hole ${holeNum}`;
+      } else if (result === "half") {
+        message = `Hole ${holeNum} halved`;
+      } else {
+        return;
+      }
+
+      const entry = {
+        matchId: String(matchId),
+        holeNumber: holeNum,
+        message,
+        createdAt: Date.now(),
+        result
+      };
+
+      const newFeedRef = push(tournamentFeedRef);
+      set(newFeedRef, entry).catch(console.error);
     }
 
     function showToast({ title, body, primaryText, secondaryText, onPrimary }) {
