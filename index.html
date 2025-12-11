@@ -197,7 +197,27 @@
         'https://docs.google.com/forms/d/e/1FAIpQLSeLqfM3XcGEqDBMi6NQ5P8RlbAnYrKS3UnD1f9EdiMmFMbbaQ/viewform';
     });
 
+    // UPDATED: prompt for player code instead of direct redirect
     document.getElementById('playerBtn').addEventListener('click', function() {
+      const code = prompt("Enter your player code:");
+
+      if (!code) {
+        return; // user cancelled or empty
+      }
+
+      // simple numeric check; you can tighten this if you want
+      if (!/^\d+$/.test(code)) {
+        alert("Invalid player code.");
+        return;
+      }
+
+      // store for player.html to use
+      try {
+        localStorage.setItem('playerCode', code);
+      } catch (e) {
+        // ignore storage errors; still try to navigate
+      }
+
       window.location.href = 'player.html';
     });
 
