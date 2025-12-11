@@ -389,6 +389,11 @@
     const chatRef = ref(db, "chatMessages");
     const tournamentFeedRef = ref(db, "tournamentFeed");
 
+    // NEW: to resolve last names + overall score for feed messages
+    const settingsRef = ref(db, "settings");
+    const playersRef = ref(db, "players");
+    const matchesRef = ref(db, "matches");
+
     const streamEl = document.getElementById("streamWindow");
     const chatInput = document.getElementById("chatInput");
     const sendBtn = document.getElementById("sendBtn");
@@ -416,6 +421,97 @@
         playerTeam = "neutral";
       }
       localStorage.setItem("ftkChatTeam", playerTeam);
+    }
+
+    // ---- SETTINGS / PLAYERS / MATCHES FOR NAME RESOLUTION ----
+    let settingsData = {};
+    let playersData = {};
+    let matchesData = {};
+
+    function getTeamNames() {
+      const t = settingsData.teamNames || {};
+      return {
+        red: t.red || "Red",
+        blue: t.blue || "Blue",
+      };
+    }
+
+    function getLastName(fullName) {
+      if (!fullName) return "";
+      const parts = fullName.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    }
+
+    function getMatchPlayersFor(matchObj) {
+      if (!matchObj) return { red: [], blue: [] };
+
+      const details = matchObj.playerDetails || {};
+      const redIds = matchObj.red?.players || [];
+      const blueIds = matchObj.blue?.players || [];
+
+      const redPlayers = redIds.map(id => {
+        const basePlayer = playersData[id] || { name: "Red Player" };
+        const overrides = details[id] || {};
+        return { id, ...basePlayer, ...overrides };
+      });
+
+      const bluePlayers = blueIds.map(id => {
+        const basePlayer = playersData[id] || { name: "Blue Player" };
+        const overrides = details[id] || {};
+        return { id, ...basePlayer, ...overrides };
+      });
+
+      return { red: redPlayers, blue: bluePlayers };
+    }
+
+    // Same logic as tournament_feed: compute overall score text
+    function computeMatchSummary(matchId, matchObj) {
+      if (!matchObj) {
+        return {
+          overallText: "Match data unavailable",
+        };
+      }
+
+      const teamNames = getTeamNames();
+      const holes = matchObj.holes || Array(18).fill("none");
+      const type = matchObj.type || (Number(matchId) > 8 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+
+      let redWins = 0;
+      let blueWins = 0;
+      let halves = 0;
+
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      const holesPlayed = redWins + blueWins + halves;
+      const diff = redWins - blueWins;
+
+      const { red, blue } = getMatchPlayersFor(matchObj);
+      const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+      const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+      const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+      const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+      let overallText = "Match not started";
+
+      if (holesPlayed === 0) {
+        overallText = "Match not started";
+      } else if (diff === 0) {
+        overallText = "Match halved";
+      } else {
+        const up = Math.abs(diff);
+        const leaderNames = diff > 0 ? redLabel : blueLabel;
+        overallText = `${leaderNames} ${up}up`;
+      }
+
+      return { overallText };
     }
 
     // ---- REPLY STATE ----
@@ -495,12 +591,57 @@
           const entry = item.data;
           const matchId = entry.matchId || "?";
           const holeNumber = entry.holeNumber != null ? entry.holeNumber : null;
-          const msg = entry.message || "";
+          const originalMsg = entry.message || "";
           const ts = entry.createdAt || null;
           const result = entry.result || "none"; // red / blue / half
 
           const dateLabel = ts ? `${formatDate(ts)} · ${formatTime(ts)}` : "";
-          const holeLabel = holeNumber ? `Hole ${holeNumber}` : "";
+
+          // Build display message using LAST NAMES when we have match data
+          let displayMessage = originalMsg;
+          let overallText = "";
+          let headerLabel = `Match ${matchId}`;
+          const matchObj = matchesData[matchId] || null;
+
+          if (matchObj) {
+            const summary = computeMatchSummary(matchId, matchObj);
+            overallText = summary.overallText || "";
+
+            // Build "Match 1 - Wolf / Wall vs Smith / Vaughn"
+            const teamNames = getTeamNames();
+            const { red, blue } = getMatchPlayersFor(matchObj);
+
+            const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+            const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+            const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+            const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+            headerLabel = `Match ${matchId} - ${redLabel} vs ${blueLabel}`;
+          }
+
+          if (
+            matchObj &&
+            holeNumber != null &&
+            (result === "red" || result === "blue" || result === "half")
+          ) {
+            const teamNames = getTeamNames();
+            const { red, blue } = getMatchPlayersFor(matchObj);
+
+            const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+            const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+            const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+            const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+            if (result === "red") {
+              displayMessage = `${redLabel} win Hole ${holeNumber}`;
+            } else if (result === "blue") {
+              displayMessage = `${blueLabel} win Hole ${holeNumber}`;
+            } else if (result === "half") {
+              displayMessage = `Hole ${holeNumber} halved`;
+            }
+          }
 
           const colorClass =
             result === "red" ? "red"
@@ -511,15 +652,15 @@
           html += `
             <div class="feed-item ${colorClass}">
               <div class="feed-top">
-                <span>Match ${matchId}</span>
+                <span>${headerLabel}</span>
                 <span>${dateLabel}</span>
               </div>
-              <div class="feed-msg">${msg}</div>
+              <div class="feed-msg">${displayMessage}</div>
               <div class="feed-meta">
-                <span>${holeLabel}</span>
+                <span>${overallText ? `Overall: ${overallText}` : ""}</span>
                 <button class="reply-btn" type="button"
                         data-reply-feed-id="${entry.id}"
-                        data-reply-feed-message="${msg.replace(/"/g, '&quot;')}">
+                        data-reply-feed-message="${displayMessage.replace(/"/g, '&quot;')}">
                   Reply
                 </button>
               </div>
@@ -562,6 +703,22 @@
 
       streamEl.scrollTop = streamEl.scrollHeight;
     }
+
+    // ---- LOAD SETTINGS / PLAYERS / MATCHES (for name + overall resolution) ----
+    onValue(settingsRef, (snap) => {
+      settingsData = snap.val() || {};
+      renderStream();
+    });
+
+    onValue(playersRef, (snap) => {
+      playersData = snap.val() || {};
+      renderStream();
+    });
+
+    onValue(matchesRef, (snap) => {
+      matchesData = snap.val() || {};
+      renderStream();
+    });
 
     // ---- LOAD TOURNAMENT FEED ----
     onValue(tournamentFeedRef, (snap) => {
