@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Player List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --border: #d1d5db;
+      --text: #111827;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+
+    body {
+      background: var(--bg);
+      padding: 1rem;
+    }
+
+    .title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 0.6rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    td {
+      color: var(--text);
+    }
+
+    td.hcp {
+      text-align: right;
+      color: var(--muted);
+      width: 80px;
+    }
+
+    td.num {
+      width: 35px;
+      text-align: right;
+      color: var(--muted);
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="title">Player List</div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Player</th>
+        <th style="text-align:right;">Handicap</th>
+      </tr>
+    </thead>
+    <tbody id="playerList"></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const playersRef = ref(db, "players");
+    const listEl = document.getElementById("playerList");
+
+    onValue(playersRef, (snap) => {
+      const data = snap.val() || {};
+      const players = Object.values(data);
+
+      // Sort by handicap ascending
+      players.sort((a, b) => (parseFloat(a.handicap ?? 999) - parseFloat(b.handicap ?? 999)));
+
+      listEl.innerHTML = players
+        .map(
+          (p, i) => `
+            <tr>
+              <td class="num">${i + 1}</td>
+              <td>${p.name || "Unknown Player"}</td>
+              <td class="hcp">${p.handicap ?? "N/A"}</td>
+            </tr>
+          `
+        )
+        .join("");
+    });
+  </script>
+</body>
+</html>
