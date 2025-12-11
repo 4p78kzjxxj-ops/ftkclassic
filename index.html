@@ -118,6 +118,21 @@
       text-align: center;
     }
 
+    .hero-logo {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+      border: 2px solid var(--border);
+    }
+
+    .hero-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+    }
+
     .hero-btn,
     .hero-btn-secondary {
       width: 100%;
@@ -172,7 +187,7 @@
 
   <main>
     <section class="hero-card">
-      <img src="IMG_7296.jpg" class="hero-logo" style="width:120px;border-radius:50%;" />
+      <img src="IMG_7296.jpg" class="hero-logo" />
       <div class="hero-title">Welcome to the FTK Classic</div>
 
       <button id="playerBtn" class="hero-btn" type="button">I'm a player</button>
@@ -188,6 +203,23 @@
   </main>
 
   <script>
+    const PLAYER_CODES = {
+      "3601": "David Wolf",
+      "3602": "Jake Smith",
+      "3603": "Jon Wall",
+      "3604": "Justin Vaughn",
+      "3605": "Will Miller",
+      "3606": "Ivan Bolds",
+      "3607": "Taylor Harbin",
+      "3608": "Eric Tomeo",
+      "3609": "Matt Ruff",
+      "3610": "Eric Crowe",
+      "3611": "Brett Cooper",
+      "3612": "Jordan Fiedler",
+      "3613": "Michael Godwin",
+      "3614": "Tyler Huff"
+    };
+
     document.getElementById('spectatorBtn').addEventListener('click', function() {
       window.location.href = 'spectator.html';
     });
@@ -197,28 +229,25 @@
         'https://docs.google.com/forms/d/e/1FAIpQLSeLqfM3XcGEqDBMi6NQ5P8RlbAnYrKS3UnD1f9EdiMmFMbbaQ/viewform';
     });
 
-    // UPDATED: prompt for player code instead of direct redirect
     document.getElementById('playerBtn').addEventListener('click', function() {
       const code = prompt("Enter your player code:");
+      if (!code) return;
 
-      if (!code) {
-        return; // user cancelled or empty
-      }
+      const trimmed = code.trim();
 
-      // simple numeric check; you can tighten this if you want
-      if (!/^\d+$/.test(code)) {
+      if (!PLAYER_CODES[trimmed]) {
         alert("Invalid player code.");
         return;
       }
 
-      // store for player.html to use
       try {
-        localStorage.setItem('playerCode', code);
+        localStorage.setItem('playerCode', trimmed);
+        localStorage.setItem('playerName', PLAYER_CODES[trimmed]);
       } catch (e) {
-        // ignore storage errors; still try to navigate
+        // ignore storage errors
       }
 
-      window.location.href = 'player.html';
+      window.location.href = 'player.html?code=' + encodeURIComponent(trimmed);
     });
 
     function goToAdmin() {
