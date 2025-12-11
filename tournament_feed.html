@@ -496,7 +496,7 @@
       for (const entry of entries) {
         const matchId = entry.matchId || "?";
         const holeNumber = entry.holeNumber != null ? entry.holeNumber : null;
-        const msg = entry.message || "";
+        const originalMsg = entry.message || "";
         const ts = entry.createdAt || null;
         const result = entry.result || "none"; // red / blue / half
 
@@ -508,6 +508,32 @@
 
         const dateLabel = ts ? `${formatDate(ts)} · ${formatTime(ts)}` : "";
         const holeLabel = holeNumber ? `Hole ${holeNumber}` : "";
+
+        // Build display message using LAST NAMES instead of team names for hole results
+        let displayMessage = originalMsg;
+
+        if (
+          matchObj &&
+          holeNumber != null &&
+          (result === "red" || result === "blue" || result === "half")
+        ) {
+          const teamNames = getTeamNames();
+          const { red, blue } = getMatchPlayersFor(matchObj);
+
+          const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
+          const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
+
+          const redLabel = redLasts.length ? redLasts.join(" / ") : teamNames.red;
+          const blueLabel = blueLasts.length ? blueLasts.join(" / ") : teamNames.blue;
+
+          if (result === "red") {
+            displayMessage = `${redLabel} win Hole ${holeNumber}`;
+          } else if (result === "blue") {
+            displayMessage = `${blueLabel} win Hole ${holeNumber}`;
+          } else if (result === "half") {
+            displayMessage = `Hole ${holeNumber} halved`;
+          }
+        }
 
         // Shade bubble based on who won THIS hole
         const colorClass =
@@ -525,7 +551,7 @@
               <div class="feed-match-label">Match ${matchId} · ${typeLabel}</div>
               <div class="feed-time">${dateLabel}</div>
             </div>
-            <div class="feed-message">${msg}</div>
+            <div class="feed-message">${displayMessage}</div>
             <div class="feed-overall">
               Overall: <span>${overallText}</span>
             </div>
