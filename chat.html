@@ -372,6 +372,11 @@
       set,
       onValue
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -385,6 +390,23 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+
+    // --- AUTH (anonymous) ---
+    const auth = getAuth(app);
+    let authInitResolve;
+    const authInitPromise = new Promise((resolve) => {
+      authInitResolve = resolve;
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        authInitResolve(user);
+      }
+    });
+
+    signInAnonymously(auth).catch((err) => {
+      console.error("Auth error:", err);
+    });
 
     const chatRef = ref(db, "chatMessages");
     const tournamentFeedRef = ref(db, "tournamentFeed");
@@ -746,7 +768,9 @@
     });
 
     // ---- SEND MESSAGE ----
-    sendBtn.onclick = () => {
+    sendBtn.onclick = async () => {
+      await authInitPromise; // ensure we're signed in
+
       const text = chatInput.value.trim();
       if (!text) return;
 
@@ -777,6 +801,8 @@
 
     // ---- CLEAR CHAT + TOURNAMENT FEED (ADMIN CODE 3618) ----
     clearBtn.onclick = async () => {
+      await authInitPromise; // ensure we're signed in
+
       const code = prompt("Enter admin code to clear chat and tournament feed:");
 
       if (code === null) return;
