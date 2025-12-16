@@ -524,15 +524,7 @@
       </button>
       <div class="danger-note">
         This permanently deletes all photos from Storage and the photos node in the database.
-      
-      <button id="uploadFall2025Btn" type="button" class="btn">
-        📸 Upload Fall 2025 photos
-      </button>
-      <div class="status-text">
-        Adds photos to the site with the comment: "FTK Classic - Fall 2025".
       </div>
-      <input id="fall2025PhotosInput" type="file" accept="image/*" multiple style="display:none" />
-</div>
 
       <div id="adminToolsStatus" class="status-text"></div>
     </section>
@@ -637,7 +629,7 @@
             title: "Admin access",
             message: "Enter the admin password to manage players, teams, matches and photos.",
             onSuccess: function () {
-              sessionStorage.setItem("ftkAdminAuthorized", "true";
+              sessionStorage.setItem("ftkAdminAuthorized", "true");
               hideOverlay();
             },
             redirectHome: true,
@@ -665,8 +657,6 @@
       ref as storageRef,
       listAll,
       deleteObject,
-      uploadBytes,
-      getDownloadURL,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
     import {
@@ -1098,7 +1088,7 @@
 
     // Delete ALL photos (Storage + DB)
     async function deleteAllPhotosInStorage() {
-      const rootRef = storageRef(storage, "matchPhotos");
+      const roots = ["matchPhotos", "match_photos", "group_photos", "tournamentPhotos"];
 
       async function deleteFolder(folderRef) {
         const res = await listAll(folderRef);
@@ -1110,86 +1100,17 @@
         await Promise.all(res.prefixes.map((subRef) => deleteFolder(subRef)));
       }
 
-      await deleteFolder(rootRef);
-    }
-
-    
-    // Upload Fall 2025 photos (adds to Storage + 'photos' node)
-    const uploadFall2025Btn = document.getElementById("uploadFall2025Btn");
-    const fall2025PhotosInput = document.getElementById("fall2025PhotosInput");
-
-    function safeFilename(name) {
-      return String(name || "photo")
-        .replace(/[^a-z0-9._-]/gi, "_")
-        .slice(-80);
-    }
-
-    async function uploadFall2025Photos(files) {
-      const list = Array.from(files || []);
-      if (!list.length) return;
-
-      adminToolsStatus.textContent = `Uploading ${list.length} photo(s)…`;
-
-      let ok = 0;
-      for (const file of list) {
+      for (const r of roots) {
         try {
-          const stamp = Date.now();
-          const rand = Math.random().toString(16).slice(2);
-          const path = `tournamentPhotos/fall2025/${stamp}_${rand}_${safeFilename(file.name)}`;
-
-          const fRef = storageRef(storage, path);
-          await uploadBytes(fRef, file);
-          const url = await getDownloadURL(fRef);
-
-          await push(ref(db, "photos"), {
-  url: downloadURL,
-  source: "admin",
-  matchLabel: "FTK Classic - Fall 2025",
-  timestamp: new Date("2025-11-28T12:00:00").getTime()
-});
-
-          ok++;
-          adminToolsStatus.textContent = `Uploaded ${ok}/${list.length}…`;
+          await deleteFolder(storageRef(storage, r));
         } catch (err) {
-          console.error("Fall 2025 upload failed:", err);
+          // ignore missing/unauthorized folders; DB deletion still proceeds
+          console.warn("Skip delete for", r, err?.code || err?.message || err);
         }
       }
-
-      adminToolsStatus.textContent = `Fall 2025 upload complete. Uploaded ${ok}/${list.length}.`;
-      setTimeout(() => (adminToolsStatus.textContent = ""), 6000);
     }
 
-    uploadFall2025Btn.addEventListener("click", () => {
-      if (window.requireAdminPassword) {
-        window.requireAdminPassword(() => fall2025PhotosInput.click(), {
-          title: "Upload Fall 2025 photos",
-          message: "Enter the admin password to upload Fall 2025 tournament photos.",
-        });
-      } else {
-        fall2025PhotosInput.click();
-      }
-    });
-
-    fall2025PhotosInput.addEventListener("change", () => {
-      const files = fall2025PhotosInput.files;
-      if (!files || !files.length) return;
-
-      if (window.requireAdminPassword) {
-        window.requireAdminPassword(async () => {
-          await uploadFall2025Photos(files);
-          fall2025PhotosInput.value = "";
-        }, {
-          title: "Upload Fall 2025 photos",
-          message: "Re-enter the admin password to confirm this upload.",
-        });
-      } else {
-        uploadFall2025Photos(files).finally(() => {
-          fall2025PhotosInput.value = "";
-        });
-      }
-    });
-
-deletePhotosBtn.addEventListener("click", () => {
+    deletePhotosBtn.addEventListener("click", () => {
       const really = confirm(
         "This will permanently delete ALL tournament photos from Storage and the 'photos' node in the database. Are you sure?"
       );
