@@ -996,17 +996,17 @@
     let matchId = params.get("match") || params.get("id") || null;
     const playerCode = params.get("code");
 
-if (playerCode) {
-  const mappedMatch = CODE_TO_MATCH[playerCode];
-
-  // If we already have a match in the URL (ex: match=1), do NOT redirect.
-  // Only redirect if there's no match AND we can't map the code.
-  if (!mappedMatch && !matchId) {
-    window.location.href = "index.html";
-  } else if (mappedMatch && !matchId) {
-    matchId = mappedMatch;
-  }
-}
+    // If a player code is provided *and* no explicit match is provided,
+    // map the code -> match. If the code is unknown, send them home.
+    // (If "match" is provided, we honor it so Match Admin links from player.html work.)
+    if (playerCode && !matchId) {
+      const mappedMatch = CODE_TO_MATCH[playerCode];
+      if (!mappedMatch) {
+        window.location.href = "index.html";
+      } else {
+        matchId = mappedMatch;
+      }
+    }
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
@@ -1899,11 +1899,9 @@ if (playerCode) {
 
       headerSubtitleEl.textContent = `Match admin – Match ${matchId}`;
 
-      updateScoreUI();
-      renderPlayersRow();
-      renderHoles();
-      renderGroupPhotoState();
-    }
+      // renderScoreBubble() sets the match title/subtitle (last names) and also renders the rest of the UI.
+      renderScoreBubble();
+}
 
     groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
     cameraButton.addEventListener("click", handleCameraClick);
