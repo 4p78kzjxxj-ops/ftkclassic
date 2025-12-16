@@ -1142,12 +1142,11 @@
           const url = await getDownloadURL(fRef);
 
           await push(ref(db, "photos"), {
-            url,
-            path,
-            comment: "FTK Classic - Fall 2025",
-            season: "Fall 2025",
-            createdAt: serverTimestamp(),
-          });
+  url: downloadURL,
+  source: "admin",
+  matchLabel: "FTK Classic - Fall 2025",
+  timestamp: new Date("2025-11-28T12:00:00").getTime()
+});
 
           ok++;
           adminToolsStatus.textContent = `Uploaded ${ok}/${list.length}…`;
