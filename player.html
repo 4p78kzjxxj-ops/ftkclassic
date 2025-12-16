@@ -159,26 +159,6 @@
       box-shadow: var(--shadow-soft);
     }
 
-    .card-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      margin-bottom: 0.45rem;
-    }
-
-    .card-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-    }
-
-    .card-subtitle {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
     .player-header-main {
       display: flex;
       flex-direction: column;
@@ -663,7 +643,8 @@
         <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
         <div class="site-title-group">
           <div class="site-title">FTK Classic</div>
-          <div id="headerSubtitle" class="site-subtitle">Player profile</div>
+          <!-- subtitle now starts empty; JS will set to just the player name -->
+          <div id="headerSubtitle" class="site-subtitle"></div>
         </div>
       </div>
       <nav class="nav-links">
@@ -676,10 +657,7 @@
       <section class="layout">
         <!-- LEFT: Player info + achievements -->
         <section class="card">
-          <div class="card-header">
-            <div class="card-title">Player</div>
-            <div class="card-subtitle">Profile and achievements.</div>
-          </div>
+          <!-- card-header removed per request -->
 
           <div class="player-header-main">
             <div class="player-name-row">
@@ -753,7 +731,7 @@
       authDomain: "ftkclassicdb.firebaseapp.com",
       databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
       projectId: "ftkclassicdb",
-      storageBucket: "ftkclassicdb.firebasestorage.app",
+      storageBucket: "ftkclassicdb-firebasestorage.app",
       messagingSenderId: "963469808092",
       appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
     };
@@ -1087,7 +1065,7 @@
 
     const urlParams = getQueryParams();
     const requestedCode = urlParams.code || null;
-    const requestedId = urlParams.id || urlParams.playerId || null;
+    the requestedId = urlParams.id || urlParams.playerId || null;
     const requestedName = urlParams.name || null;
     const requestedNine = urlParams.nine || null;
 
@@ -1127,7 +1105,7 @@
 
       const playerId = resolvePlayerId();
 
-      // Hide the Team row entirely (per request)
+      // Hide the Team row entirely (per previous request)
       if (playerTeamRowEl) {
         playerTeamRowEl.style.display = "none";
       }
@@ -1141,7 +1119,7 @@
         if (playerTeamEl) playerTeamEl.textContent = "—";
         if (playerHandicapEl) playerHandicapEl.textContent = "—";
         if (playerCodeEl) playerCodeEl.textContent = "—";
-        headerSubtitleEl.textContent = "Player profile";
+        headerSubtitleEl.textContent = "";
         renderAchievements("", 0, 0);
         if (playerStatsEl) playerStatsEl.textContent = "";
         return;
@@ -1155,7 +1133,8 @@
       const codeForPlayer = getCodeForName(fullName);
 
       playerNameEl.textContent = fullName;
-      headerSubtitleEl.textContent = `Player profile – ${fullName}`;
+      // Subtitle now just shows the name, not "Player profile – ..."
+      headerSubtitleEl.textContent = fullName;
       playerErrorEl.style.display = "none";
 
       const teamLabel =
