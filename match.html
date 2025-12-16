@@ -996,15 +996,17 @@
     let matchId = params.get("match") || params.get("id") || null;
     const playerCode = params.get("code");
 
-    if (playerCode) {
-      const mappedMatch = CODE_TO_MATCH[playerCode];
-      if (!mappedMatch) {
-        // Invalid code – send them back home
-        window.location.href = "index.html";
-      } else {
-        matchId = mappedMatch;
-      }
-    }
+if (playerCode) {
+  const mappedMatch = CODE_TO_MATCH[playerCode];
+
+  // If we already have a match in the URL (ex: match=1), do NOT redirect.
+  // Only redirect if there's no match AND we can't map the code.
+  if (!mappedMatch && !matchId) {
+    window.location.href = "index.html";
+  } else if (mappedMatch && !matchId) {
+    matchId = mappedMatch;
+  }
+}
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
