@@ -36,15 +36,75 @@
     .site-header-left{display:flex;align-items:center;gap:.65rem;min-width:0;}
     .site-logo{width:40px;height:40px;border-radius:10px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.12);}
     .site-title{font-weight:800;letter-spacing:-.02em;line-height:1.1;}
-    .site-subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw;}
-    .nav-links{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
-    .nav-btn{
-      height:36px;display:inline-flex;align-items:center;justify-content:center;
-      padding:0 .75rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;
-      font-size:.85rem;font-weight:700;text-decoration:none;color:var(--text);
+    .site-subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55vw;}
+
+    /* HAMBURGER MENU */
+    .menu-wrap{
+      margin-left:auto;
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:.4rem;
     }
-    .nav-btn.current{border-color:#111827;background:#111827;color:#fff;}
-    .nav-btn.secondary{background:#fff;color:var(--text);}
+    .hamburger-btn{
+      height:36px;
+      width:40px;
+      border-radius:999px;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .hamburger-btn:active{transform:scale(.98);}
+    .hamburger-icon{width:18px;height:12px;position:relative;}
+    .hamburger-icon span{
+      position:absolute;left:0;right:0;height:2px;background:#111827;border-radius:999px;
+    }
+    .hamburger-icon span:nth-child(1){top:0;}
+    .hamburger-icon span:nth-child(2){top:5px;}
+    .hamburger-icon span:nth-child(3){top:10px;}
+
+    .menu-panel{
+      position:absolute;
+      top:44px;
+      right:0;
+      width:220px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      box-shadow:0 12px 28px rgba(0,0,0,.18);
+      display:none;
+      overflow:hidden;
+      z-index:9998;
+    }
+    .menu-panel.open{display:block;}
+
+    .menu-section{
+      padding:.45rem;
+      background:#fff;
+    }
+    .menu-item{
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.6rem .65rem;
+      border-radius:12px;
+      border:1px solid transparent;
+      background:#fff;
+      text-decoration:none;
+      color:var(--text);
+      font-size:.9rem;
+      font-weight:800;
+      cursor:pointer;
+      text-align:left;
+    }
+    .menu-item:hover{
+      background:#f3f4f6;
+      border-color:#e5e7eb;
+    }
 
     main{max-width:1100px;margin:0 auto;padding:1rem;}
     .card{
@@ -69,7 +129,7 @@
     .group-title{font-weight:900;line-height:1.15}
     .group-sub{font-size:.78rem;color:var(--muted);margin-top:.15rem}
 
-    /* SMALLER THUMBNAILS: more columns + tighter gaps */
+    /* Smaller thumbnails */
     .photos-grid{
       display:grid;
       grid-template-columns:repeat(4, 1fr);
@@ -83,7 +143,6 @@
       display:flex;flex-direction:column;
     }
 
-    /* Thumbnail box with a fixed ratio, but show full image (no crop) */
     .thumb{
       width:100%;
       aspect-ratio: 4 / 3;
@@ -96,7 +155,7 @@
     .thumb img{
       width:100%;
       height:100%;
-      object-fit:contain; /* full thumbnail, letterboxed if needed */
+      object-fit:contain;
       display:block;
     }
 
@@ -133,20 +192,19 @@
       font-weight:900;cursor:pointer;
     }
 
-    /* IMPORTANT: make modal image not forced to "landscape" on mobile */
     .modal-body{
       display:flex;
       align-items:center;
       justify-content:center;
       background:#000;
-      height:calc(100vh - 64px); /* keeps room for header inside modal */
+      height:calc(100vh - 64px);
       max-height:85vh;
     }
     .modal-body img{
       max-width:100%;
       max-height:100%;
-      width:auto;     /* key for portrait on phones */
-      height:auto;    /* key for portrait on phones */
+      width:auto;
+      height:auto;
       object-fit:contain;
       display:block;
     }
@@ -163,12 +221,21 @@
       </div>
     </div>
 
-    <div class="nav-links">
-      <a href="index.html" class="nav-btn secondary">Home</a>
-      <a href="spectator.html" class="nav-btn secondary">Scores</a>
-      <a href="photos.html" class="nav-btn current">Photos</a>
-      <a href="tournament_feed.html" class="nav-btn secondary">Feed</a>
-      <a href="chat.html" class="nav-btn secondary">Chat</a>
+    <!-- HAMBURGER MENU -->
+    <div class="menu-wrap">
+      <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Open menu">
+        <div class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+      </button>
+
+      <div id="menuPanel" class="menu-panel" role="menu" aria-label="Navigation menu">
+        <div class="menu-section">
+          <a class="menu-item" href="index.html">Home</a>
+          <a class="menu-item" href="spectator.html">Scores</a>
+          <a class="menu-item" href="tournament_feed.html">Feed</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -191,6 +258,32 @@
       </div>
     </div>
   </div>
+
+  <!-- MENU LOGIC -->
+  <script>
+    (function () {
+      const hamburgerBtn = document.getElementById("hamburgerBtn");
+      const menuPanel = document.getElementById("menuPanel");
+
+      function closeMenu() { menuPanel.classList.remove("open"); }
+      function toggleMenu() { menuPanel.classList.toggle("open"); }
+
+      hamburgerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!menuPanel.classList.contains("open")) return;
+        const inside = menuPanel.contains(e.target) || hamburgerBtn.contains(e.target);
+        if (!inside) closeMenu();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu();
+      });
+    })();
+  </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -267,11 +360,7 @@
 
     function formatPretty(d) {
       try {
-        return d.toLocaleString(undefined, {
-          year: "numeric",
-          month: "long",
-          day: "numeric"
-        });
+        return d.toLocaleString(undefined, { year:"numeric", month:"long", day:"numeric" });
       } catch {
         return d.toString();
       }
@@ -374,11 +463,9 @@
 
                 const holeLabel = (p.hole || p.holeNumber)
                   ? `Hole ${p.hole || p.holeNumber}`
-                  : (p.type === "group" || p.group === true ? "Photo" : "");
+                  : (p.type === "group" || p.group === true ? "Group Photo" : "");
 
-                const modalTitleText =
-                  groupModalTitle +
-                  (holeLabel ? ` · ${holeLabel}` : "");
+                const modalTitleText = groupModalTitle + (holeLabel ? ` · ${holeLabel}` : "");
 
                 return `
                   <div class="photo-card">
