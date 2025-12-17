@@ -508,6 +508,8 @@
           <a class="menu-item" href="spectator.html">Scores</a>
           <a class="menu-item" href="chat.html">Chat</a>
           <a class="menu-item" href="tournament_feed.html">Feed</a>
+          <a class="menu-item" href="stats.html">Stats</a>
+          <a class="menu-item" href="photos.html">Photos</a>
         </div>
 
         <div class="menu-section">
@@ -515,6 +517,10 @@
           <button id="menuClearFeedBtn" class="menu-item danger" type="button">Clear feed</button>
           <button id="menuClearChatBtn" class="menu-item danger" type="button">Clear chat</button>
           <button id="menuDeletePhotosBtn" class="menu-item danger" type="button">Delete photos</button>
+
+          <!-- NEW: delete only match photos (exclude admin uploads) -->
+          <button id="menuDeleteMatchPhotosBtn" class="menu-item danger" type="button">Delete match photos only</button>
+
           <button id="menuResetScoresBtn" class="menu-item danger" type="button">Reset match scores</button>
         </div>
 
@@ -863,6 +869,7 @@
     const menuClearFeedBtn = document.getElementById("menuClearFeedBtn");
     const menuClearChatBtn = document.getElementById("menuClearChatBtn");
     const menuDeletePhotosBtn = document.getElementById("menuDeletePhotosBtn");
+    const menuDeleteMatchPhotosBtn = document.getElementById("menuDeleteMatchPhotosBtn"); // NEW
     const menuResetScoresBtn = document.getElementById("menuResetScoresBtn");
     const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
     const fall2025FileInput = document.getElementById("fall2025FileInput");
@@ -1005,7 +1012,7 @@
       bluePlayersList.innerHTML = blueList.join("") || '<div style="font-size:0.78rem;color:#9ca3af;">No blue players yet.</div>';
     }
 
-    // changed: prompt-based add player
+    // prompt-based add player
     addPlayerBtn.addEventListener("click", async () => {
       const first = prompt("First name:");
       if (first === null) return;
@@ -1262,6 +1269,56 @@
       setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
     }
 
+    // NEW: delete ONLY match photos (keeps admin uploads)
+    async function doDeleteMatchPhotosOnly() {
+      adminToolsStatus.textContent = "Deleting match photos only…";
+
+      // 1) Delete storage folders that correspond to match photos (leave tournamentPhotos intact)
+      const roots = ["matchPhotos", "match_photos", "group_photos"];
+
+      async function deleteFolder(folderRef) {
+        const res = await listAll(folderRef);
+        await Promise.all(res.items.map((itemRef) => deleteObject(itemRef)));
+        await Promise.all(res.prefixes.map((subRef) => deleteFolder(subRef)));
+      }
+
+      for (const r of roots) {
+        try {
+          await deleteFolder(storageRef(storage, r));
+        } catch (err) {
+          console.warn("Skip delete for", r, err?.code || err?.message || err);
+        }
+      }
+
+      // 2) Delete ONLY the DB photo entries that are NOT admin uploads
+      //    Admin uploads (Fall 2025 + any admin uploads you tagged) have matchLabel "FTK Classic - Fall 2025"
+      //    We keep anything with that matchLabel, and delete everything else.
+      const snap = await import("https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js")
+        .then(m => m.get(ref(db, "photos")));
+
+      const all = snap.exists() ? (snap.val() || {}) : {};
+      const updates = {};
+      for (const [pid, p] of Object.entries(all)) {
+        const label = String(p?.matchLabel || "").trim();
+        const comment = String(p?.comment || "").trim();
+
+        const isAdminUpload =
+          label === "FTK Classic - Fall 2025" ||
+          comment === "FTK Classic - Fall 2025";
+
+        if (!isAdminUpload) {
+          updates[`photos/${pid}`] = null;
+        }
+      }
+
+      if (Object.keys(updates).length) {
+        await update(ref(db), updates);
+      }
+
+      adminToolsStatus.textContent = "Match photos deleted (admin uploads preserved).";
+      setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
+    }
+
     deletePhotosBtn.addEventListener("click", () => {
       const really = confirm(
         "This will permanently delete ALL tournament photos from Storage and the 'photos' node in the database. Are you sure?"
@@ -1346,6 +1403,26 @@
       }, {
         title: "Delete photos",
         message: "Enter the admin code to delete ALL photos.",
+      });
+    });
+
+    // NEW menu action: delete match photos only
+    menuDeleteMatchPhotosBtn.addEventListener("click", () => {
+      closeMenu();
+      const really = confirm("Delete ONLY match photos (keep admin uploads)? This cannot be undone.");
+      if (!really) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          await doDeleteMatchPhotosOnly();
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to delete match photos: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Delete match photos only",
+        message: "Enter the admin code to delete match photos (admin uploads will be preserved).",
       });
     });
 
