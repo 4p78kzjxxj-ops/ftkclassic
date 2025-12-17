@@ -287,7 +287,14 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      onChildAdded,
+      onChildChanged,
+      onChildRemoved
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -302,7 +309,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const settingsRef = ref(db, "settings");
     const playersRef  = ref(db, "players");
     const matchesRef  = ref(db, "matches");
     const photosRef   = ref(db, "photos");
@@ -318,6 +324,25 @@
     let players  = {};
     let matches  = {};
     let photos   = {};
+
+    let modalOpen = false;
+
+    // coalesce renders so the page doesn't "refresh" constantly
+    let renderQueued = false;
+    let renderTimer = null;
+
+    function scheduleRender() {
+      if (modalOpen) return; // don't rebuild DOM while user is viewing a photo
+      if (renderTimer) clearTimeout(renderTimer);
+      renderTimer = setTimeout(() => {
+        if (renderQueued) return;
+        renderQueued = true;
+        requestAnimationFrame(() => {
+          renderQueued = false;
+          render();
+        });
+      }, 80);
+    }
 
     function esc(s) {
       return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -367,6 +392,7 @@
     }
 
     function openModal(url, title) {
+      modalOpen = true;
       modalImg.src = url;
       modalTitle.textContent = title || "Photo";
       modalBackdrop.style.display = "flex";
@@ -374,6 +400,7 @@
     function closeModal() {
       modalBackdrop.style.display = "none";
       modalImg.src = "";
+      modalOpen = false;
     }
     modalClose.addEventListener("click", closeModal);
     modalBackdrop.addEventListener("click", (e) => {
@@ -490,8 +517,13 @@
         `);
       }
 
+      // preserve scroll position so it doesn't feel like the page "refreshes"
+      const y = window.scrollY || 0;
+
       photosRoot.className = "";
       photosRoot.innerHTML = html.join("");
+
+      window.scrollTo(0, y);
 
       photosRoot.querySelectorAll(".thumb").forEach((el) => {
         const open = () => openModal(el.getAttribute("data-full"), el.getAttribute("data-title"));
@@ -505,10 +537,32 @@
       });
     }
 
-    onValue(settingsRef, () => { render(); });
-    onValue(playersRef,  (snap) => { players  = snap.val() || {}; render(); });
-    onValue(matchesRef,  (snap) => { matches  = snap.val() || {}; render(); });
-    onValue(photosRef,   (snap) => { photos   = snap.val() || {}; render(); });
+    // Players/matches can still use onValue (changes are infrequent)
+    onValue(playersRef,  (snap) => { players  = snap.val() || {}; scheduleRender(); });
+    onValue(matchesRef,  (snap) => { matches  = snap.val() || {}; scheduleRender(); });
+
+    // Photos: switch to incremental listeners so it doesn't "refresh" on every change
+    // Initial load once:
+    onValue(photosRef, (snap) => {
+      photos = snap.val() || {};
+      scheduleRender();
+    }, { onlyOnce: true });
+
+    // Then incremental updates:
+    onChildAdded(photosRef, (snap) => {
+      photos[snap.key] = snap.val() || {};
+      scheduleRender();
+    });
+
+    onChildChanged(photosRef, (snap) => {
+      photos[snap.key] = snap.val() || {};
+      scheduleRender();
+    });
+
+    onChildRemoved(photosRef, (snap) => {
+      if (snap && snap.key) delete photos[snap.key];
+      scheduleRender();
+    });
   </script>
 </body>
 </html>
