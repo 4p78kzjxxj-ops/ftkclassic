@@ -508,8 +508,6 @@
           <a class="menu-item" href="spectator.html">Scores</a>
           <a class="menu-item" href="chat.html">Chat</a>
           <a class="menu-item" href="tournament_feed.html">Feed</a>
-          <a class="menu-item" href="photos.html">Photos</a>
-          <a class="menu-item" href="stats.html">Stats</a>
         </div>
 
         <div class="menu-section">
@@ -570,28 +568,16 @@
     <!-- PLAYERS -->
     <section class="card">
       <div class="section-title">Players & handicaps</div>
+
+      <!-- changed: button only (prompts for info) -->
       <div class="form-row">
-        <div class="field" style="flex:2;">
-          <label for="newPlayerName">Player name</label>
-          <input id="newPlayerName" type="text" placeholder="First Last" />
-        </div>
-        <div class="field" style="width:110px;">
-          <label for="newPlayerTeam">Team</label>
-          <select id="newPlayerTeam">
-            <option value="red">Red</option>
-            <option value="blue">Blue</option>
-          </select>
-        </div>
-        <div class="field" style="width:110px;">
-          <label for="newPlayerHcp">Handicap</label>
-          <input id="newPlayerHcp" type="number" step="0.1" placeholder="0.0" />
-        </div>
         <div class="field" style="align-self:flex-end;">
           <button id="addPlayerBtn" type="button" class="btn btn-primary">
             Add player
           </button>
         </div>
       </div>
+
       <div class="two-col">
         <div class="team-block">
           <div class="team-block-title red" id="redTeamLabel">Red team</div>
@@ -857,9 +843,6 @@
     const saveTeamsBtn = document.getElementById("saveTeamsBtn");
     const teamsStatusEl = document.getElementById("teamsStatus");
 
-    const newPlayerNameInput = document.getElementById("newPlayerName");
-    const newPlayerTeamSelect = document.getElementById("newPlayerTeam");
-    const newPlayerHcpInput = document.getElementById("newPlayerHcp");
     const addPlayerBtn = document.getElementById("addPlayerBtn");
     const redPlayersList = document.getElementById("redPlayersList");
     const bluePlayersList = document.getElementById("bluePlayersList");
@@ -889,13 +872,8 @@
     let matches = {};
 
     // Menu logic
-    function closeMenu() {
-      menuPanel.classList.remove("open");
-    }
-
-    function toggleMenu() {
-      menuPanel.classList.toggle("open");
-    }
+    function closeMenu() { menuPanel.classList.remove("open"); }
+    function toggleMenu() { menuPanel.classList.toggle("open"); }
 
     hamburgerBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -946,12 +924,6 @@
       return { red: t.red || "Red", blue: t.blue || "Blue" };
     }
 
-    function getLastName(fullName) {
-      if (!fullName) return "";
-      const parts = fullName.trim().split(/\s+/);
-      return parts[parts.length - 1];
-    }
-
     function computeUsedPlayers() {
       const usedFront = new Set();
       const usedBack = new Set();
@@ -987,9 +959,7 @@
       const red = redTeamNameInput.value.trim() || "Red";
       const blue = blueTeamNameInput.value.trim() || "Blue";
       try {
-        await update(settingsRef, {
-          teamNames: { red, blue },
-        });
+        await update(settingsRef, { teamNames: { red, blue } });
         teamsStatusEl.textContent = "Team names saved.";
         setTimeout(() => (teamsStatusEl.textContent = ""), 3000);
       } catch (err) {
@@ -1035,27 +1005,37 @@
       bluePlayersList.innerHTML = blueList.join("") || '<div style="font-size:0.78rem;color:#9ca3af;">No blue players yet.</div>';
     }
 
+    // changed: prompt-based add player
     addPlayerBtn.addEventListener("click", async () => {
-      const name = newPlayerNameInput.value.trim();
-      const team = newPlayerTeamSelect.value || "red";
-      const hcp = parseFloat(newPlayerHcpInput.value || "0") || 0;
+      const first = prompt("First name:");
+      if (first === null) return;
 
-      if (!name) {
-        playersStatusEl.textContent = "Enter a player name.";
+      const last = prompt("Last name:");
+      if (last === null) return;
+
+      const hcpStr = prompt("Handicap (example: 8.5):", "0");
+      if (hcpStr === null) return;
+
+      const name = `${String(first).trim()} ${String(last).trim()}`.trim();
+      const hcp = parseFloat(String(hcpStr).trim());
+      const handicap = Number.isFinite(hcp) ? hcp : 0;
+
+      if (!name || name.split(/\s+/).length < 2) {
+        playersStatusEl.textContent = "Enter a first and last name.";
         return;
       }
+
+      const team = "red";
 
       try {
         const playerRef = push(playersRef);
         await set(playerRef, {
           name,
           team,
-          handicap: hcp,
+          handicap,
           mulliganUsed: false,
           reverseMulliganUsed: false,
         });
-        newPlayerNameInput.value = "";
-        newPlayerHcpInput.value = "";
         playersStatusEl.textContent = "Player added.";
         setTimeout(() => (playersStatusEl.textContent = ""), 2500);
       } catch (err) {
@@ -1133,34 +1113,10 @@
           const matchTitle = `Match ${id}`;
           const subLabel = type === "front" ? "Front 9" : "Back 9";
 
-          const redOpt1 = buildPlayerOptions(
-            "red",
-            redPlayers[0] || "",
-            type,
-            usedFront,
-            usedBack
-          );
-          const redOpt2 = buildPlayerOptions(
-            "red",
-            redPlayers[1] || "",
-            type,
-            usedFront,
-            usedBack
-          );
-          const blueOpt1 = buildPlayerOptions(
-            "blue",
-            bluePlayers[0] || "",
-            type,
-            usedFront,
-            usedBack
-          );
-          const blueOpt2 = buildPlayerOptions(
-            "blue",
-            bluePlayers[1] || "",
-            type,
-            usedFront,
-            usedBack
-          );
+          const redOpt1 = buildPlayerOptions("red", redPlayers[0] || "", type, usedFront, usedBack);
+          const redOpt2 = buildPlayerOptions("red", redPlayers[1] || "", type, usedFront, usedBack);
+          const blueOpt1 = buildPlayerOptions("blue", bluePlayers[0] || "", type, usedFront, usedBack);
+          const blueOpt2 = buildPlayerOptions("blue", bluePlayers[1] || "", type, usedFront, usedBack);
 
           html.push(`
             <div class="match-row" data-match-id="${id}">
@@ -1285,11 +1241,7 @@
 
       async function deleteFolder(folderRef) {
         const res = await listAll(folderRef);
-
-        // delete files in this folder
         await Promise.all(res.items.map((itemRef) => deleteObject(itemRef)));
-
-        // recurse into subfolders
         await Promise.all(res.prefixes.map((subRef) => deleteFolder(subRef)));
       }
 
@@ -1297,7 +1249,6 @@
         try {
           await deleteFolder(storageRef(storage, r));
         } catch (err) {
-          // ignore missing/unauthorized folders; DB deletion still proceeds
           console.warn("Skip delete for", r, err?.code || err?.message || err);
         }
       }
@@ -1342,7 +1293,7 @@
         try {
           adminToolsStatus.textContent = "Clearing feed…";
           await set(ref(db, "tournamentFeed"), null);
-          await set(ref(db, "feed"), null); // fallback if your node is named differently
+          await set(ref(db, "feed"), null);
           adminToolsStatus.textContent = "Feed cleared.";
           setTimeout(() => (adminToolsStatus.textContent = ""), 3500);
         } catch (err) {
@@ -1364,8 +1315,8 @@
         try {
           adminToolsStatus.textContent = "Clearing chat…";
           await set(ref(db, "chat"), null);
-          await set(ref(db, "chatMessages"), null); // fallback
-          await set(ref(db, "messages"), null); // fallback
+          await set(ref(db, "chatMessages"), null);
+          await set(ref(db, "messages"), null);
           adminToolsStatus.textContent = "Chat cleared.";
           setTimeout(() => (adminToolsStatus.textContent = ""), 3500);
         } catch (err) {
@@ -1437,6 +1388,8 @@
       try {
         adminToolsStatus.textContent = `Uploading ${files.length} photo${files.length === 1 ? "" : "s"}…`;
 
+        const fixedTs = new Date("2025-11-28T12:00:00").getTime();
+
         for (const file of files) {
           const safeName = (file.name || "photo").replace(/[^\w.\-]+/g, "_");
           const path = `tournamentPhotos/fall2025/${Date.now()}_${safeName}`;
@@ -1447,19 +1400,21 @@
 
           const photoRef = push(ref(db, "photos"));
           await set(photoRef, {
-  url,
-  storagePath: path,
+            url,
+            storagePath: path,
 
-  // fixed date: Nov 28, 2025
-  timestamp: new Date("2025-11-28T12:00:00").getTime(),
-  createdAt: new Date("2025-11-28T12:00:00").getTime(),
+            // fixed date: Nov 28, 2025
+            timestamp: fixedTs,
+            createdAt: fixedTs,
 
-  matchLabel: "FTK Classic - Fall 2025",
-  matchId: "",
-  hole: "",
-  group: true,
-  comment: "FTK Classic - Fall 2025",
-});
+            // display label for photos.html grouping
+            matchLabel: "FTK Classic - Fall 2025",
+            matchId: "",
+
+            hole: "",
+            group: true,
+            comment: "FTK Classic - Fall 2025",
+          });
         }
 
         adminToolsStatus.textContent = "Fall 2025 photos uploaded.";
