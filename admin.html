@@ -75,25 +75,106 @@
       margin-top: 0.15rem;
     }
 
-    .nav-links {
+    /* HAMBURGER MENU */
+    .menu-wrap {
       margin-left: auto;
+      position: relative;
       display: flex;
+      align-items: center;
       gap: 0.4rem;
-      flex-wrap: wrap;
     }
 
-    .nav-btn {
-      font-size: 0.8rem;
+    .hamburger-btn {
+      height: 36px;
+      width: 40px;
       border-radius: 999px;
-      padding: 0.25rem 0.7rem;
       border: 1px solid var(--border);
+      background: #ffffff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hamburger-btn:active { transform: scale(0.98); }
+
+    .hamburger-icon {
+      width: 18px;
+      height: 12px;
+      position: relative;
+    }
+    .hamburger-icon span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #111827;
+      border-radius: 999px;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 5px; }
+    .hamburger-icon span:nth-child(3) { top: 10px; }
+
+    .menu-panel {
+      position: absolute;
+      top: 44px;
+      right: 0;
+      width: 260px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 0.9rem;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      display: none;
+      overflow: hidden;
+      z-index: 9998;
+    }
+
+    .menu-panel.open { display: block; }
+
+    .menu-section {
+      padding: 0.45rem 0.45rem 0.35rem;
+      border-bottom: 1px solid #eef2f7;
+      background: #ffffff;
+    }
+
+    .menu-section:last-child { border-bottom: none; }
+
+    .menu-section-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0.2rem 0.3rem 0.35rem;
+    }
+
+    .menu-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.6rem;
+      border-radius: 0.7rem;
+      border: 1px solid transparent;
       background: #ffffff;
       text-decoration: none;
       color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: left;
     }
 
-    .nav-btn.secondary {
+    .menu-item:hover {
       background: #f3f4f6;
+      border-color: #e5e7eb;
+    }
+
+    .menu-item.danger {
+      color: #991b1b;
+    }
+
+    .menu-item.danger:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
     }
 
     main {
@@ -412,10 +493,36 @@
         <div id="viewerCount" class="viewer-count">Viewing now: 0 admins</div>
       </div>
     </div>
-    <div class="nav-links">
-      <a href="spectator.html" class="nav-btn secondary">Scores</a>
-      <a href="competitors.html" class="nav-btn secondary">Competitors</a>
-      <a href="photos.html" class="nav-btn">Photos</a>
+
+    <div class="menu-wrap">
+      <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Open menu">
+        <div class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+      </button>
+
+      <div id="menuPanel" class="menu-panel" role="menu" aria-label="Admin menu">
+        <div class="menu-section">
+          <div class="menu-section-title">Navigate</div>
+          <a class="menu-item" href="index.html">Home</a>
+          <a class="menu-item" href="spectator.html">Scores</a>
+          <a class="menu-item" href="chat.html">Chat</a>
+          <a class="menu-item" href="tournament_feed.html">Feed</a>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">Actions</div>
+          <button id="menuClearFeedBtn" class="menu-item danger" type="button">Clear feed</button>
+          <button id="menuClearChatBtn" class="menu-item danger" type="button">Clear chat</button>
+          <button id="menuDeletePhotosBtn" class="menu-item danger" type="button">Delete photos</button>
+          <button id="menuResetScoresBtn" class="menu-item danger" type="button">Reset match scores</button>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">Fall 2025</div>
+          <button id="menuUploadFall2025Btn" class="menu-item" type="button">Upload photos from Fall 2025 Classic</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -530,10 +637,14 @@
     </section>
   </main>
 
+  <!-- Hidden file input for Fall 2025 upload -->
+  <input id="fall2025FileInput" type="file" accept="image/*" multiple style="display:none;" />
+
   <!-- AUTH / PASSWORD MODAL LOGIC -->
   <script>
     (function () {
       const ADMIN_PASSWORD = "admin123"; // change here if you want a different password
+      const ADMIN_CODE = "3618"; // admin code for destructive actions
 
       const overlay = document.getElementById("authOverlay");
       const titleEl = document.getElementById("authTitle");
@@ -545,22 +656,35 @@
 
       let currentAction = null;
       let redirectHomeOnCancel = false;
+      let currentValidator = null; // function(value) => boolean
+      let restoreInputType = "password";
+      let restorePlaceholder = "Admin password";
 
       function showOverlay(options) {
         const {
           title = "Admin access",
           message = "Enter the admin password.",
+          placeholder = "Admin password",
+          inputType = "password",
+          validator = null,
           onSuccess = null,
           redirectHome = false,
         } = options || {};
 
         currentAction = typeof onSuccess === "function" ? onSuccess : null;
         redirectHomeOnCancel = !!redirectHome;
+        currentValidator = typeof validator === "function" ? validator : null;
 
         titleEl.textContent = title;
         msgEl.textContent = message;
         errorEl.textContent = "";
         pwdInput.value = "";
+
+        restoreInputType = pwdInput.type;
+        restorePlaceholder = pwdInput.placeholder;
+
+        pwdInput.type = inputType;
+        pwdInput.placeholder = placeholder;
 
         overlay.style.display = "flex";
         setTimeout(() => pwdInput.focus(), 50);
@@ -568,16 +692,21 @@
 
       function hideOverlay() {
         overlay.style.display = "none";
+        pwdInput.type = restoreInputType || "password";
+        pwdInput.placeholder = restorePlaceholder || "Admin password";
+        currentValidator = null;
       }
 
       function handleSubmit() {
         const value = (pwdInput.value || "").trim();
         if (!value) {
-          errorEl.textContent = "Please enter the admin password.";
+          errorEl.textContent = "Please enter the required value.";
           return;
         }
 
-        if (value === ADMIN_PASSWORD) {
+        const ok = currentValidator ? currentValidator(value) : (value === ADMIN_PASSWORD);
+
+        if (ok) {
           const action = currentAction;
           currentAction = null;
           errorEl.textContent = "";
@@ -588,7 +717,7 @@
             hideOverlay();
           }
         } else {
-          errorEl.textContent = "Incorrect password. Try again.";
+          errorEl.textContent = "Incorrect. Try again.";
         }
       }
 
@@ -608,11 +737,29 @@
         }
       });
 
-      // Expose a helper for other scripts to require password again
+      // Expose helpers
       window.requireAdminPassword = function (onSuccess, options) {
         showOverlay({
           title: options?.title || "Admin confirmation",
           message: options?.message || "Re-enter the admin password to continue.",
+          placeholder: "Admin password",
+          inputType: "password",
+          validator: (v) => v === ADMIN_PASSWORD,
+          onSuccess: function () {
+            hideOverlay();
+            if (typeof onSuccess === "function") onSuccess();
+          },
+          redirectHome: false,
+        });
+      };
+
+      window.requireAdminCode = function (onSuccess, options) {
+        showOverlay({
+          title: options?.title || "Admin code required",
+          message: options?.message || "Enter the admin code to continue.",
+          placeholder: "Admin code",
+          inputType: "text",
+          validator: (v) => v === ADMIN_CODE,
           onSuccess: function () {
             hideOverlay();
             if (typeof onSuccess === "function") onSuccess();
@@ -628,6 +775,9 @@
           showOverlay({
             title: "Admin access",
             message: "Enter the admin password to manage players, teams, matches and photos.",
+            placeholder: "Admin password",
+            inputType: "password",
+            validator: (v) => v === ADMIN_PASSWORD,
             onSuccess: function () {
               sessionStorage.setItem("ftkAdminAuthorized", "true");
               hideOverlay();
@@ -657,6 +807,8 @@
       ref as storageRef,
       listAll,
       deleteObject,
+      uploadBytes,
+      getDownloadURL,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
     import {
@@ -720,9 +872,43 @@
     const deletePhotosBtn = document.getElementById("deletePhotosBtn");
     const adminToolsStatus = document.getElementById("adminToolsStatus");
 
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const menuPanel = document.getElementById("menuPanel");
+
+    const menuClearFeedBtn = document.getElementById("menuClearFeedBtn");
+    const menuClearChatBtn = document.getElementById("menuClearChatBtn");
+    const menuDeletePhotosBtn = document.getElementById("menuDeletePhotosBtn");
+    const menuResetScoresBtn = document.getElementById("menuResetScoresBtn");
+    const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
+    const fall2025FileInput = document.getElementById("fall2025FileInput");
+
     let settings = {};
     let players = {};
     let matches = {};
+
+    // Menu logic
+    function closeMenu() {
+      menuPanel.classList.remove("open");
+    }
+
+    function toggleMenu() {
+      menuPanel.classList.toggle("open");
+    }
+
+    hamburgerBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!menuPanel.classList.contains("open")) return;
+      const inside = menuPanel.contains(e.target) || hamburgerBtn.contains(e.target);
+      if (!inside) closeMenu();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu();
+    });
 
     // Presence
     function setupPresence(pageKey) {
@@ -1059,7 +1245,23 @@
       updateMatchAssignment(matchId, side, slot, playerId);
     });
 
-    // Reset scores
+    // Reset scores (shared logic)
+    async function doResetAllScores() {
+      adminToolsStatus.textContent = "Resetting scores…";
+
+      const updatesObj = {};
+      for (let i = 1; i <= 16; i++) {
+        const holes = new Array(18).fill("none");
+        updatesObj[`matches/${i}/holes`] = holes;
+      }
+
+      await update(ref(db), updatesObj);
+
+      adminToolsStatus.textContent = "All scores reset.";
+      setTimeout(() => (adminToolsStatus.textContent = ""), 4000);
+    }
+
+    // Reset scores (page button)
     resetScoresBtn.addEventListener("click", async () => {
       const confirmed = confirm(
         "Reset ALL scores for ALL matches? This sets all 18 holes to 'no result' for matches 1–16."
@@ -1067,18 +1269,7 @@
       if (!confirmed) return;
 
       try {
-        adminToolsStatus.textContent = "Resetting scores…";
-
-        const updates = {};
-        for (let i = 1; i <= 16; i++) {
-          const holes = new Array(18).fill("none");
-          updates[`matches/${i}/holes`] = holes;
-        }
-
-        await update(ref(db), updates);
-
-        adminToolsStatus.textContent = "All scores reset.";
-        setTimeout(() => (adminToolsStatus.textContent = ""), 4000);
+        await doResetAllScores();
       } catch (err) {
         console.error(err);
         adminToolsStatus.textContent =
@@ -1110,6 +1301,14 @@
       }
     }
 
+    async function doDeleteAllPhotos() {
+      adminToolsStatus.textContent = "Deleting all photos…";
+      await deleteAllPhotosInStorage();
+      await set(ref(db, "photos"), null);
+      adminToolsStatus.textContent = "All photos deleted.";
+      setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
+    }
+
     deletePhotosBtn.addEventListener("click", () => {
       const really = confirm(
         "This will permanently delete ALL tournament photos from Storage and the 'photos' node in the database. Are you sure?"
@@ -1119,13 +1318,7 @@
       if (window.requireAdminPassword) {
         window.requireAdminPassword(async () => {
           try {
-            adminToolsStatus.textContent = "Deleting all photos…";
-
-            await deleteAllPhotosInStorage();
-            await set(ref(db, "photos"), null);
-
-            adminToolsStatus.textContent = "All photos deleted.";
-            setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
+            await doDeleteAllPhotos();
           } catch (err) {
             console.error(err);
             adminToolsStatus.textContent =
@@ -1135,6 +1328,139 @@
           title: "Confirm photo deletion",
           message: "Re-enter the admin password to delete ALL photos.",
         });
+      }
+    });
+
+    // MENU ACTIONS (admin code)
+    menuClearFeedBtn.addEventListener("click", () => {
+      closeMenu();
+      if (!confirm("Clear the tournament feed?")) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          adminToolsStatus.textContent = "Clearing feed…";
+          await set(ref(db, "tournamentFeed"), null);
+          await set(ref(db, "feed"), null); // fallback if your node is named differently
+          adminToolsStatus.textContent = "Feed cleared.";
+          setTimeout(() => (adminToolsStatus.textContent = ""), 3500);
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to clear feed: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Clear feed",
+        message: "Enter the admin code to clear the tournament feed.",
+      });
+    });
+
+    menuClearChatBtn.addEventListener("click", () => {
+      closeMenu();
+      if (!confirm("Clear the chat?")) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          adminToolsStatus.textContent = "Clearing chat…";
+          await set(ref(db, "chat"), null);
+          await set(ref(db, "chatMessages"), null); // fallback
+          await set(ref(db, "messages"), null); // fallback
+          adminToolsStatus.textContent = "Chat cleared.";
+          setTimeout(() => (adminToolsStatus.textContent = ""), 3500);
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to clear chat: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Clear chat",
+        message: "Enter the admin code to clear the chat.",
+      });
+    });
+
+    menuDeletePhotosBtn.addEventListener("click", () => {
+      closeMenu();
+      const really = confirm("Delete ALL photos (Storage + DB)? This cannot be undone.");
+      if (!really) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          await doDeleteAllPhotos();
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to delete photos: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Delete photos",
+        message: "Enter the admin code to delete ALL photos.",
+      });
+    });
+
+    menuResetScoresBtn.addEventListener("click", () => {
+      closeMenu();
+      const confirmed = confirm("Reset ALL match scoring for matches 1–16?");
+      if (!confirmed) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          await doResetAllScores();
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to reset scores: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Reset match scores",
+        message: "Enter the admin code to reset ALL match scores.",
+      });
+    });
+
+    // Fall 2025 upload
+    menuUploadFall2025Btn.addEventListener("click", () => {
+      closeMenu();
+
+      window.requireAdminCode?.(() => {
+        fall2025FileInput.value = "";
+        fall2025FileInput.click();
+      }, {
+        title: "Upload Fall 2025 photos",
+        message: "Enter the admin code to upload Fall 2025 photos.",
+      });
+    });
+
+    fall2025FileInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []).filter(Boolean);
+      if (!files.length) return;
+
+      try {
+        adminToolsStatus.textContent = `Uploading ${files.length} photo${files.length === 1 ? "" : "s"}…`;
+
+        for (const file of files) {
+          const safeName = (file.name || "photo").replace(/[^\w.\-]+/g, "_");
+          const path = `tournamentPhotos/fall2025/${Date.now()}_${safeName}`;
+          const sref = storageRef(storage, path);
+
+          await uploadBytes(sref, file, { contentType: file.type || "image/jpeg" });
+          const url = await getDownloadURL(sref);
+
+          const photoRef = push(ref(db, "photos"));
+          await set(photoRef, {
+            url,
+            storagePath: path,
+            createdAt: serverTimestamp(),
+            matchId: "fall2025",
+            hole: "",
+            group: true,
+            comment: "FTK Classic - Fall 2025",
+          });
+        }
+
+        adminToolsStatus.textContent = "Fall 2025 photos uploaded.";
+        setTimeout(() => (adminToolsStatus.textContent = ""), 4500);
+      } catch (err) {
+        console.error(err);
+        adminToolsStatus.textContent =
+          "Upload failed: " + (err?.code || err?.message || "unknown error");
       }
     });
 
