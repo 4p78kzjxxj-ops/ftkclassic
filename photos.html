@@ -406,7 +406,7 @@
 
                 const holeVal = (p.hole ?? p.holeNumber ?? "").toString().trim();
                 const isGroup = !!(p.group === true || p.isGroup === true || p.type === "group");
-                const holeLabel = holeVal ? `Hole ${holeVal}` : (isGroup ? "Group Photo" : "");
+                const holeLabel = holeVal ? `Hole ${holeVal}` : (isGroup ? "Photo" : "");
 
                 const modalTitleText = groupModalTitle + (holeLabel ? ` · ${holeLabel}` : "");
 
