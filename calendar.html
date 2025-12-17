@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Group Availability</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --shadow:0 10px 30px rgba(15, 23, 42, 0.12);
+      --tap:44px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;}
+    body{background:var(--bg);color:var(--text);min-height:100vh;padding:0.75rem;}
+    @media (min-width: 768px){ body{max-width:1100px;margin:0 auto;} }
+
+    a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+    .header{display:flex;align-items:center;gap:0.75rem;}
+    .header-left{display:flex;align-items:center;gap:0.5rem;min-width:0;}
+    .logo{height:32px;width:auto;border-radius:0.45rem;object-fit:cover;background:#e5e7eb;flex-shrink:0;}
+    .titlegrp{display:flex;flex-direction:column;gap:0.1rem;min-width:0;}
+    .title{font-size:1.05rem;font-weight:700;white-space:nowrap;}
+    .subtitle{font-size:0.78rem;color:var(--muted);white-space:nowrap;}
+    .nav{margin-left:auto;display:flex;gap:0.4rem;flex-wrap:wrap;}
+    .nav a{font-size:0.85rem;border-radius:999px;padding:0.3rem 0.9rem;border:1px solid var(--border);background:#fff;min-height:32px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;}
+    .nav a.secondary{background:#f9fafb;}
+    .nav a.current{background:#111827;color:#f9fafb;border-color:#111827;}
+
+    main{margin-top:0.6rem;display:flex;flex-direction:column;gap:0.75rem;padding-bottom:2.5rem;}
+    .card{background:var(--card);border-radius:0.9rem;padding:0.85rem;border:1px solid var(--border);box-shadow:var(--shadow);}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;flex-wrap:wrap;}
+    .month-title{font-size:1.1rem;font-weight:800;letter-spacing:-0.01em;}
+    .controls{display:flex;gap:0.4rem;}
+    .btn{min-height:34px;padding:0.25rem 0.75rem;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:0.85rem;cursor:pointer;}
+    .btn.secondary{background:#f9fafb;}
+    .note{font-size:0.82rem;color:var(--muted);margin-top:0.25rem;}
+    .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0.45rem;margin-top:0.6rem;}
+    .dow{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;text-align:center;}
+    .day{border:1px solid #e5e7eb;border-radius:0.8rem;background:#f9fafb;padding:0.55rem;min-height:86px;display:flex;flex-direction:column;gap:0.35rem;cursor:pointer;}
+    .day.off{opacity:0.55;}
+    .day.g1{background:#ecfdf5;border-color:#bbf7d0;}
+    .day.g2{background:#d1fae5;border-color:#86efac;}
+    .day.g3{background:#86efac;border-color:#4ade80;}
+    .day.g4{background:#22c55e;border-color:#16a34a;}
+    .day.g4 .pill{background:rgba(255,255,255,0.9);}
+
+    .daynum{font-weight:800;font-size:0.9rem;}
+    .pill{display:inline-flex;align-items:center;gap:0.35rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;padding:0.08rem 0.55rem;font-size:0.75rem;color:#374151;width:max-content;}
+    .pill strong{font-weight:800;color:#111827;}
+    .empty{font-size:0.78rem;color:var(--muted);}
+    .legend{display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.65rem;}
+    .legend .pill{cursor:default;}
+    .hint{font-size:0.78rem;color:var(--muted);margin-top:0.35rem;}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(17,24,39,0.55);display:none;align-items:center;justify-content:center;padding:1rem;z-index:999;}
+    .modal-backdrop.open{display:flex;}
+    .modal{width:min(520px, 100%);background:#fff;border-radius:1rem;border:1px solid rgba(209,213,219,0.8);box-shadow:0 20px 50px rgba(0,0,0,0.25);padding:0.9rem;}
+    .modal h3{font-size:1rem;font-weight:800;margin-bottom:0.25rem;}
+    .modal .meta{font-size:0.82rem;color:var(--muted);margin-bottom:0.6rem;}
+    .names{display:flex;flex-wrap:wrap;gap:0.35rem;}
+    .chip{display:inline-flex;align-items:center;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;padding:0.18rem 0.6rem;font-size:0.8rem;}
+    .modal-actions{display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.75rem;}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="logo" />
+      <div class="titlegrp">
+        <div class="title">FTK Classic</div>
+        <div class="subtitle">Group availability</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="secondary">Home</a>
+      <a href="player_list.html" class="secondary">Players</a>
+      <a href="calendar.html" class="current">Calendar</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="row">
+        <div>
+          <div id="monthTitle" class="month-title">—</div>
+          <div class="note">Tap a day to see who’s available.</div>
+        </div>
+        <div class="controls">
+          <button class="btn secondary" id="prevBtn">←</button>
+          <button class="btn secondary" id="todayBtn">Today</button>
+          <button class="btn secondary" id="nextBtn">→</button>
+        </div>
+      </div>
+
+      <div class="grid" id="dowRow">
+        <div class="dow">Sun</div><div class="dow">Mon</div><div class="dow">Tue</div><div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div>
+      </div>
+
+      <div class="grid" id="calendarGrid"></div>
+
+      <div class="legend">
+        <span class="pill"><strong id="playerCount">0</strong> players</span>
+        <span class="pill"><strong id="availCount">0</strong> availability marks</span>
+      </div>
+      <div class="hint">Players set their own days on their personal calendar.</div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3 id="modalTitle">—</h3>
+      <div class="meta" id="modalMeta">—</div>
+      <div class="names" id="modalNames"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="closeModalBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+  "apiKey": "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+  "authDomain": "ftkclassicdb.firebaseapp.com",
+  "databaseURL": "https://ftkclassicdb-default-rtdb.firebaseio.com",
+  "projectId": "ftkclassicdb",
+  "storageBucket": "ftkclassicdb-firebasestorage.app",
+  "messagingSenderId": "963469808092",
+  "appId": "1:963469808092:web:e6e789ce20ef46404b3f19"
+};
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const playersRef = ref(db, "players");
+    const availRef = ref(db, "availability");
+
+    const monthTitleEl = document.getElementById("monthTitle");
+    const gridEl = document.getElementById("calendarGrid");
+    const playerCountEl = document.getElementById("playerCount");
+    const availCountEl = document.getElementById("availCount");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMeta = document.getElementById("modalMeta");
+    const modalNames = document.getElementById("modalNames");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const todayBtn = document.getElementById("todayBtn");
+
+    let players = {};        // { playerId: {name, ...} }
+    let availability = {};   // { playerId: { 'YYYY-MM-DD': true } }
+
+    const state = {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth(), // 0-11
+    };
+
+    function pad2(n) { return String(n).padStart(2, "0"); }
+
+    function ymd(d) {
+      const y = d.getFullYear();
+      const m = pad2(d.getMonth() + 1);
+      const day = pad2(d.getDate());
+      return `${y}-${m}-${day}`;
+    }
+
+    function monthLabel(year, monthIdx) {
+      const d = new Date(year, monthIdx, 1);
+      return d.toLocaleString(undefined, { month: "long", year: "numeric" });
+    }
+
+    function dayNamesForDateKey(dateKey) {
+      const names = [];
+      for (const [pid, days] of Object.entries(availability || {})) {
+        if (!days) continue;
+        if (days[dateKey]) {
+          const nm = players[pid]?.name;
+          if (nm) names.push(nm);
+        }
+      }
+      names.sort((a,b) => a.localeCompare(b));
+      return names;
+    }
+
+    function computeCounts() {
+      const playerCount = Object.keys(players || {}).length;
+      let marks = 0;
+      for (const days of Object.values(availability || {})) {
+        if (!days) continue;
+        marks += Object.keys(days).length;
+      }
+      playerCountEl.textContent = playerCount;
+      availCountEl.textContent = marks;
+    }
+
+    function openModalForDay(dateKey) {
+      const d = new Date(dateKey + "T12:00:00");
+      const nice = d.toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+      const names = dayNamesForDateKey(dateKey);
+
+      modalTitle.textContent = nice;
+      modalMeta.textContent = names.length ? `${names.length} available` : "No one marked availability";
+      modalNames.innerHTML = names.length
+        ? names.map(n => `<span class="chip">${n}</span>`).join("")
+        : `<div class="empty">No availability marked for this day.</div>`;
+
+      modalBackdrop.classList.add("open");
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("open");
+    }
+
+    closeModalBtn.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+
+    function render() {
+      monthTitleEl.textContent = monthLabel(state.year, state.month);
+
+      const first = new Date(state.year, state.month, 1);
+      const startDow = first.getDay(); // 0 Sun
+      const daysInMonth = new Date(state.year, state.month + 1, 0).getDate();
+
+      // Build 6 weeks (42 cells) so layout doesn't jump
+      const cells = [];
+      for (let i = 0; i < 42; i++) {
+        const dayNum = i - startDow + 1;
+        const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
+
+        const d = inMonth
+          ? new Date(state.year, state.month, dayNum)
+          : new Date(state.year, state.month, 1 + (dayNum - 1)); // overflow dates
+
+        const key = ymd(d);
+        const names = dayNamesForDateKey(key);
+        const count = names.length;
+        const countClass = count >= 4 ? "g4" : count === 3 ? "g3" : count === 2 ? "g2" : count === 1 ? "g1" : "";
+
+        cells.push(`
+          <div class="day ${inMonth ? "" : "off"} ${countClass}" data-date="${key}">
+            <div class="daynum">${d.getDate()}</div>
+            <div class="pill"><strong>${count}</strong> available</div>
+          </div>
+        `);
+      }
+
+      gridEl.innerHTML = cells.join("");
+
+      gridEl.querySelectorAll(".day").forEach((el) => {
+        el.addEventListener("click", () => {
+          const key = el.getAttribute("data-date");
+          if (!key) return;
+          openModalForDay(key);
+        });
+      });
+
+      computeCounts();
+    }
+
+    prevBtn.addEventListener("click", () => {
+      state.month -= 1;
+      if (state.month < 0) {
+        state.month = 11;
+        state.year -= 1;
+      }
+      render();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      state.month += 1;
+      if (state.month > 11) {
+        state.month = 0;
+        state.year += 1;
+      }
+      render();
+    });
+
+    todayBtn.addEventListener("click", () => {
+      const now = new Date();
+      state.year = now.getFullYear();
+      state.month = now.getMonth();
+      render();
+    });
+
+    // Live data
+    onValue(playersRef, (snap) => {
+      players = snap.val() || {};
+      render();
+    });
+
+    onValue(availRef, (snap) => {
+      availability = snap.val() || {};
+      render();
+    });
+  </script>
+</body>
+</html>

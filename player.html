@@ -373,137 +373,11 @@
       gap: 0.6rem;
     }
 
-    .match-card {
-      border-radius: 0.8rem;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      padding: 0.6rem 0.65rem 0.7rem 0.65rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .match-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .match-header-main {
-      display: flex;
-      flex-direction: column;
-      gap: 0.1rem;
-    }
-
-    .match-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-    }
-
-    .match-status-text {
-      font-size: 0.8rem;
-      color: #374151;
-    }
-
-    .match-type-pill {
-      font-size: 0.75rem;
-      padding: 0.1rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      color: #374151;
-      white-space: nowrap;
-    }
-
-    .team-row {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.82rem;
-      color: #374151;
-    }
-
-    .team-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-    }
-
-    .team-name {
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .team-name.red {
-      color: #b91c1c;
-    }
-
-    .team-name.blue {
-      color: #1d4ed8;
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.12rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      font-size: 0.75rem;
-      background: #ffffff;
-      color: #374151;
-    }
-
-    .status-chip.red {
-      background: #fef2f2;
-      border-color: #fecaca;
-      color: #7f1d1d;
-    }
-
-    .status-chip.blue {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1e3a8a;
-    }
-
-    .status-chip.half {
-      background: #f3f4f6;
-      border-color: #e5e7eb;
-      color: #374151;
-    }
-
     .empty-state {
       font-size: 0.8rem;
       color: var(--muted);
       text-align: center;
       padding: 0.75rem 0.5rem;
-    }
-
-    .card-footer-links {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 0.35rem;
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .card-footer-links a {
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 2px;
-    }
-
-    .card-footer-links span {
-      opacity: 0.7;
-    }
-
-    .card-footer-links span + span::before {
-      content: "•";
-      margin: 0 0.4rem;
     }
 
     .matches-card-header-row {
@@ -520,16 +394,6 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-    }
-
-    .matches-card-subtitle {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .matches-card-subtitle span {
-      font-weight: 600;
-      color: var(--text);
     }
 
     .match-item {
@@ -643,13 +507,14 @@
         <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
         <div class="site-title-group">
           <div class="site-title">FTK Classic</div>
-          <!-- subtitle now starts empty; JS will set to just the player name -->
           <div id="headerSubtitle" class="site-subtitle"></div>
         </div>
       </div>
       <nav class="nav-links">
         <a href="index.html" class="nav-btn secondary">Home</a>
         <a href="spectator.html" class="nav-btn secondary">Scores</a>
+        <a href="calendar.html" class="nav-btn secondary">Calendar</a>
+        <a id="myCalendarLink" href="#" class="nav-btn secondary" style="pointer-events:none; opacity:.6;">My Availability</a>
       </nav>
     </header>
 
@@ -657,8 +522,6 @@
       <section class="layout">
         <!-- LEFT: Player info + achievements -->
         <section class="card">
-          <!-- card-header removed per request -->
-
           <div class="player-header-main">
             <div class="player-name-row">
               <div id="playerName" class="player-name">Player</div>
@@ -683,14 +546,12 @@
               </div>
             </div>
 
-            <!-- Holes won / lost / halved line -->
             <div id="playerStats" class="player-note" style="margin-top:0.5rem;"></div>
 
             <div id="playerAchievementsSection" class="player-achievements" style="display:none;">
               <div class="player-achievements-title">Achievements</div>
               <ul id="playerAchievementsList" class="player-achievements-list"></ul>
 
-              <!-- Next achievement progression -->
               <div class="player-next-achievement" id="playerNextAchievement" style="display:none;">
                 <div class="player-next-title">Next achievement</div>
                 <div class="player-next-bar-outer">
@@ -720,11 +581,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      onValue
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -765,21 +622,12 @@
     };
 
     const STATIC_PLAYER_ACHIEVEMENTS = {
-      "david wolf": [
-        "Fall 2025 FTK Classic champion – Dawgleg GC"
-      ],
-      "jon wall": [
-        "Fall 2025 FTK Classic champion – Dawgleg GC"
-      ],
-      "ivan bolds": [
-        "Fall 2025 FTK Classic champion – Dawgleg GC"
-      ],
-      "will miller": [
-        "Fall 2025 FTK Classic champion – Dawgleg GC"
-      ]
+      "david wolf": ["Fall 2025 FTK Classic champion – Dawgleg GC"],
+      "jon wall": ["Fall 2025 FTK Classic champion – Dawgleg GC"],
+      "ivan bolds": ["Fall 2025 FTK Classic champion – Dawgleg GC"],
+      "will miller": ["Fall 2025 FTK Classic champion – Dawgleg GC"]
     };
 
-    // Hole-win achievement thresholds
     const HOLE_ACHIEVEMENT_THRESHOLDS = [3, 10, 20, 30];
 
     function getCodeForName(name) {
@@ -808,18 +656,13 @@
     function getQueryParams() {
       const params = new URLSearchParams(window.location.search || "");
       const out = {};
-      for (const [k, v] of params.entries()) {
-        out[k] = v;
-      }
+      for (const [k, v] of params.entries()) out[k] = v;
       return out;
     }
 
     function getTeamNames(settings) {
       const t = (settings && settings.teamNames) || {};
-      return {
-        red: t.red || "Red",
-        blue: t.blue || "Blue"
-      };
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
     }
 
     function computeMatchType(mid, m) {
@@ -831,11 +674,7 @@
 
     function computeMatchStatus(mid, m) {
       if (!m) {
-        return {
-          statusTag: "upcoming",
-          statusText: "Not started",
-          detailText: ""
-        };
+        return { statusTag: "upcoming", statusText: "Not started", detailText: "" };
       }
 
       const type = computeMatchType(mid, m);
@@ -857,11 +696,7 @@
       }
 
       if (!played) {
-        return {
-          statusTag: "upcoming",
-          statusText: "Not started",
-          detailText: ""
-        };
+        return { statusTag: "upcoming", statusText: "Not started", detailText: "" };
       }
 
       const holesLeft = (end - start) - played;
@@ -869,37 +704,18 @@
 
       if (holesLeft === 0 || absDiff > holesLeft) {
         if (diff === 0) {
-          return {
-            statusTag: "final",
-            statusText: "Final – All square",
-            detailText: ""
-          };
+          return { statusTag: "final", statusText: "Final – All square", detailText: "" };
         }
-
         const leader = diff > 0 ? "Red" : "Blue";
-        const margin = absDiff;
-        const remaining = holesLeft;
-        return {
-          statusTag: "final",
-          statusText: `Final – ${leader} ${margin} & ${remaining}`,
-          detailText: ""
-        };
+        return { statusTag: "final", statusText: `Final – ${leader} ${absDiff} & ${holesLeft}`, detailText: "" };
       }
 
       if (diff === 0) {
-        return {
-          statusTag: "live",
-          statusText: `Thru ${lastHole} – All square`,
-          detailText: ""
-        };
+        return { statusTag: "live", statusText: `Thru ${lastHole} – All square`, detailText: "" };
       }
 
       const leader = diff > 0 ? "Red" : "Blue";
-      return {
-        statusTag: "live",
-        statusText: `Thru ${lastHole} – ${leader} ${absDiff} up`,
-        detailText: ""
-      };
+      return { statusTag: "live", statusText: `Thru ${lastHole} – ${leader} ${absDiff} up`, detailText: "" };
     }
 
     function computeMatchWinner(matchId, match) {
@@ -910,7 +726,6 @@
       for (let i = 0; i < holes.length; i++) {
         const res = holes[i];
         if (!res || res === "none") continue;
-
         if (res === "red") redUp++;
         else if (res === "blue") blueUp++;
       }
@@ -922,75 +737,55 @@
     function renderAchievements(fullName, holesWon, matchWins) {
       const key = normalizeName(fullName || "");
       const staticList = STATIC_PLAYER_ACHIEVEMENTS[key] || [];
-
-      // Build achievement objects
       const achievements = [];
 
-      // Champions (link to past winners)
-      for (const text of staticList) {
-        achievements.push({ text, link: "past_winners.html", trophy: true });
-      }
+      for (const text of staticList) achievements.push({ text, link: "past_winners.html", trophy: true });
 
-      // Match win achievement
       if (matchWins > 0) {
-        const text =
-          matchWins === 1
-            ? "Won a match at the FTK Classic"
-            : `Won ${matchWins} matches at the FTK Classic`;
-        achievements.push({ text, link: null, trophy: true });
+        achievements.push({
+          text: matchWins === 1 ? "Won a match at the FTK Classic" : `Won ${matchWins} matches at the FTK Classic`,
+          link: null,
+          trophy: true
+        });
       }
 
-      // Hole win achievements
       for (const threshold of HOLE_ACHIEVEMENT_THRESHOLDS) {
         if (holesWon >= threshold) {
-          const text =
-            threshold === 3
-              ? "Won 3 FTK Classic holes"
-              : `Won ${threshold}+ FTK Classic holes`;
-          achievements.push({ text, link: null, trophy: false });
+          achievements.push({
+            text: threshold === 3 ? "Won 3 FTK Classic holes" : `Won ${threshold}+ FTK Classic holes`,
+            link: null,
+            trophy: false
+          });
         }
       }
 
-      // Render
       const section = playerAchievementsSectionEl;
       if (!section) return;
 
       if (!achievements.length) {
         section.style.display = "block";
         playerAchievementsListEl.innerHTML = "";
-        playerAchievementsListEl.insertAdjacentHTML(
-          "beforeend",
-          `<li class="player-achievements-empty">None</li>`
-        );
+        playerAchievementsListEl.insertAdjacentHTML("beforeend", `<li class="player-achievements-empty">None</li>`);
       } else {
         section.style.display = "block";
-        playerAchievementsListEl.innerHTML = achievements
-          .map((ach) => {
-            const icon = ach.trophy ? "🏆" : "⭐";
-            const inner = ach.link
-              ? `<span class="player-achievement-icon">${icon}</span><a href="${ach.link}" class="player-achievement-link">${ach.text}</a>`
-              : `<span class="player-achievement-icon">${icon}</span><span>${ach.text}</span>`;
-            return `<li class="player-achievement-item"><span class="player-achievement-badge">${inner}</span></li>`;
-          })
-          .join("");
+        playerAchievementsListEl.innerHTML = achievements.map((ach) => {
+          const icon = ach.trophy ? "🏆" : "⭐";
+          const inner = ach.link
+            ? `<span class="player-achievement-icon">${icon}</span><a href="${ach.link}" class="player-achievement-link">${ach.text}</a>`
+            : `<span class="player-achievement-icon">${icon}</span><span>${ach.text}</span>`;
+          return `<li class="player-achievement-item"><span class="player-achievement-badge">${inner}</span></li>`;
+        }).join("");
       }
 
-      // Next achievement progress bar (holes-based)
-      if (!playerNextAchievementEl || !playerNextAchievementBarEl || !playerNextAchievementTextEl) {
-        return;
-      }
+      if (!playerNextAchievementEl || !playerNextAchievementBarEl || !playerNextAchievementTextEl) return;
 
       playerNextAchievementEl.style.display = "block";
-
       const thresholds = HOLE_ACHIEVEMENT_THRESHOLDS.slice().sort((a, b) => a - b);
       let nextThreshold = null;
       let prevThreshold = 0;
 
       for (const t of thresholds) {
-        if (holesWon < t) {
-          nextThreshold = t;
-          break;
-        }
+        if (holesWon < t) { nextThreshold = t; break; }
         prevThreshold = t;
       }
 
@@ -1070,30 +865,22 @@
     const requestedNine = urlParams.nine || null;
 
     function resolvePlayerId() {
-      if (requestedId && players[requestedId]) {
-        return requestedId;
-      }
+      if (requestedId && players[requestedId]) return requestedId;
 
       if (requestedCode) {
         const codeName = PLAYER_CODES[requestedCode];
         if (codeName) {
           const target = normalizeName(codeName);
-          const entries = Object.entries(players || {});
-          for (const [pid, p] of entries) {
-            if (normalizeName(p.name || "") === target) {
-              return pid;
-            }
+          for (const [pid, p] of Object.entries(players || {})) {
+            if (normalizeName(p.name || "") === target) return pid;
           }
         }
       }
 
       if (requestedName) {
         const target = normalizeName(requestedName);
-        const entries = Object.entries(players || {});
-        for (const [pid, p] of entries) {
-          if (normalizeName(p.name || "") === target) {
-            return pid;
-          }
+        for (const [pid, p] of Object.entries(players || {})) {
+          if (normalizeName(p.name || "") === target) return pid;
         }
       }
 
@@ -1105,10 +892,15 @@
 
       const playerId = resolvePlayerId();
 
-      // Hide the Team row entirely (per previous request)
-      if (playerTeamRowEl) {
-        playerTeamRowEl.style.display = "none";
+      // ✅ REQUIRED: enable player's personal availability calendar link
+      const myCal = document.getElementById("myCalendarLink");
+      if (myCal && playerId) {
+        myCal.href = `player_calendar.html?player=${encodeURIComponent(playerId)}`;
+        myCal.style.pointerEvents = "auto";
+        myCal.style.opacity = "1";
       }
+
+      if (playerTeamRowEl) playerTeamRowEl.style.display = "none";
 
       if (!playerId) {
         playerNameEl.textContent = "Player not found";
@@ -1133,12 +925,10 @@
       const codeForPlayer = getCodeForName(fullName);
 
       playerNameEl.textContent = fullName;
-      // Subtitle now just shows the name, not "Player profile – ..."
       headerSubtitleEl.textContent = fullName;
       playerErrorEl.style.display = "none";
 
-      const teamLabel =
-        team === "blue" ? `${teamNames.blue} team` : `${teamNames.red} team`;
+      const teamLabel = team === "blue" ? `${teamNames.blue} team` : `${teamNames.red} team`;
       if (playerTeamEl) playerTeamEl.textContent = teamLabel;
 
       playerHandicapEl.textContent = handicap === "—" ? "—" : String(handicap);
@@ -1146,8 +936,7 @@
 
       playerTeamBadgeEl.style.display = "inline-flex";
       const badgeLabel = team === "blue" ? `${teamNames.blue} team` : `${teamNames.red} team`;
-      playerTeamBadgeEl.className =
-        "player-team-badge " + (team === "blue" ? "blue" : "red");
+      playerTeamBadgeEl.className = "player-team-badge " + (team === "blue" ? "blue" : "red");
       playerTeamBadgeEl.innerHTML = `
         <span class="dot"></span>
         <span id="playerTeamBadgeLabel">${badgeLabel}</span>
@@ -1155,17 +944,6 @@
 
       const playerMatches = getMatchesForPlayer(playerId);
 
-      // Count unique matchups (ignoring separate Front 9 / Back 9 records)
-      const uniqueMatchups = new Set();
-      for (const pm of playerMatches) {
-        const m = pm.match || {};
-        const redIds = ((m.red && m.red.players) || []).slice().sort().join(",");
-        const blueIds = ((m.blue && m.blue.players) || []).slice().sort().join(",");
-        uniqueMatchups.add(redIds + "|" + blueIds);
-      }
-      const matchCount = uniqueMatchups.size;
-
-      // Aggregate holes + match wins (live)
       let holesWon = 0;
       let holesLost = 0;
       let holesHalved = 0;
@@ -1173,8 +951,8 @@
 
       for (const pm of playerMatches) {
         const m = pm.match;
-        const side = pm.side; // "red" or "blue"
-        const type = pm.type; // "front" or "back"
+        const side = pm.side;
+        const type = pm.type;
 
         const holes = m.holes || Array(18).fill("none");
         const start = type === "back" ? 9 : 0;
@@ -1184,21 +962,15 @@
           const res = holes[i];
           if (!res || res === "none") continue;
 
-          if (res === "half" || res === "halved") {
-            holesHalved++;
-          } else if (res === "red" || res === "blue") {
-            if (res === side) {
-              holesWon++;
-            } else {
-              holesLost++;
-            }
+          if (res === "half" || res === "halved") holesHalved++;
+          else if (res === "red" || res === "blue") {
+            if (res === side) holesWon++;
+            else holesLost++;
           }
         }
 
         const winner = computeMatchWinner(pm.id, m);
-        if (winner && winner === side) {
-          matchWins++;
-        }
+        if (winner && winner === side) matchWins++;
       }
 
       const manual = (manualStats && manualStats[playerId]) || {};
@@ -1209,18 +981,12 @@
 
       if (playerStatsEl) {
         const totalPlayed = holesWon + holesLost + holesHalved;
-        if (totalPlayed === 0) {
-          playerStatsEl.textContent = "Holes so far: no holes recorded yet.";
-        } else {
-          playerStatsEl.textContent =
-            "Holes so far: " +
-            holesWon + " won · " +
-            holesLost + " lost · " +
-            holesHalved + " halved";
-        }
+        playerStatsEl.textContent =
+          totalPlayed === 0
+            ? "Holes so far: no holes recorded yet."
+            : "Holes so far: " + holesWon + " won · " + holesLost + " lost · " + holesHalved + " halved";
       }
 
-      // Achievements & next achievement bar (includes manual historical stats)
       renderAchievements(fullName, totalHolesForAchievements, totalMatchWinsForAchievements);
 
       if (!playerMatches.length) {
@@ -1229,99 +995,67 @@
         return;
       }
 
-      const html = playerMatches
-        .map(({ id: mid, match: m, side, type }) => {
-          const typeLabel = type === "back" ? "Back 9" : "Front 9";
+      const html = playerMatches.map(({ id: mid, match: m, type }) => {
+        const typeLabel = type === "back" ? "Back 9" : "Front 9";
 
-          const redIds = (m.red && m.red.players) || [];
-          const blueIds = (m.blue && m.blue.players) || [];
-          const redNames = redIds
-            .map((pid) => players[pid]?.name)
-            .filter(Boolean)
-            .map(getLastName);
-          const blueNames = blueIds
-            .map((pid) => players[pid]?.name)
-            .filter(Boolean)
-            .map(getLastName);
+        const redIds = (m.red && m.red.players) || [];
+        const blueIds = (m.blue && m.blue.players) || [];
+        const redNames = redIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
+        const blueNames = blueIds.map((pid) => players[pid]?.name).filter(Boolean).map(getLastName);
 
-          const redPair = redNames.length ? redNames.join(" / ") : "Red pair";
-          const bluePair = blueNames.length ? blueNames.join(" / ") : "Blue pair";
+        const redPair = redNames.length ? redNames.join(" / ") : "Red pair";
+        const bluePair = blueNames.length ? blueNames.join(" / ") : "Blue pair";
 
-          const { statusTag, statusText } = computeMatchStatus(
-            mid,
-            m
-          );
+        const { statusTag, statusText } = computeMatchStatus(mid, m);
 
-          const statusClass =
-            statusTag === "final"
-              ? "match-item-status final"
-              : statusTag === "live"
-              ? "match-item-status live"
-              : "match-item-status upcoming";
+        const statusClass =
+          statusTag === "final" ? "match-item-status final" :
+          statusTag === "live" ? "match-item-status live" :
+          "match-item-status upcoming";
 
-          const codeForPlayerLink = getCodeForName(fullName);
+        const codeForPlayerLink = getCodeForName(fullName);
 
-          const linksHtml = `
-            <a href="match_spectator.html?id=${mid}" class="match-link">
-              <span class="icon">👀</span>
-              <span>View as spectator</span>
-            </a>
-            <a href="${
-              codeForPlayerLink
-                ? `match.html?code=${encodeURIComponent(codeForPlayerLink)}&match=${encodeURIComponent(mid)}`
-                : `match.html?match=${encodeURIComponent(mid)}`
-            }" class="match-link">
-              <span class="icon">🛠️</span>
-              <span>Match admin</span>
-            </a>
-          `;
+        const linksHtml = `
+          <a href="match_spectator.html?id=${mid}" class="match-link">
+            <span class="icon">👀</span>
+            <span>View as spectator</span>
+          </a>
+          <a href="${
+            codeForPlayerLink
+              ? `match.html?code=${encodeURIComponent(codeForPlayerLink)}&match=${encodeURIComponent(mid)}`
+              : `match.html?match=${encodeURIComponent(mid)}`
+          }" class="match-link">
+            <span class="icon">🛠️</span>
+            <span>Match admin</span>
+          </a>
+        `;
 
-          return `
-            <div class="match-item">
-              <div class="match-item-header">
-                <div class="match-item-title">Match ${mid}</div>
-                <div class="match-item-type">${typeLabel}</div>
-              </div>
-              <div class="match-item-line">
-                <span>${redPair} vs ${bluePair}</span>
-                <span class="${statusClass}">${statusText}</span>
-              </div>
-              <div class="match-item-footer">
-                <div class="match-item-links">
-                  ${linksHtml}
-                </div>
+        return `
+          <div class="match-item">
+            <div class="match-item-header">
+              <div class="match-item-title">Match ${mid}</div>
+              <div class="match-item-type">${typeLabel}</div>
+            </div>
+            <div class="match-item-line">
+              <span>${redPair} vs ${bluePair}</span>
+              <span class="${statusClass}">${statusText}</span>
+            </div>
+            <div class="match-item-footer">
+              <div class="match-item-links">
+                ${linksHtml}
               </div>
             </div>
-          `;
-        })
-        .join("");
+          </div>
+        `;
+      }).join("");
 
       matchesListEl.innerHTML = html;
     }
 
-    onValue(settingsRef, (snap) => {
-      settings = snap.val() || {};
-      settingsLoaded = true;
-      render();
-    });
-
-    onValue(playersRef, (snap) => {
-      players = snap.val() || {};
-      playersLoaded = true;
-      render();
-    });
-
-    onValue(matchesRef, (snap) => {
-      matches = snap.val() || {};
-      matchesLoaded = true;
-      render();
-    });
-
-    onValue(manualStatsRef, (snap) => {
-      manualStats = snap.val() || {};
-      manualStatsLoaded = true;
-      render();
-    });
+    onValue(settingsRef, (snap) => { settings = snap.val() || {}; settingsLoaded = true; render(); });
+    onValue(playersRef, (snap) => { players = snap.val() || {}; playersLoaded = true; render(); });
+    onValue(matchesRef, (snap) => { matches = snap.val() || {}; matchesLoaded = true; render(); });
+    onValue(manualStatsRef, (snap) => { manualStats = snap.val() || {}; manualStatsLoaded = true; render(); });
   </script>
 </body>
 </html>
