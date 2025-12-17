@@ -64,26 +64,6 @@
       gap: 0.6rem;
       margin-bottom: 0.5rem;
     }
-    /* Fix nav overlap on mobile */
-@media (max-width: 700px) {
-  .site-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nav-links {
-    margin-left: 0;
-    margin-top: 0.4rem;
-    width: 100%;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .nav-btn {
-    flex: 1;
-    text-align: center;
-  }
-}
 
     .site-header-left {
       display: flex;
@@ -113,26 +93,98 @@
       white-space: nowrap;
     }
 
-    .nav-links {
+    /* HAMBURGER MENU (Home / Scores / Feed) */
+    .menu-wrap {
       margin-left: auto;
+      position: relative;
       display: flex;
+      align-items: center;
       gap: 0.4rem;
-      flex-wrap: nowrap;
     }
 
-    .nav-btn {
-      font-size: 0.85rem;
+    .hamburger-btn {
+      height: 36px;
+      width: 40px;
       border-radius: 999px;
-      padding: 0.3rem 0.9rem;
       border: 1px solid var(--border);
+      background: #ffffff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--tap-target);
+      min-width: var(--tap-target);
+    }
+
+    .hamburger-btn:active { transform: scale(0.98); }
+
+    .hamburger-icon {
+      width: 18px;
+      height: 12px;
+      position: relative;
+    }
+    .hamburger-icon span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #111827;
+      border-radius: 999px;
+    }
+    .hamburger-icon span:nth-child(1) { top: 0; }
+    .hamburger-icon span:nth-child(2) { top: 5px; }
+    .hamburger-icon span:nth-child(3) { top: 10px; }
+
+    .menu-panel {
+      position: absolute;
+      top: 44px;
+      right: 0;
+      width: 220px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 0.9rem;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      display: none;
+      overflow: hidden;
+      z-index: 9998;
+    }
+    .menu-panel.open { display: block; }
+
+    .menu-section {
+      padding: 0.45rem 0.45rem 0.35rem;
+      border-bottom: 1px solid #eef2f7;
+      background: #ffffff;
+    }
+    .menu-section:last-child { border-bottom: none; }
+
+    .menu-section-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0.2rem 0.3rem 0.35rem;
+    }
+
+    .menu-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.6rem;
+      border-radius: 0.7rem;
+      border: 1px solid transparent;
       background: #ffffff;
       text-decoration: none;
       color: var(--text);
-      white-space: nowrap;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: left;
+      min-height: var(--tap-target);
     }
 
-    .nav-btn.secondary {
+    .menu-item:hover {
       background: #f3f4f6;
+      border-color: #e5e7eb;
     }
 
     main {
@@ -162,10 +214,7 @@
     }
 
     /* Match list view */
-
-    #matchListCard {
-      display: none;
-    }
+    #matchListCard { display: none; }
 
     .match-list-container {
       display: flex;
@@ -183,10 +232,7 @@
       align-items: center;
     }
 
-    .match-list-main {
-      flex: 1;
-      min-width: 0;
-    }
+    .match-list-main { flex: 1; min-width: 0; }
 
     .match-list-title {
       font-size: 0.95rem;
@@ -232,7 +278,6 @@
     }
 
     /* Sticky score bubble (admin view) */
-
     .score-wrapper {
       position: sticky;
       top: 0;
@@ -249,10 +294,7 @@
     }
 
     /* BIG GROUP PHOTO BOX */
-
-    .group-photo-area {
-      margin-bottom: 0.65rem;
-    }
+    .group-photo-area { margin-bottom: 0.65rem; }
 
     .group-photo-big-button {
       width: 100%;
@@ -272,9 +314,7 @@
       border-color: #eab308;
     }
 
-    .group-photo-big-button:active {
-      transform: scale(0.98);
-    }
+    .group-photo-big-button:active { transform: scale(0.98); }
 
     .group-photo-icon {
       width: 44px;
@@ -313,15 +353,9 @@
       margin-bottom: 0.3rem;
     }
 
-    .match-title-text {
-      font-size: 1rem;
-      font-weight: 700;
-    }
+    .match-title-text { font-size: 1rem; font-weight: 700; }
 
-    .match-subtitle-text {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
+    .match-subtitle-text { font-size: 0.8rem; color: var(--muted); }
 
     .match-actions-row {
       display: flex;
@@ -371,13 +405,8 @@
       justify-content: center;
     }
 
-    .camera-btn:hover {
-      background: #fef9c3;
-    }
-
-    .camera-btn:active {
-      transform: scale(0.97);
-    }
+    .camera-btn:hover { background: #fef9c3; }
+    .camera-btn:active { transform: scale(0.97); }
 
     .match-timer-row {
       display: flex;
@@ -402,9 +431,7 @@
       color: var(--text);
     }
 
-    .match-timer-value.timer-done {
-      color: var(--red);
-    }
+    .match-timer-value.timer-done { color: var(--red); }
 
     .match-timer-controls {
       display: flex;
@@ -426,17 +453,7 @@
       white-space: nowrap;
     }
 
-    .match-timer-btn:active {
-      transform: scale(0.97);
-    }
-
-    .match-photo-btn {
-      background: #e0f2fe;
-    }
-
-    .match-photo-btn:hover {
-      background: #bfdbfe;
-    }
+    .match-timer-btn:active { transform: scale(0.97); }
 
     .score-line {
       display: flex;
@@ -447,17 +464,9 @@
       gap: 0.5rem;
     }
 
-    .score-line span {
-      flex: 1;
-    }
-
-    .score-line span:nth-child(2) {
-      text-align: center;
-    }
-
-    .score-line span:last-child {
-      text-align: right;
-    }
+    .score-line span { flex: 1; }
+    .score-line span:nth-child(2) { text-align: center; }
+    .score-line span:last-child { text-align: right; }
 
     .score-slider {
       position: relative;
@@ -484,14 +493,8 @@
       padding-bottom: 0.15rem;
     }
 
-    .pill-row::-webkit-scrollbar {
-      height: 4px;
-    }
-
-    .pill-row::-webkit-scrollbar-thumb {
-      background: #d1d5db;
-      border-radius: 999px;
-    }
+    .pill-row::-webkit-scrollbar { height: 4px; }
+    .pill-row::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 999px; }
 
     .score-pill {
       flex: 0 0 auto;
@@ -509,27 +512,10 @@
       justify-content: center;
     }
 
-    .score-pill.red {
-      background: var(--red-soft);
-      border-color: #fecaca;
-      color: var(--red);
-    }
-
-    .score-pill.blue {
-      background: var(--blue-soft);
-      border-color: #bfdbfe;
-      color: var(--blue);
-    }
-
-    .score-pill.half {
-      background: var(--half-soft);
-      border-color: #d4d4d8;
-      color: var(--half);
-    }
-
-    .score-pill.empty {
-      opacity: 0.35;
-    }
+    .score-pill.red { background: var(--red-soft); border-color: #fecaca; color: var(--red); }
+    .score-pill.blue { background: var(--blue-soft); border-color: #bfdbfe; color: var(--blue); }
+    .score-pill.half { background: var(--half-soft); border-color: #d4d4d8; color: var(--half); }
+    .score-pill.empty { opacity: 0.35; }
 
     .players-row {
       display: flex;
@@ -539,27 +525,13 @@
       margin-top: 0.3rem;
     }
 
-    .team-col {
-      flex: 1;
-      font-size: 0.85rem;
-    }
+    .team-col { flex: 1; font-size: 0.85rem; }
 
-    .team-name {
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-    }
+    .team-name { font-weight: 600; margin-bottom: 0.15rem; }
+    .team-name.red { color: var(--red); }
+    .team-name.blue { color: var(--blue); }
 
-    .team-name.red {
-      color: var(--red);
-    }
-
-    .team-name.blue {
-      color: var(--blue);
-    }
-
-    .player-name {
-      font-size: 0.85rem;
-    }
+    .player-name { font-size: 0.85rem; }
 
     .player-line {
       display: flex;
@@ -591,22 +563,10 @@
       justify-content: center;
     }
 
-    .m-pill.m-on {
-      background: #bbf7d0;
-      border-color: #4ade80;
-      color: #166534;
-    }
+    .m-pill.m-on { background: #bbf7d0; border-color: #4ade80; color: #166534; }
+    .m-pill.m-off { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
 
-    .m-pill.m-off {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #991b1b;
-    }
-
-    .holes-card {
-      margin-top: 0.2rem;
-      display: none;
-    }
+    .holes-card { margin-top: 0.2rem; display: none; }
 
     .hole-row {
       border-top: 1px solid #e5e7eb;
@@ -615,17 +575,9 @@
       border-radius: 0.75rem;
     }
 
-    .hole-row-red {
-      background: var(--red-soft);
-    }
-
-    .hole-row-blue {
-      background: var(--blue-soft);
-    }
-
-    .hole-row-half {
-      background: var(--half-soft);
-    }
+    .hole-row-red { background: var(--red-soft); }
+    .hole-row-blue { background: var(--blue-soft); }
+    .hole-row-half { background: var(--half-soft); }
 
     .hole-header-line {
       display: flex;
@@ -635,10 +587,7 @@
       margin-bottom: 0.35rem;
     }
 
-    .hole-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
+    .hole-label { font-size: 0.9rem; font-weight: 600; }
 
     .hole-meta {
       font-size: 0.8rem;
@@ -674,32 +623,11 @@
       justify-content: center;
     }
 
-    .pill-btn.red-active {
-      background: var(--red-soft);
-      border-color: #fecaca;
-      color: var(--red);
-    }
-
-    .pill-btn.blue-active {
-      background: var(--blue-soft);
-      border-color: #bfdbfe;
-      color: var(--blue);
-    }
-
-    .pill-btn.half-active {
-      background: var(--half-soft);
-      border-color: #d4d4d8;
-      color: var(--half);
-    }
-
-    .pill-btn.halved {
-      font-size: 0.85rem;
-    }
-
-    .pill-btn.clear {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
+    .pill-btn.red-active { background: var(--red-soft); border-color: #fecaca; color: var(--red); }
+    .pill-btn.blue-active { background: var(--blue-soft); border-color: #bfdbfe; color: var(--blue); }
+    .pill-btn.half-active { background: var(--half-soft); border-color: #d4d4d8; color: var(--half); }
+    .pill-btn.halved { font-size: 0.85rem; }
+    .pill-btn.clear { font-size: 0.8rem; color: var(--muted); }
 
     .hole-nav {
       display: flex;
@@ -722,10 +650,7 @@
       gap: 0.25rem;
     }
 
-    .hole-nav-btn[disabled] {
-      opacity: 0.5;
-      cursor: default;
-    }
+    .hole-nav-btn[disabled] { opacity: 0.5; cursor: default; }
 
     .hole-meta-count {
       font-size: 0.8rem;
@@ -734,14 +659,7 @@
       flex: 1;
     }
 
-    .subtext {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 0.25rem;
-    }
-
     /* POP-UP TOAST / MODAL */
-
     #toastContainer {
       position: fixed;
       inset: 0;
@@ -753,9 +671,7 @@
       padding: 1rem;
     }
 
-    #toastContainer.active {
-      display: flex;
-    }
+    #toastContainer.active { display: flex; }
 
     .toast {
       background: #f9fafb;
@@ -784,9 +700,7 @@
       flex-shrink: 0;
     }
 
-    .toast-content {
-      flex: 1;
-    }
+    .toast-content { flex: 1; }
 
     .toast-title {
       font-size: 0.98rem;
@@ -819,28 +733,16 @@
       justify-content: center;
     }
 
-    .toast-btn.primary {
-      background: #fbbf24;
-      color: #111827;
-    }
-
-    .toast-btn.secondary {
-      background: #e5e7eb;
-      color: #374151;
-    }
+    .toast-btn.primary { background: #fbbf24; color: #111827; }
+    .toast-btn.secondary { background: #e5e7eb; color: #374151; }
 
     @keyframes toast-pop-in {
-      from {
-        opacity: 0;
-        transform: scale(0.92) translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
+      from { opacity: 0; transform: scale(0.92) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
     }
   </style>
 </head>
+
 <body>
   <header class="site-header">
     <div class="site-header-left">
@@ -850,12 +752,22 @@
         <div class="site-subtitle">Match admin – select a match</div>
       </div>
     </div>
-    <div class="nav-links">
-      <a href="index.html" class="nav-btn secondary">Home</a>
-      <a href="spectator.html" class="nav-btn secondary">Scores</a>
-      <a href="photos.html" class="nav-btn secondary">Photos</a>
-      <a href="tournament_feed.html" class="nav-btn secondary">Feed</a>
-      <a href="chat.html" class="nav-btn secondary">Chat</a>
+
+    <div class="menu-wrap">
+      <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Open menu">
+        <div class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+      </button>
+
+      <div id="menuPanel" class="menu-panel" role="menu" aria-label="Navigation menu">
+        <div class="menu-section">
+          <div class="menu-section-title">Navigate</div>
+          <a class="menu-item" href="index.html">Home</a>
+          <a class="menu-item" href="spectator.html">Scores</a>
+          <a class="menu-item" href="tournament_feed.html">Feed</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -936,25 +848,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      onValue,
-      update,
-      push,
-      set
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-    import {
-      getStorage,
-      ref as sRef,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
-    import {
-      getAuth,
-      signInAnonymously,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getDatabase, ref, onValue, update, push, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -970,42 +866,30 @@
     const db = getDatabase(app);
     const storage = getStorage(app);
 
-    // 🔐 Anonymous auth to satisfy ".write": "auth != null"
     const auth = getAuth(app);
-    signInAnonymously(auth).catch((error) => {
-      console.error("Anonymous auth failed:", error);
-    });
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("Signed in anonymously:", user.uid);
-      }
-    });
+    signInAnonymously(auth).catch((error) => console.error("Anonymous auth failed:", error));
+    onAuthStateChanged(auth, (user) => { if (user) console.log("Signed in anonymously:", user.uid); });
 
-    // --- Player code protection + mapping to match IDs ---
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const menuPanel = document.getElementById("menuPanel");
+    function closeMenu() { menuPanel.classList.remove("open"); }
+    function toggleMenu() { menuPanel.classList.toggle("open"); }
+    hamburgerBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); });
+    document.addEventListener("click", (e) => {
+      if (!menuPanel.classList.contains("open")) return;
+      const inside = menuPanel.contains(e.target) || hamburgerBtn.contains(e.target);
+      if (!inside) closeMenu();
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+
     const params = new URLSearchParams(window.location.search);
-
-    // Map player codes to their match admin pages
-    const CODE_TO_MATCH = {
-      "3601": "1", // David Wolf
-      "3602": "2", // Jake Smith
-      "3603": "3", // Jon Wall
-      "3604": "4", // Justin Vaughn
-      "3605": "5", // Will Miller
-    };
-
+    const CODE_TO_MATCH = { "3601": "1", "3602": "2", "3603": "3", "3604": "4", "3605": "5" };
     let matchId = params.get("match") || params.get("id") || null;
     const playerCode = params.get("code");
-
-    // If a player code is provided *and* no explicit match is provided,
-    // map the code -> match. If the code is unknown, send them home.
-    // (If "match" is provided, we honor it so Match Admin links from player.html work.)
     if (playerCode && !matchId) {
       const mappedMatch = CODE_TO_MATCH[playerCode];
-      if (!mappedMatch) {
-        window.location.href = "index.html";
-      } else {
-        matchId = mappedMatch;
-      }
+      if (!mappedMatch) window.location.href = "index.html";
+      else matchId = mappedMatch;
     }
 
     const settingsRef = ref(db, "settings");
@@ -1065,10 +949,8 @@
 
     function startMatchTimer() {
       if (!matchId || !matchTimerEl) return;
-      if (timerInterval) return; // already running
-      if (timerRemainingSeconds <= 0 || timerRemainingSeconds > 60) {
-        timerRemainingSeconds = 60;
-      }
+      if (timerInterval) return;
+      if (timerRemainingSeconds <= 0 || timerRemainingSeconds > 60) timerRemainingSeconds = 60;
       matchTimerEl.classList.remove("timer-done");
       updateMatchTimerDisplay();
       timerInterval = setInterval(() => {
@@ -1085,38 +967,17 @@
       }, 1000);
     }
 
-    if (matchTimerStartBtn) {
-      matchTimerStartBtn.addEventListener("click", startMatchTimer);
-    }
-
-    if (matchTimerResetBtn) {
-      matchTimerResetBtn.addEventListener("click", resetMatchTimer);
-    }
-
-    if (matchTimerEl) {
-      timerRemainingSeconds = 60;
-      updateMatchTimerDisplay();
-    }
+    if (matchTimerStartBtn) matchTimerStartBtn.addEventListener("click", startMatchTimer);
+    if (matchTimerResetBtn) matchTimerResetBtn.addEventListener("click", resetMatchTimer);
+    if (matchTimerEl) { timerRemainingSeconds = 60; updateMatchTimerDisplay(); }
 
     const holeConfigs = [
-      { num: 1,  par: 5, yards: 474 },
-      { num: 2,  par: 4, yards: 340 },
-      { num: 3,  par: 4, yards: 360 },
-      { num: 4,  par: 3, yards: 180 },
-      { num: 5,  par: 5, yards: 455 },
-      { num: 6,  par: 4, yards: 390 },
-      { num: 7,  par: 3, yards: 145 },
-      { num: 8,  par: 4, yards: 400 },
-      { num: 9,  par: 4, yards: 270 },
-      { num: 10, par: 3, yards: 155 },
-      { num: 11, par: 4, yards: 335 },
-      { num: 12, par: 3, yards: 160 },
-      { num: 13, par: 4, yards: 385 },
-      { num: 14, par: 3, yards: 170 },
-      { num: 15, par: 5, yards: 500 },
-      { num: 16, par: 4, yards: 435 },
-      { num: 17, par: 4, yards: 355 },
-      { num: 18, par: 5, yards: 490 },
+      { num: 1,  par: 5, yards: 474 }, { num: 2,  par: 4, yards: 340 }, { num: 3,  par: 4, yards: 360 },
+      { num: 4,  par: 3, yards: 180 }, { num: 5,  par: 5, yards: 455 }, { num: 6,  par: 4, yards: 390 },
+      { num: 7,  par: 3, yards: 145 }, { num: 8,  par: 4, yards: 400 }, { num: 9,  par: 4, yards: 270 },
+      { num: 10, par: 3, yards: 155 }, { num: 11, par: 4, yards: 335 }, { num: 12, par: 3, yards: 160 },
+      { num: 13, par: 4, yards: 385 }, { num: 14, par: 3, yards: 170 }, { num: 15, par: 5, yards: 500 },
+      { num: 16, par: 4, yards: 435 }, { num: 17, par: 4, yards: 355 }, { num: 18, par: 5, yards: 490 },
     ];
 
     let settings = {};
@@ -1128,7 +989,6 @@
     let playersLoaded = false;
     let matchesLoaded = false;
 
-    // state: which absolute hole index (0–17) we’re on
     let currentHoleIndex = null;
     let segmentStart = 0;
     let segmentEnd = 9;
@@ -1142,73 +1002,29 @@
 
       let firstEmpty = -1;
       for (let i = segmentStart; i < segmentEnd; i++) {
-        if (holes[i] === "none") {
-          firstEmpty = i;
-          break;
-        }
+        if (holes[i] === "none") { firstEmpty = i; break; }
       }
-      if (firstEmpty >= 0) {
-        currentHoleIndex = firstEmpty;
-      } else {
-        // all holes filled -> show last hole in the segment
-        currentHoleIndex = segmentEnd - 1;
-      }
+      currentHoleIndex = firstEmpty >= 0 ? firstEmpty : (segmentEnd - 1);
     }
 
-    function recalcCurrentHoleIndex() {
-      if (!matchData || !matchId) return;
-      const holes = matchData.holes || [];
-      let firstEmpty = -1;
-      for (let i = segmentStart; i < segmentEnd; i++) {
-        if (holes[i] === "none") {
-          firstEmpty = i;
-          break;
-        }
-      }
-      if (firstEmpty >= 0) {
-        currentHoleIndex = firstEmpty;
-      } else {
-        currentHoleIndex = segmentEnd - 1;
-      }
-    }
-
-    onValue(settingsRef, (snap) => {
-      settings = snap.val() || {};
-      settingsLoaded = true;
-      renderMain();
-    });
-
-    onValue(playersRef, (snap) => {
-      players = snap.val() || {};
-      playersLoaded = true;
-      renderMain();
-    });
+    onValue(settingsRef, (snap) => { settings = snap.val() || {}; settingsLoaded = true; renderMain(); });
+    onValue(playersRef,  (snap) => { players  = snap.val() || {}; playersLoaded  = true; renderMain(); });
 
     onValue(matchesRef, (snap) => {
       matchesAll = snap.val() || {};
       matchesLoaded = true;
 
       if (matchId) {
-        matchData = matchesAll[matchId] || {
-          type: Number(matchId) > 8 ? "back" : "front",
-          holes: Array(18).fill("none"),
-        };
-        if (!matchData.holes) {
-          matchData.holes = Array(18).fill("none");
-        }
-        if (currentHoleIndex === null) {
-          initCurrentHoleIndex();
-        }
+        matchData = matchesAll[matchId] || { type: Number(matchId) > 8 ? "back" : "front", holes: Array(18).fill("none") };
+        if (!matchData.holes) matchData.holes = Array(18).fill("none");
+        if (currentHoleIndex === null) initCurrentHoleIndex();
       }
       renderMain();
     });
 
     function getTeamNames() {
       const t = settings.teamNames || {};
-      return {
-        red: t.red || "Red",
-        blue: t.blue || "Blue",
-      };
+      return { red: t.red || "Red", blue: t.blue || "Blue" };
     }
 
     function getLastName(fullName) {
@@ -1245,10 +1061,7 @@
       const end = start + 9;
       const holes = m?.holes || Array(18).fill("none");
 
-      let redWins = 0;
-      let blueWins = 0;
-      let halves = 0;
-
+      let redWins = 0, blueWins = 0, halves = 0;
       for (let i = start; i < end; i++) {
         const h = holes[i];
         if (h === "red") redWins++;
@@ -1264,10 +1077,8 @@
       let status = m?.status || "upcoming";
       let summary = "Ready to start";
 
-      if (holesPlayed === 0) {
-        status = "upcoming";
-        summary = "Ready to start";
-      } else if (holesRemaining === 0) {
+      if (holesPlayed === 0) { status = "upcoming"; summary = "Ready to start"; }
+      else if (holesRemaining === 0) {
         status = "final";
         if (diff === 0) summary = "Halved";
         else if (diff > 0) summary = "Red wins " + Math.abs(diff) + " up";
@@ -1295,7 +1106,6 @@
         const typeLabel = type === "back" ? "Back 9" : "Front 9";
 
         const { red, blue } = getMatchPlayersFor(m || {});
-
         const redLasts = red.map(p => getLastName(p.name)).filter(Boolean);
         const blueLasts = blue.map(p => getLastName(p.name)).filter(Boolean);
 
@@ -1328,15 +1138,7 @@
 
     function computeScoreSummary() {
       if (!matchData || !matchId) {
-        return {
-          leader: null,
-          diff: 0,
-          centerText: "Ready to start",
-          statusTag: "Not started",
-          totalHoles: 9,
-          holesPlayed: 0,
-          holesRemaining: 9,
-        };
+        return { centerText: "Ready to start", statusTag: "Not started", totalHoles: 9, holesPlayed: 0, holesRemaining: 9 };
       }
 
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
@@ -1344,10 +1146,7 @@
       const end = start + 9;
       const holes = matchData.holes || Array(18).fill("none");
 
-      let redWins = 0;
-      let blueWins = 0;
-      let halves = 0;
-
+      let redWins = 0, blueWins = 0, halves = 0;
       for (let i = start; i < end; i++) {
         const h = holes[i];
         if (h === "red") redWins++;
@@ -1360,14 +1159,9 @@
       const holesRemaining = total - holesPlayed;
       const diff = redWins - blueWins;
 
-      let leader = null;
-      if (diff > 0) leader = "red";
-      else if (diff < 0) leader = "blue";
-
       let centerText = "Ready to start";
-      if (holesPlayed === 0) {
-        centerText = "Ready to start";
-      } else if (holesRemaining === 0) {
+      if (holesPlayed === 0) centerText = "Ready to start";
+      else if (holesRemaining === 0) {
         if (diff === 0) centerText = "Halved";
         else if (diff > 0) centerText = `Red wins ${Math.abs(diff)} up`;
         else centerText = `Blue wins ${Math.abs(diff)} up`;
@@ -1381,15 +1175,7 @@
       if (holesPlayed === 0) statusTag = "Not started";
       else if (holesRemaining === 0) statusTag = "Final";
 
-      return {
-        leader,
-        diff: Math.abs(diff),
-        centerText,
-        statusTag,
-        totalHoles: total,
-        holesPlayed,
-        holesRemaining,
-      };
+      return { centerText, statusTag, totalHoles: total, holesPlayed, holesRemaining };
     }
 
     function updateScoreUI() {
@@ -1442,18 +1228,8 @@
         <div class="player-line">
           <div class="player-name">${label}</div>
           <div class="player-mulligans">
-            <div class="m-pill ${mUsed ? "m-off" : "m-on"}"
-                 data-mulligan-toggle
-                 data-player-id="${playerId}"
-                 data-type="m">
-              M
-            </div>
-            <div class="m-pill ${rmUsed ? "m-off" : "m-on"}"
-                 data-mulligan-toggle
-                 data-player-id="${playerId}"
-                 data-type="rm">
-              RM
-            </div>
+            <div class="m-pill ${mUsed ? "m-off" : "m-on"}" data-mulligan-toggle data-player-id="${playerId}" data-type="m">M</div>
+            <div class="m-pill ${rmUsed ? "m-off" : "m-on"}" data-mulligan-toggle data-player-id="${playerId}" data-type="rm">RM</div>
           </div>
         </div>
       `;
@@ -1467,21 +1243,15 @@
       const existing = details[playerId] || players[playerId] || {};
       const newVal = !existing[field];
 
-      if (!matchData.playerDetails) {
-        matchData.playerDetails = {};
-      }
+      if (!matchData.playerDetails) matchData.playerDetails = {};
       const localBase = matchData.playerDetails[playerId] || existing || {};
-      matchData.playerDetails[playerId] = {
-        ...localBase,
-        [field]: newVal,
-      };
+      matchData.playerDetails[playerId] = { ...localBase, [field]: newVal };
 
       const updatesObj = {};
       updatesObj["players/" + playerId + "/" + field] = newVal;
       updatesObj["matches/" + matchId + "/playerDetails/" + playerId + "/" + field] = newVal;
 
       update(ref(db), updatesObj).catch(console.error);
-
       renderScoreBubble();
     }
 
@@ -1491,23 +1261,15 @@
       const { red, blue } = getMatchPlayersFor(matchData);
       const teamNames = getTeamNames();
 
-      const mRed = red
-        .map(p => {
-          const mid = p.id || p.playerId || "";
-          const mUsed = !!p.mulliganUsed;
-          const rmUsed = !!p.reverseMulliganUsed;
-          return playerMulliganRow(mid, p.name, "red", mUsed, rmUsed);
-        })
-        .join("");
+      const mRed = red.map(p => {
+        const mid = p.id || p.playerId || "";
+        return playerMulliganRow(mid, p.name, "red", !!p.mulliganUsed, !!p.reverseMulliganUsed);
+      }).join("");
 
-      const mBlue = blue
-        .map(p => {
-          const mid = p.id || p.playerId || "";
-          const mUsed = !!p.mulliganUsed;
-          const rmUsed = !!p.reverseMulliganUsed;
-          return playerMulliganRow(mid, p.name, "blue", mUsed, rmUsed);
-        })
-        .join("");
+      const mBlue = blue.map(p => {
+        const mid = p.id || p.playerId || "";
+        return playerMulliganRow(mid, p.name, "blue", !!p.mulliganUsed, !!p.reverseMulliganUsed);
+      }).join("");
 
       playersRow.innerHTML = `
         <div class="team-col">
@@ -1531,19 +1293,14 @@
 
     function renderHoles() {
       if (!matchData || !matchId) return;
-
-      if (currentHoleIndex === null) {
-        initCurrentHoleIndex();
-      }
+      if (currentHoleIndex === null) initCurrentHoleIndex();
 
       const holes = matchData.holes || Array(18).fill("none");
       const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
 
-      holesSectionTitle.textContent = type === "back"
-        ? "Hole-by-hole – Back 9"
-        : "Hole-by-hole – Front 9";
+      holesSectionTitle.textContent = type === "back" ? "Hole-by-hole – Back 9" : "Hole-by-hole – Front 9";
 
       let html = "";
 
@@ -1556,15 +1313,9 @@
 
       html += `
         <div class="hole-nav">
-          <button class="hole-nav-btn" id="prevHoleBtn" ${prevDisabled ? "disabled" : ""}>
-            ◀ Prev
-          </button>
-          <div class="hole-meta-count">
-            Hole ${currentIndex - start + 1} of 9
-          </div>
-          <button class="hole-nav-btn" id="nextHoleBtn" ${nextDisabled ? "disabled" : ""}>
-            Next ▶
-          </button>
+          <button class="hole-nav-btn" id="prevHoleBtn" ${prevDisabled ? "disabled" : ""}>◀ Prev</button>
+          <div class="hole-meta-count">Hole ${currentIndex - start + 1} of 9</div>
+          <button class="hole-nav-btn" id="nextHoleBtn" ${nextDisabled ? "disabled" : ""}>Next ▶</button>
         </div>
       `;
 
@@ -1580,34 +1331,20 @@
         else if (value === "blue") rowClass += " hole-row-blue";
         else if (value === "half") rowClass += " hole-row-half";
 
-        const holeNumberInSegment = idx - start + 1;
-
-        let holeHtml = `
+        html += `
           <div class="${rowClass}" data-hole-index="${idx}" ${idx === currentIndex ? "" : 'style="display:none;"'}>
             <div class="hole-header-line">
               <div class="hole-label">Hole ${holeNum}</div>
-              <div class="hole-meta">
-                Par ${par} · ${yards} yds
-              </div>
+              <div class="hole-meta">Par ${par} · ${yards} yds</div>
             </div>
             <div class="hole-buttons">
-              <button class="pill-btn blue ${value === "blue" ? "blue-active" : ""}" data-hole="${idx}" data-result="blue">
-                ${blueName} wins
-              </button>
-              <button class="pill-btn halved ${value === "half" ? "half-active" : ""}" data-hole="${idx}" data-result="half">
-                Halved
-              </button>
-              <button class="pill-btn red ${value === "red" ? "red-active" : ""}" data-hole="${idx}" data-result="red">
-                ${redName} wins
-              </button>
-              <button class="pill-btn clear" data-hole="${idx}" data-result="none">
-                Clear
-              </button>
+              <button class="pill-btn blue ${value === "blue" ? "blue-active" : ""}" data-hole="${idx}" data-result="blue">${blueName} wins</button>
+              <button class="pill-btn halved ${value === "half" ? "half-active" : ""}" data-hole="${idx}" data-result="half">Halved</button>
+              <button class="pill-btn red ${value === "red" ? "red-active" : ""}" data-hole="${idx}" data-result="red">${redName} wins</button>
+              <button class="pill-btn clear" data-hole="${idx}" data-result="none">Clear</button>
             </div>
           </div>
         `;
-
-        html += holeHtml;
       }
 
       holesContainer.innerHTML = html;
@@ -1616,17 +1353,11 @@
       const nextBtn = document.getElementById("nextHoleBtn");
 
       prevBtn.addEventListener("click", () => {
-        if (currentHoleIndex > start) {
-          currentHoleIndex--;
-          updateVisibleHoleRow();
-        }
+        if (currentHoleIndex > start) { currentHoleIndex--; updateVisibleHoleRow(); }
       });
 
       nextBtn.addEventListener("click", () => {
-        if (currentHoleIndex < end - 1) {
-          currentHoleIndex++;
-          updateVisibleHoleRow();
-        }
+        if (currentHoleIndex < end - 1) { currentHoleIndex++; updateVisibleHoleRow(); }
       });
 
       holesContainer.querySelectorAll(".pill-btn").forEach(btn => {
@@ -1657,47 +1388,7 @@
       });
 
       const meta = holesContainer.querySelector(".hole-meta-count");
-      if (meta) {
-        meta.textContent = `Hole ${currentIndex - start + 1} of 9`;
-      }
-    }
-
-    function handleHoleClick(holeIndex, result) {
-      if (!matchId || holeIndex == null) return;
-
-      const path = `matches/${matchId}/holes/${holeIndex}`;
-      const updates = {};
-      updates[path] = result;
-      update(ref(db), updates).catch(console.error);
-
-      // Only send to feed when a winner/half is recorded
-      if (result === "none") return;
-
-      const teamNames = getTeamNames();
-      const config = holeConfigs[holeIndex] || {};
-      const holeNum = config.num ?? (holeIndex + 1);
-
-      let message;
-      if (result === "red") {
-        message = `${teamNames.red} wins Hole ${holeNum}`;
-      } else if (result === "blue") {
-        message = `${teamNames.blue} wins Hole ${holeNum}`;
-      } else if (result === "half") {
-        message = `Hole ${holeNum} halved`;
-      } else {
-        return;
-      }
-
-      const entry = {
-        matchId: String(matchId),
-        holeNumber: holeNum,
-        message,
-        createdAt: Date.now(),
-        result
-      };
-
-      const newFeedRef = push(tournamentFeedRef);
-      set(newFeedRef, entry).catch(console.error);
+      if (meta) meta.textContent = `Hole ${currentIndex - start + 1} of 9`;
     }
 
     function showToast({ title, body, primaryText, secondaryText, onPrimary }) {
@@ -1731,7 +1422,7 @@
       });
     }
 
-    function handleGroupPhotoClick() {
+    async function handleGroupPhotoClick() {
       if (!matchId) return;
 
       const input = document.createElement("input");
@@ -1743,37 +1434,31 @@
         const file = input.files[0];
         if (!file) return;
 
-        const storagePath = `group_photos/match_${matchId}_${Date.now()}.jpg`;
+        const storagePath = `matchPhotos/group/match_${matchId}_${Date.now()}_${(file.name || "photo").replace(/[^\w.\-]+/g, "_")}`;
         const storageRef = sRef(storage, storagePath);
 
         try {
-          await uploadBytes(storageRef, file);
+          await uploadBytes(storageRef, file, { contentType: file.type || "image/jpeg" });
           const url = await getDownloadURL(storageRef);
 
           const photoRef = ref(db, "photos");
           const newPhotoRef = push(photoRef);
 
           const now = new Date().toISOString();
-          await set(newPhotoRef, {
-            matchId: matchId,
-            url,
-            timestamp: now,
-            type: "group",
-          });
+          await set(newPhotoRef, { matchId, url, timestamp: now, type: "group", storagePath });
 
-          await update(ref(db, `matches/${matchId}`), {
-            groupPhotoUrl: url,
-          });
+          await update(ref(db, `matches/${matchId}`), { groupPhotoUrl: url });
 
         } catch (err) {
-          console.error(err);
+          console.error("Upload failed:", err?.code, err?.message, err);
+          alert("Upload failed: " + (err?.code || err?.message || "unknown error"));
         }
       });
 
       input.click();
     }
 
-    function handleCameraClick() {
+    async function handleCameraClick() {
       if (!matchId) return;
 
       const input = document.createElement("input");
@@ -1785,26 +1470,22 @@
         const file = input.files[0];
         if (!file) return;
 
-        const storagePath = `match_photos/match_${matchId}_${Date.now()}.jpg`;
+        const storagePath = `matchPhotos/match/match_${matchId}_${Date.now()}_${(file.name || "photo").replace(/[^\w.\-]+/g, "_")}`;
         const storageRef = sRef(storage, storagePath);
 
         try {
-          await uploadBytes(storageRef, file);
+          await uploadBytes(storageRef, file, { contentType: file.type || "image/jpeg" });
           const url = await getDownloadURL(storageRef);
 
           const photoRef = ref(db, "photos");
           const newPhotoRef = push(photoRef);
 
           const now = new Date().toISOString();
-          await set(newPhotoRef, {
-            matchId: matchId,
-            url,
-            timestamp: now,
-            type: "match",
-          });
+          await set(newPhotoRef, { matchId, url, timestamp: now, type: "match", storagePath });
 
         } catch (err) {
-          console.error(err);
+          console.error("Upload failed:", err?.code, err?.message, err);
+          alert("Upload failed: " + (err?.code || err?.message || "unknown error"));
         }
       });
 
@@ -1820,13 +1501,8 @@
         primaryText: "Clear photo",
         secondaryText: "Cancel",
         onPrimary: async () => {
-          try {
-            await update(ref(db, `matches/${matchId}`), {
-              groupPhotoUrl: null,
-            });
-          } catch (err) {
-            console.error(err);
-          }
+          try { await update(ref(db, `matches/${matchId}`), { groupPhotoUrl: null }); }
+          catch (err) { console.error(err); }
         },
       });
     }
@@ -1848,6 +1524,52 @@
         groupPhotoArea.querySelector(".group-photo-title").textContent = "Take group photo";
         groupPhotoArea.querySelector(".group-photo-subtitle").textContent = "Tap to capture a group photo for this match.";
         clearMatchPhotoButton.style.display = "none";
+      }
+    }
+
+    function handleHoleClick(holeIndex, result) {
+      if (!matchId || holeIndex == null) return;
+
+      const path = `matches/${matchId}/holes/${holeIndex}`;
+      const updatesObj = {};
+      updatesObj[path] = result;
+      update(ref(db), updatesObj).catch(console.error);
+
+      // Only send to feed when a winner/half is recorded
+      if (result === "none") return;
+
+      const teamNames = getTeamNames();
+      const config = holeConfigs[holeIndex] || {};
+      const holeNum = config.num ?? (holeIndex + 1);
+
+      let message;
+      let winnerText = null;
+
+      if (result === "red") {
+        message = `${teamNames.red} wins Hole ${holeNum}`;
+        winnerText = teamNames.red;
+      } else if (result === "blue") {
+        message = `${teamNames.blue} wins Hole ${holeNum}`;
+        winnerText = teamNames.blue;
+      } else if (result === "half") {
+        message = `Hole ${holeNum} halved`;
+      } else {
+        return;
+      }
+
+      const entry = { matchId: String(matchId), holeNumber: holeNum, message, createdAt: Date.now(), result };
+      const newFeedRef = push(tournamentFeedRef);
+      set(newFeedRef, entry).catch(console.error);
+
+      // ✅ NEW: congratulate winner + prompt for photo (only when red/blue wins)
+      if (winnerText) {
+        showToast({
+          title: `🏆 ${winnerText} wins!`,
+          body: `Great hole! Take a celebratory photo?`,
+          primaryText: "Take photo",
+          secondaryText: "Not now",
+          onPrimary: () => handleCameraClick(),
+        });
       }
     }
 
@@ -1874,9 +1596,7 @@
     }
 
     function renderMain() {
-      if (!settingsLoaded || !playersLoaded || !matchesLoaded) {
-        return;
-      }
+      if (!settingsLoaded || !playersLoaded || !matchesLoaded) return;
 
       const hasMatchParam = !!matchId;
 
@@ -1885,7 +1605,6 @@
         matchListCard.style.display = "block";
         scoreWrapper.style.display = "none";
         holesCard.style.display = "none";
-
         renderMatchList();
         return;
       }
@@ -1893,15 +1612,9 @@
       matchListCard.style.display = "none";
       scoreWrapper.style.display = "block";
       holesCard.style.display = "block";
-
-      const type = matchData.type || (Number(matchId) > 8 ? "back" : "front");
-      const typeLabel = type === "back" ? "Back 9" : "Front 9";
-
       headerSubtitleEl.textContent = `Match admin – Match ${matchId}`;
-
-      // renderScoreBubble() sets the match title/subtitle (last names) and also renders the rest of the UI.
       renderScoreBubble();
-}
+    }
 
     groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
     cameraButton.addEventListener("click", handleCameraClick);
