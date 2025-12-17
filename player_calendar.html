@@ -117,7 +117,21 @@
 </head>
 <body>
 
-<header>Pick the days you’re available to golf</header>
+<header style="display:flex; align-items:center; gap:12px;">
+  <button id="backBtn"
+    style="
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:10px;
+      padding:6px 10px;
+      font-size:14px;
+      cursor:pointer;
+    ">
+    ← Back
+  </button>
+  <span>Pick the days you’re available to golf</span>
+</header>
+
 
 <div class="calendar">
   <div class="cal-top">
@@ -165,6 +179,14 @@
 
   const params = new URLSearchParams(window.location.search);
   const playerId = params.get("player");
+  const backBtn = document.getElementById("backBtn");
+
+if (backBtn && playerId) {
+  backBtn.onclick = () => {
+    // Go back to this player's profile page
+    window.location.href = `player.html?id=${encodeURIComponent(playerId)}`;
+  };
+}
 
   const statusNote = document.getElementById("statusNote");
   const grid = document.getElementById("calendarGrid");
