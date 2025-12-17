@@ -1445,14 +1445,19 @@
 
           const photoRef = push(ref(db, "photos"));
           await set(photoRef, {
-            url,
-            storagePath: path,
-            createdAt: serverTimestamp(),
-            matchId: "FTK Classic - Fall 2025",
-            hole: "",
-            group: true,
-            comment: "FTK Classic - Fall 2025",
-          });
+  url,
+  storagePath: path,
+
+  // fixed date: Nov 28, 2025
+  timestamp: new Date("2025-11-28T12:00:00").getTime(),
+  createdAt: new Date("2025-11-28T12:00:00").getTime(),
+
+  matchLabel: "FTK Classic - Fall 2025",
+  matchId: "",
+  hole: "",
+  group: true,
+  comment: "FTK Classic - Fall 2025",
+});
         }
 
         adminToolsStatus.textContent = "Fall 2025 photos uploaded.";
