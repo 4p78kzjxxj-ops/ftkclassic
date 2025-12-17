@@ -41,16 +41,16 @@
     .note{font-size:0.82rem;color:var(--muted);margin-top:0.25rem;}
     .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0.45rem;margin-top:0.6rem;}
     .dow{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;text-align:center;}
-    .day{border:1px solid #e5e7eb;border-radius:0.8rem;background:#f9fafb;padding:0.55rem;min-height:86px;display:flex;flex-direction:column;gap:0.35rem;cursor:pointer;}
+    .day{border:1px solid #e5e7eb;border-radius:0.8rem;background:#f9fafb;padding:0.55rem;min-height:86px;display:flex;flex-direction:column;gap:0.35rem;cursor:pointer;overflow:hidden;}
     .day.off{opacity:0.55;}
     .day.g1{background:#ecfdf5;border-color:#bbf7d0;}
     .day.g2{background:#d1fae5;border-color:#86efac;}
     .day.g3{background:#86efac;border-color:#4ade80;}
     .day.g4{background:#22c55e;border-color:#16a34a;}
-    .day.g4 .pill{background:rgba(255,255,255,0.9);}
+    .day.g4 .pill{background:rgba(255,255,255,0.9);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
     .daynum{font-weight:800;font-size:0.9rem;}
-    .pill{display:inline-flex;align-items:center;gap:0.35rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;padding:0.08rem 0.55rem;font-size:0.75rem;color:#374151;width:max-content;}
+    .pill{display:inline-flex;align-items:center;gap:0.35rem;border-radius:999px;border:1px solid #e5e7eb;background:#fff;padding:0.08rem 0.55rem;font-size:0.75rem;color:#374151;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .pill strong{font-weight:800;color:#111827;}
     .empty{font-size:0.78rem;color:var(--muted);}
     .legend{display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.65rem;}
@@ -129,6 +129,11 @@
       ref,
       onValue
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
     const firebaseConfig = {
   "apiKey": "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -140,7 +145,11 @@
   "appId": "1:963469808092:web:e6e789ce20ef46404b3f19"
 };
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
+
+    // Anonymous (null) auth so availability reads work when rules require auth
+    signInAnonymously(auth).catch((e) => console.error('Anonymous auth failed:', e));
 
     const playersRef = ref(db, "players");
     const availRef = ref(db, "availability");
@@ -296,17 +305,22 @@
       state.month = now.getMonth();
       render();
     });
+// Live data (wait for auth so rules that require auth don't show 0s)
+onAuthStateChanged(auth, (user) => {
+  if (!user) return;
 
-    // Live data
-    onValue(playersRef, (snap) => {
-      players = snap.val() || {};
-      render();
-    });
+  onValue(playersRef, (snap) => {
+    players = snap.val() || {};
+    render();
+  });
 
-    onValue(availRef, (snap) => {
-      availability = snap.val() || {};
-      render();
-    });
-  </script>
+  onValue(availRef, (snap) => {
+    availability = snap.val() || {};
+    render();
+  });
+
+});
+
+</script>
 </body>
 </html>
