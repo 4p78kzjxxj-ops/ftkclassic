@@ -13,205 +13,631 @@
       --text:#111827;
       --muted:#6b7280;
       --border:#d1d5db;
+      --shadow-soft:0 10px 30px rgba(15,23,42,.12);
     }
 
-    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
     body{background:var(--bg);color:var(--text);}
 
-    /* HEADER */
-    header{
-      position:sticky;top:0;z-index:5;
-      background:#f3f4f6;
+    .site-header{
+      position:sticky;top:0;z-index:10;
+      background:rgba(243,244,246,.9);
+      backdrop-filter:saturate(180%) blur(10px);
       border-bottom:1px solid #e5e7eb;
-      padding:.75rem 1rem;
-      display:flex;align-items:center;gap:.75rem;
+      padding:0.75rem 1rem;
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;
     }
-    header img{width:38px;height:38px;border-radius:10px;}
-    header h1{font-size:1rem;font-weight:900;}
-    header span{font-size:.8rem;color:var(--muted);}
+    .site-header-left{display:flex;align-items:center;gap:.65rem;min-width:0;}
+    .site-logo{width:40px;height:40px;border-radius:10px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.12);}
+    .site-title{font-weight:800;letter-spacing:-.02em;line-height:1.1;}
+    .site-subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55vw;}
+
+    /* HAMBURGER MENU (right side) */
+    .menu-wrap{
+      margin-left:auto;
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:.4rem;
+    }
+    .hamburger-btn{
+      height:36px;
+      width:40px;
+      border-radius:999px;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .hamburger-btn:active{transform:scale(.98);}
+    .hamburger-icon{width:18px;height:12px;position:relative;}
+    .hamburger-icon span{
+      position:absolute;left:0;right:0;height:2px;background:#111827;border-radius:999px;
+    }
+    .hamburger-icon span:nth-child(1){top:0;}
+    .hamburger-icon span:nth-child(2){top:5px;}
+    .hamburger-icon span:nth-child(3){top:10px;}
+
+    .menu-panel{
+      position:absolute;
+      top:44px;
+      right:0;
+      width:220px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      box-shadow:0 12px 28px rgba(0,0,0,.18);
+      display:none;
+      overflow:hidden;
+      z-index:9998;
+    }
+    .menu-panel.open{display:block;}
+    .menu-section{padding:.45rem;background:#fff;}
+    .menu-item{
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.6rem .65rem;
+      border-radius:12px;
+      border:1px solid transparent;
+      background:#fff;
+      text-decoration:none;
+      color:var(--text);
+      font-size:.9rem;
+      font-weight:800;
+      cursor:pointer;
+      text-align:left;
+    }
+    .menu-item:hover{background:#f3f4f6;border-color:#e5e7eb;}
 
     main{max-width:1100px;margin:0 auto;padding:1rem;}
+    .card{
+      background:var(--card);
+      border:1px solid #e5e7eb;
+      border-radius:18px;
+      box-shadow:var(--shadow-soft);
+      padding:1rem;
+      margin-bottom:1rem;
+    }
+    .section-title{font-weight:800;margin-bottom:.75rem;}
+    .empty-state{font-size:.85rem;color:var(--muted);text-align:center;padding:.75rem .5rem;}
 
     .group{
-      background:#fff;border:1px solid #e5e7eb;border-radius:16px;
-      padding:.75rem;margin-bottom:.75rem;
+      border:1px solid #e5e7eb;border-radius:16px;background:#fff;
+      padding:.85rem;margin-bottom:.85rem;
     }
-    .group-title{font-weight:900;margin-bottom:.5rem;}
+    .group-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.65rem;}
+    .group-title{font-weight:900;line-height:1.15}
+    .group-sub{font-size:.78rem;color:var(--muted);margin-top:.15rem}
 
-    .grid{
-      display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;
+    .photos-grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:.5rem;
     }
-    @media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:900px){ .photos-grid{grid-template-columns:repeat(3, 1fr);} }
+    @media (max-width:620px){ .photos-grid{grid-template-columns:repeat(2, 1fr);} }
 
+    .photo-card{
+      border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff;
+      display:flex;flex-direction:column;
+    }
     .thumb{
-      aspect-ratio:4/3;
+      width:100%;
+      aspect-ratio: 4 / 3;
       background:#f9fafb;
-      border-radius:12px;
-      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;
       cursor:pointer;
+      overflow:hidden;
+      -webkit-tap-highlight-color: transparent;
     }
-    .thumb img{
-      width:100%;height:100%;object-fit:contain;
+    .thumb img{width:100%;height:100%;object-fit:contain;display:block;}
+    .meta{padding:.5rem .6rem;}
+    .meta-sub{
+      font-size:.76rem;color:var(--muted);line-height:1.2;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
 
-    /* FULLSCREEN VIEWER */
+    /* iOS-safe “fullscreen” viewer (CSS overlay, not Fullscreen API) */
     #viewer{
       position:fixed;inset:0;
       background:#000;
       display:none;
-      z-index:100;
-      touch-action:pan-y;
+      z-index:10000;
+      touch-action: pan-y;
     }
     #viewer.show{display:block;}
 
     #viewerHeader{
       position:fixed;
       top:0;left:0;right:0;
-      display:flex;justify-content:space-between;align-items:center;
-      padding:
-        calc(.75rem + env(safe-area-inset-top))
-        calc(1rem + env(safe-area-inset-right))
-        .75rem
-        calc(1rem + env(safe-area-inset-left));
-      background:linear-gradient(to bottom,rgba(0,0,0,.8),rgba(0,0,0,0));
+      display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+
+      padding-top: calc(.75rem + env(safe-area-inset-top));
+      padding-left:  calc(1rem + env(safe-area-inset-left));
+      padding-right: calc(1rem + env(safe-area-inset-right));
+      padding-bottom: .75rem;
+
+      background:linear-gradient(to bottom, rgba(0,0,0,.82), rgba(0,0,0,0));
       color:#fff;
-      z-index:110;
+      z-index:10001;
     }
     #viewerTitle{
-      font-size:.9rem;font-weight:900;
+      font-weight:900;font-size:.9rem;opacity:.95;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-      max-width:70vw;
+      max-width:72vw;
     }
     #viewerClose{
-      height:38px;width:38px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.3);
-      background:rgba(255,255,255,.15);
-      color:#fff;font-size:1.2rem;
+      height:40px;width:40px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.14);
+      color:#fff;font-weight:900;font-size:1.1rem;
+      cursor:pointer;
     }
+    #viewerClose:active{transform:scale(.98);}
 
-    #viewerImgWrap{
+    #viewerBody{
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
-      padding-top:70px;
+      padding-top: calc(70px + env(safe-area-inset-top));
+      padding-bottom: calc(78px + env(safe-area-inset-bottom));
     }
     #viewerImg{
       max-width:100%;max-height:100%;
       object-fit:contain;
       pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
     }
 
-    /* BOTTOM DONE BUTTON (BULLETPROOF EXIT) */
+    /* Tap zones for prev/next */
+    .tap-zone{position:absolute;top:0;bottom:0;width:33%;z-index:10002;}
+    .tap-zone.left{left:0;}
+    .tap-zone.right{right:0;}
+
+    /* Bottom Done (cannot disappear on iOS) */
     #viewerDone{
       position:fixed;
-      left:50%;transform:translateX(-50%);
+      left:50%;
+      transform:translateX(-50%);
       bottom:calc(14px + env(safe-area-inset-bottom));
-      height:46px;padding:0 22px;
+      height:46px;
+      padding:0 22px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.3);
-      background:rgba(255,255,255,.18);
-      color:#fff;font-weight:900;
-      z-index:120;
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      font-weight:900;
+      z-index:10003;
+      cursor:pointer;
     }
+    #viewerDone:active{transform:translateX(-50%) scale(.98);}
   </style>
 </head>
 
 <body>
-<header>
-  <img src="IMG_7296.jpg" />
-  <div>
-    <h1>FTK Classic</h1>
-    <span id="subtitle">Photos</span>
-  </div>
-</header>
-
-<main>
-  <div id="photosRoot">Loading photos…</div>
-</main>
-
-<!-- FULLSCREEN VIEWER -->
-<div id="viewer">
-  <div id="viewerHeader">
-    <div id="viewerTitle">Photo</div>
-    <button id="viewerClose">✕</button>
-  </div>
-
-  <div id="viewerImgWrap">
-    <img id="viewerImg" />
-  </div>
-
-  <button id="viewerDone">Done</button>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-const app = initializeApp({
-  apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
-  authDomain: "ftkclassicdb.firebaseapp.com",
-  databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
-  projectId: "ftkclassicdb",
-  storageBucket: "ftkclassicdb.firebasestorage.app",
-  messagingSenderId: "963469808092",
-  appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
-});
-const db = getDatabase(app);
-
-const photosRoot = document.getElementById("photosRoot");
-const viewer = document.getElementById("viewer");
-const viewerImg = document.getElementById("viewerImg");
-const viewerTitle = document.getElementById("viewerTitle");
-
-let gallery = [];
-let current = 0;
-
-function openViewer(idx){
-  current = idx;
-  viewerImg.src = gallery[current].url;
-  viewerTitle.textContent = gallery[current].title || "Photo";
-  viewer.classList.add("show");
-}
-
-function closeViewer(){
-  viewer.classList.remove("show");
-  viewerImg.src = "";
-}
-
-document.getElementById("viewerClose").onclick = closeViewer;
-document.getElementById("viewerDone").onclick = closeViewer;
-
-let startX = 0;
-viewer.addEventListener("touchstart", e => startX = e.touches[0].clientX);
-viewer.addEventListener("touchend", e => {
-  const dx = e.changedTouches[0].clientX - startX;
-  if(Math.abs(dx) > 50){
-    current = dx < 0 ? (current+1)%gallery.length : (current-1+gallery.length)%gallery.length;
-    viewerImg.src = gallery[current].url;
-  }
-});
-
-onValue(ref(db,"photos"), snap => {
-  const data = snap.val() || {};
-  gallery = Object.values(data).map(p => ({url:p.url,title:p.matchLabel||"Photo"}));
-
-  photosRoot.innerHTML = `
-    <div class="group">
-      <div class="group-title">Tournament Photos</div>
-      <div class="grid">
-        ${gallery.map((p,i)=>`
-          <div class="thumb" data-i="${i}">
-            <img src="${p.url}" />
-          </div>`).join("")}
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div style="min-width:0;">
+        <div class="site-title">FTK Classic</div>
+        <div id="subtitle" class="site-subtitle">Photos</div>
       </div>
     </div>
-  `;
 
-  photosRoot.querySelectorAll(".thumb").forEach(el=>{
-    el.onclick = ()=>openViewer(+el.dataset.i);
-  });
-});
-</script>
+    <!-- HAMBURGER MENU -->
+    <div class="menu-wrap">
+      <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Open menu">
+        <div class="hamburger-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+      </button>
+
+      <div id="menuPanel" class="menu-panel" role="menu" aria-label="Navigation menu">
+        <div class="menu-section">
+          <a class="menu-item" href="index.html">Home</a>
+          <a class="menu-item" href="spectator.html">Scores</a>
+          <a class="menu-item" href="tournament_feed.html">Feed</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">Tournament photos</div>
+      <div id="photosRoot" class="empty-state">Loading photos…</div>
+    </section>
+  </main>
+
+  <!-- iOS-safe viewer overlay -->
+  <div id="viewer" aria-hidden="true">
+    <div id="viewerHeader">
+      <div id="viewerTitle">Photo</div>
+      <button id="viewerClose" type="button" aria-label="Close photo">✕</button>
+    </div>
+
+    <div id="viewerBody">
+      <div class="tap-zone left" aria-hidden="true"></div>
+      <div class="tap-zone right" aria-hidden="true"></div>
+      <img id="viewerImg" alt="Full size photo" />
+    </div>
+
+    <button id="viewerDone" type="button" aria-label="Close photo">Done</button>
+  </div>
+
+  <!-- MENU LOGIC -->
+  <script>
+    (function () {
+      const hamburgerBtn = document.getElementById("hamburgerBtn");
+      const menuPanel = document.getElementById("menuPanel");
+
+      function closeMenu() { menuPanel.classList.remove("open"); }
+      function toggleMenu() { menuPanel.classList.toggle("open"); }
+
+      hamburgerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!menuPanel.classList.contains("open")) return;
+        const inside = menuPanel.contains(e.target) || hamburgerBtn.contains(e.target);
+        if (!inside) closeMenu();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu();
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const playersRef  = ref(db, "players");
+    const matchesRef  = ref(db, "matches");
+    const photosRef   = ref(db, "photos");
+
+    const photosRoot = document.getElementById("photosRoot");
+    const subtitleEl = document.getElementById("subtitle");
+
+    // Viewer
+    const viewer = document.getElementById("viewer");
+    const viewerImg = document.getElementById("viewerImg");
+    const viewerTitle = document.getElementById("viewerTitle");
+    const viewerClose = document.getElementById("viewerClose");
+    const viewerDone = document.getElementById("viewerDone");
+    const leftZone = viewer.querySelector(".tap-zone.left");
+    const rightZone = viewer.querySelector(".tap-zone.right");
+
+    let players  = {};
+    let matches  = {};
+    let photos   = {};
+
+    let lastPlayersSig = "";
+    let lastMatchesSig = "";
+
+    // Flat gallery for swipe
+    let gallery = [];
+    let indexById = {};
+    let currentIndex = -1;
+
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+
+    function getLastName(full) {
+      const s = String(full || "").trim();
+      if (!s) return "";
+      const parts = s.split(/\s+/);
+      return parts[parts.length - 1] || s;
+    }
+
+    function getMatchPlayersFor(match) {
+      const redIds  = Array.isArray(match?.red?.players)  ? match.red.players  : [];
+      const blueIds = Array.isArray(match?.blue?.players) ? match.blue.players : [];
+      const red = redIds.filter(Boolean).map((id) => ({ id, name: players?.[id]?.name || "" }));
+      const blue = blueIds.filter(Boolean).map((id) => ({ id, name: players?.[id]?.name || "" }));
+      return { red, blue };
+    }
+
+    function getMatchTitle(matchId) {
+      const m = matches?.[matchId];
+      if (!m) return "";
+      const { red, blue } = getMatchPlayersFor(m);
+      const redLasts  = red.map(p => getLastName(p.name)).join(" / ");
+      const blueLasts = blue.map(p => getLastName(p.name)).join(" / ");
+      if (!redLasts && !blueLasts) return "";
+      return `${redLasts} vs ${blueLasts}`;
+    }
+
+    function parseTime(v) {
+      if (!v) return null;
+      if (typeof v === "number") return new Date(v);
+      const d = new Date(String(v));
+      if (isNaN(d.getTime())) return null;
+      return d;
+    }
+
+    function formatPretty(d) {
+      try {
+        return d.toLocaleString(undefined, { year:"numeric", month:"long", day:"numeric" });
+      } catch {
+        return d.toString();
+      }
+    }
+
+    function toArray(obj) {
+      const out = [];
+      if (!obj) return out;
+      for (const [id, val] of Object.entries(obj)) out.push({ _id: id, ...(val || {}) });
+      return out;
+    }
+
+    function sortByNewest(arr) {
+      return arr.sort((a, b) => {
+        const da = parseTime(a.timestamp)?.getTime() || parseTime(a.createdAt)?.getTime() || 0;
+        const db = parseTime(b.timestamp)?.getTime() || parseTime(b.createdAt)?.getTime() || 0;
+        return db - da;
+      });
+    }
+
+    function buildGroups(photoList) {
+      const groups = new Map();
+      for (const p of photoList) {
+        const key = p.matchLabel
+          ? `label::${p.matchLabel}`
+          : (p.matchId ? `match::${p.matchId}` : "unknown::unknown");
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(p);
+      }
+      return Array.from(groups.entries()).map(([key, items]) => {
+        sortByNewest(items);
+        const newest = (parseTime(items[0]?.timestamp)?.getTime() || parseTime(items[0]?.createdAt)?.getTime() || 0);
+        return { key, items, newest };
+      }).sort((a, b) => b.newest - a.newest);
+    }
+
+    function computePlayersSig(pl) {
+      const entries = Object.entries(pl || {}).map(([id, p]) => `${id}:${String(p?.name || "")}`);
+      entries.sort();
+      return entries.join("|");
+    }
+    function computeMatchesSig(ms) {
+      const entries = Object.entries(ms || {}).map(([id, m]) => {
+        const r = Array.isArray(m?.red?.players) ? m.red.players.filter(Boolean).join(",") : "";
+        const b = Array.isArray(m?.blue?.players) ? m.blue.players.filter(Boolean).join(",") : "";
+        return `${id}:r=${r}|b=${b}`;
+      });
+      entries.sort();
+      return entries.join("||");
+    }
+
+    function viewerOpenById(photoId) {
+      const idx = indexById[photoId];
+      if (idx == null) return;
+      currentIndex = idx;
+
+      const p = gallery[currentIndex];
+      viewerImg.src = p?.url || "";
+      viewerTitle.textContent = p?._modalTitle || "Photo";
+
+      viewer.classList.add("show");
+      viewer.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function viewerCloseNow() {
+      viewer.classList.remove("show");
+      viewer.setAttribute("aria-hidden", "true");
+      viewerImg.src = "";
+      currentIndex = -1;
+      document.body.style.overflow = "";
+    }
+
+    function viewerSetIndex(idx) {
+      if (!gallery.length) return;
+      if (idx < 0) idx = gallery.length - 1;
+      if (idx >= gallery.length) idx = 0;
+      currentIndex = idx;
+
+      const p = gallery[currentIndex];
+      viewerImg.src = p?.url || "";
+      viewerTitle.textContent = p?._modalTitle || "Photo";
+    }
+    function nextPhoto(){ viewerSetIndex(currentIndex + 1); }
+    function prevPhoto(){ viewerSetIndex(currentIndex - 1); }
+
+    viewerClose.addEventListener("click", (e) => { e.stopPropagation(); viewerCloseNow(); });
+    viewerDone.addEventListener("click", (e) => { e.stopPropagation(); viewerCloseNow(); });
+
+    leftZone.addEventListener("click", (e) => { e.stopPropagation(); prevPhoto(); });
+    rightZone.addEventListener("click", (e) => { e.stopPropagation(); nextPhoto(); });
+
+    window.addEventListener("keydown", (e) => {
+      if (!viewer.classList.contains("show")) return;
+      if (e.key === "Escape") viewerCloseNow();
+      if (e.key === "ArrowRight") nextPhoto();
+      if (e.key === "ArrowLeft") prevPhoto();
+    });
+
+    // Swipe detection
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touching = false;
+
+    viewer.addEventListener("touchstart", (e) => {
+      const t = e.touches?.[0];
+      if (!t) return;
+      touching = true;
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    }, { passive: true });
+
+    viewer.addEventListener("touchend", (e) => {
+      if (!touching) return;
+      touching = false;
+
+      const t = e.changedTouches?.[0];
+      if (!t) return;
+
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        if (dx < 0) nextPhoto();
+        else prevPhoto();
+      }
+    }, { passive: true });
+
+    function render() {
+      const list = sortByNewest(toArray(photos));
+
+      if (!list.length) {
+        photosRoot.className = "empty-state";
+        photosRoot.textContent = "No photos yet.";
+        subtitleEl.textContent = "Photos";
+        gallery = [];
+        indexById = {};
+        return;
+      }
+
+      subtitleEl.textContent = `${list.length} item${list.length === 1 ? "" : "s"}`;
+
+      const groups = buildGroups(list);
+      const html = [];
+
+      // rebuild gallery
+      gallery = [];
+      indexById = {};
+
+      for (const g of groups) {
+        const isLabelGroup = g.key.startsWith("label::");
+        const matchLabel = isLabelGroup ? g.key.replace("label::", "") : null;
+
+        let title = "";
+        let sub = "";
+
+        if (matchLabel) {
+          title = matchLabel;
+          sub = "";
+        } else if (g.key.startsWith("match::")) {
+          const matchId = g.key.replace("match::", "");
+          title = getMatchTitle(matchId) || "";
+          sub = `Match ${matchId}`;
+        }
+
+        const groupModalTitle = title ? (sub ? `${title} · ${sub}` : title) : (sub || "Photo");
+
+        html.push(`
+          <div class="group">
+            <div class="group-head">
+              <div>
+                ${title ? `<div class="group-title">${esc(title)}</div>` : ``}
+                ${sub ? `<div class="group-sub">${esc(sub)}</div>` : ``}
+              </div>
+            </div>
+
+            <div class="photos-grid">
+              ${g.items.map((p) => {
+                const d = parseTime(p.timestamp) || parseTime(p.createdAt);
+                const when = d ? formatPretty(d) : "";
+
+                const holeLabel = (p.hole || p.holeNumber)
+                  ? `Hole ${p.hole || p.holeNumber}`
+                  : (p.type === "group" || p.group === true ? "Group Photo" : "");
+
+                const modalTitleText = groupModalTitle + (holeLabel ? ` · ${holeLabel}` : "");
+
+                const gp = { ...p, _modalTitle: modalTitleText };
+                const idx = gallery.length;
+                gallery.push(gp);
+                indexById[p._id] = idx;
+
+                return `
+                  <div class="photo-card">
+                    <div class="thumb"
+                      data-id="${esc(p._id)}"
+                      role="button"
+                      tabindex="0"
+                      aria-label="Open photo">
+                      <img loading="lazy" src="${esc(p.url)}" alt="Photo" />
+                    </div>
+
+                    <div class="meta">
+                      ${holeLabel ? `<div class="meta-sub">${esc(holeLabel)}</div>` : ``}
+                      ${when ? `<div class="meta-sub">${esc(when)}</div>` : ``}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `);
+      }
+
+      photosRoot.className = "";
+      photosRoot.innerHTML = html.join("");
+
+      photosRoot.querySelectorAll(".thumb").forEach((el) => {
+        const id = el.getAttribute("data-id");
+        const open = () => viewerOpenById(id);
+        el.addEventListener("click", open);
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
+        });
+      });
+    }
+
+    // IMPORTANT: only re-render on players/matches changes if relevant fields changed
+    onValue(playersRef, (snap) => {
+      const next = snap.val() || {};
+      const sig = computePlayersSig(next);
+      players = next;
+      if (sig !== lastPlayersSig) {
+        lastPlayersSig = sig;
+        render();
+      }
+    });
+
+    onValue(matchesRef, (snap) => {
+      const next = snap.val() || {};
+      const sig = computeMatchesSig(next);
+      matches = next;
+      if (sig !== lastMatchesSig) {
+        lastMatchesSig = sig;
+        render();
+      }
+    });
+
+    onValue(photosRef, (snap) => {
+      photos = snap.val() || {};
+      render();
+    });
+  </script>
 </body>
 </html>
