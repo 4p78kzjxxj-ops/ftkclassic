@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>FTK Classic – Photos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root{
@@ -183,12 +183,18 @@
       position:relative;
     }
 
+    /* KEY FIX: safe-area padding so controls show on iOS Chrome */
     .modal-head{
       position:absolute;
       top:0;left:0;right:0;
       display:flex;align-items:center;justify-content:space-between;gap:.6rem;
-      padding:.65rem .85rem;
-      background:linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,0));
+
+      padding-top: calc(.65rem + env(safe-area-inset-top));
+      padding-left:  calc(.85rem + env(safe-area-inset-left));
+      padding-right: calc(.85rem + env(safe-area-inset-right));
+      padding-bottom: .65rem;
+
+      background:linear-gradient(to bottom, rgba(0,0,0,.75), rgba(0,0,0,0));
       color:#e5e7eb;
       z-index:6;
     }
@@ -255,6 +261,21 @@
     @media (max-width:700px){
       .nav-btn{display:none;}
     }
+
+    /* Backup close button (always visible) */
+    .fab-close{
+      position:absolute;
+      right: calc(14px + env(safe-area-inset-right));
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      height:48px;width:48px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.12);
+      color:#fff;font-weight:900;
+      z-index:7;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+    }
+    .fab-close:active{transform:scale(.98);}
   </style>
 </head>
 
@@ -308,6 +329,10 @@
         <div class="nav-zone right" aria-hidden="true"></div>
         <button id="prevBtn" class="nav-btn prev" type="button" aria-label="Previous photo">‹</button>
         <button id="nextBtn" class="nav-btn next" type="button" aria-label="Next photo">›</button>
+
+        <!-- backup close -->
+        <button id="fabClose" class="fab-close" type="button" aria-label="Close photo">✕</button>
+
         <img id="modalImg" alt="Full size photo" />
       </div>
     </div>
@@ -365,6 +390,7 @@
 
     const modalBackdrop = document.getElementById("modalBackdrop");
     const modalClose = document.getElementById("modalClose");
+    const fabClose = document.getElementById("fabClose");
     const modalImg = document.getElementById("modalImg");
     const modalTitle = document.getElementById("modalTitle");
     const modalBox = document.getElementById("modalBox");
@@ -521,7 +547,7 @@
     }
 
     async function closeModal() {
-      await exitFullscreen();        // <-- KEY: always exit fullscreen
+      await exitFullscreen();
       modalBackdrop.style.display = "none";
       modalImg.src = "";
       currentIndex = -1;
@@ -532,11 +558,12 @@
     function prevPhoto() { setModalIndex(currentIndex - 1); }
 
     modalClose.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
+    fabClose.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
+
     modalBackdrop.addEventListener("click", (e) => {
       if (e.target === modalBackdrop) closeModal();
     });
 
-    // Fullscreen toggle button
     fsToggle.addEventListener("click", async (e) => {
       e.stopPropagation();
       if (document.fullscreenElement) await exitFullscreen();
@@ -544,7 +571,6 @@
       updateFsButton();
     });
 
-    // Swipe detection
     let touchStartX = 0;
     let touchStartY = 0;
     let touching = false;
@@ -716,7 +742,6 @@
       render();
     });
 
-    // Initial state
     updateFsButton();
   </script>
 </body>
