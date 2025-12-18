@@ -129,7 +129,6 @@
     .group-title{font-weight:900;line-height:1.15}
     .group-sub{font-size:.78rem;color:var(--muted);margin-top:.15rem}
 
-    /* Smaller thumbnails */
     .photos-grid{
       display:grid;
       grid-template-columns:repeat(4, 1fr);
@@ -171,7 +170,7 @@
       position:fixed;inset:0;background:rgba(17,24,39,.85);
       display:none;align-items:center;justify-content:center;
       padding:0;z-index:50;
-      touch-action: pan-y; /* allow vertical scroll in page, but we'll handle horizontal swipes inside */
+      touch-action: pan-y;
     }
     .modal{
       width:100vw;
@@ -187,20 +186,26 @@
     .modal-head{
       position:absolute;
       top:0;left:0;right:0;
-      display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+      display:flex;align-items:center;justify-content:space-between;gap:.6rem;
       padding:.65rem .85rem;
       background:linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,0));
       color:#e5e7eb;
-      z-index:5;
-      pointer-events:none; /* allow swipe on image area */
+      z-index:6;
     }
-    .modal-title{font-weight:900;font-size:.9rem;opacity:.95;pointer-events:none;}
-    .modal-close{
+    .modal-title{
+      font-weight:900;font-size:.9rem;opacity:.95;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width:65vw;
+    }
+    .modal-actions{
+      display:flex;align-items:center;gap:.5rem;
+    }
+    .modal-btn{
       height:36px;min-width:36px;border-radius:10px;border:1px solid rgba(255,255,255,.22);
       background:rgba(255,255,255,.10);color:#fff;
       font-weight:900;cursor:pointer;
-      pointer-events:auto;
     }
+    .modal-btn:active{transform:scale(.98);}
 
     .modal-body{
       width:100%;
@@ -210,7 +215,7 @@
       justify-content:center;
       background:#000;
       position:relative;
-      touch-action: pan-y; /* we’ll detect horizontal swipe */
+      touch-action: pan-y;
     }
     .modal-body img{
       max-width:100%;
@@ -224,7 +229,6 @@
       pointer-events:none;
     }
 
-    /* Prev/Next tap zones + buttons */
     .nav-zone{
       position:absolute;top:0;bottom:0;width:33%;
       z-index:4;
@@ -249,7 +253,7 @@
     .nav-btn.prev{left:14px;}
     .nav-btn.next{right:14px;}
     @media (max-width:700px){
-      .nav-btn{display:none;} /* rely on swipe/tap zones on mobile */
+      .nav-btn{display:none;}
     }
   </style>
 </head>
@@ -264,7 +268,6 @@
       </div>
     </div>
 
-    <!-- HAMBURGER MENU -->
     <div class="menu-wrap">
       <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Open menu">
         <div class="hamburger-icon" aria-hidden="true">
@@ -294,7 +297,10 @@
     <div id="modalBox" class="modal">
       <div class="modal-head">
         <div id="modalTitle" class="modal-title">Photo</div>
-        <button id="modalClose" class="modal-close" type="button">✕</button>
+        <div class="modal-actions">
+          <button id="fsToggle" class="modal-btn" type="button" aria-label="Exit fullscreen">⤡</button>
+          <button id="modalClose" class="modal-btn" type="button" aria-label="Close photo">✕</button>
+        </div>
       </div>
 
       <div id="modalBody" class="modal-body">
@@ -364,6 +370,8 @@
     const modalBox = document.getElementById("modalBox");
     const modalBody = document.getElementById("modalBody");
 
+    const fsToggle = document.getElementById("fsToggle");
+
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     const leftZone = modalBody.querySelector(".nav-zone.left");
@@ -376,9 +384,8 @@
     let lastPlayersSig = "";
     let lastMatchesSig = "";
 
-    // Swipe/gallery state
-    let gallery = [];           // flattened list in the same order as displayed (newest->oldest groups, then newest->oldest inside)
-    let galleryIndexById = {};  // photo _id -> index
+    let gallery = [];
+    let galleryIndexById = {};
     let currentIndex = -1;
 
     function esc(s) {
@@ -474,7 +481,6 @@
       return entries.join("||");
     }
 
-    // Fullscreen helpers
     async function requestFullscreen(el) {
       try {
         if (document.fullscreenElement) return;
@@ -485,6 +491,12 @@
       try {
         if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
       } catch {}
+    }
+
+    function updateFsButton() {
+      const isFs = !!document.fullscreenElement;
+      fsToggle.textContent = isFs ? "⤡" : "⤢";
+      fsToggle.setAttribute("aria-label", isFs ? "Exit fullscreen" : "Enter fullscreen");
     }
 
     function setModalIndex(idx) {
@@ -505,22 +517,31 @@
       if (idx == null) return;
       modalBackdrop.style.display = "flex";
       setModalIndex(idx);
-      requestFullscreen(modalBox);
+      requestFullscreen(modalBox).finally(updateFsButton);
     }
 
     async function closeModal() {
+      await exitFullscreen();        // <-- KEY: always exit fullscreen
       modalBackdrop.style.display = "none";
       modalImg.src = "";
       currentIndex = -1;
-      await exitFullscreen();
+      updateFsButton();
     }
 
     function nextPhoto() { setModalIndex(currentIndex + 1); }
     function prevPhoto() { setModalIndex(currentIndex - 1); }
 
-    modalClose.addEventListener("click", closeModal);
+    modalClose.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
     modalBackdrop.addEventListener("click", (e) => {
       if (e.target === modalBackdrop) closeModal();
+    });
+
+    // Fullscreen toggle button
+    fsToggle.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (document.fullscreenElement) await exitFullscreen();
+      else await requestFullscreen(modalBox);
+      updateFsButton();
     });
 
     // Swipe detection
@@ -529,7 +550,7 @@
     let touching = false;
 
     modalBody.addEventListener("touchstart", (e) => {
-      if (!modalBackdrop.style.display || modalBackdrop.style.display === "none") return;
+      if (modalBackdrop.style.display !== "flex") return;
       const t = e.touches?.[0];
       if (!t) return;
       touching = true;
@@ -547,20 +568,17 @@
       const dx = t.clientX - touchStartX;
       const dy = t.clientY - touchStartY;
 
-      // Only treat as swipe if horizontal dominates + passes threshold
       if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) {
         if (dx < 0) nextPhoto();
         else prevPhoto();
       }
     }, { passive: true });
 
-    // Click/tap navigation
     prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevPhoto(); });
     nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextPhoto(); });
     leftZone.addEventListener("click", (e) => { e.stopPropagation(); prevPhoto(); });
     rightZone.addEventListener("click", (e) => { e.stopPropagation(); nextPhoto(); });
 
-    // Keyboard navigation + Esc
     window.addEventListener("keydown", (e) => {
       const open = modalBackdrop.style.display === "flex";
       if (!open) return;
@@ -570,13 +588,7 @@
       if (e.key === "ArrowLeft") prevPhoto();
     });
 
-    // If user exits fullscreen via iOS/gesture, keep state sane
-    document.addEventListener("fullscreenchange", () => {
-      const open = modalBackdrop.style.display === "flex";
-      if (open && !document.fullscreenElement) {
-        // Fullscreen ended but modal still open — that's fine; leave it open.
-      }
-    });
+    document.addEventListener("fullscreenchange", updateFsButton);
 
     function render() {
       const list = sortByNewest(toArray(photos));
@@ -595,8 +607,6 @@
       const groups = buildGroups(list);
       const html = [];
 
-      // Build a flattened gallery in the same visual order the page renders:
-      // groups newest->oldest; each group items newest->oldest
       gallery = [];
       galleryIndexById = {};
 
@@ -638,7 +648,6 @@
 
                 const modalTitleText = groupModalTitle + (holeLabel ? ` · ${holeLabel}` : "");
 
-                // store into gallery
                 const gp = { ...p, _modalTitle: modalTitleText };
                 const idx = gallery.length;
                 gallery.push(gp);
@@ -706,6 +715,9 @@
       photos = snap.val() || {};
       render();
     });
+
+    // Initial state
+    updateFsButton();
   </script>
 </body>
 </html>
