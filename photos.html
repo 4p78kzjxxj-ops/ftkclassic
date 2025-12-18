@@ -151,6 +151,7 @@
       position:relative;
       cursor:pointer;
       overflow:hidden;
+      -webkit-tap-highlight-color: transparent;
     }
     .thumb img{
       width:100%;
@@ -167,38 +168,49 @@
 
     /* Modal */
     .modal-backdrop{
-      position:fixed;inset:0;background:rgba(17,24,39,.65);
+      position:fixed;inset:0;background:rgba(17,24,39,.85);
       display:none;align-items:center;justify-content:center;
-      padding:1rem;z-index:50;
+      padding:0;z-index:50;
+      touch-action: pan-y; /* allow vertical scroll in page, but we'll handle horizontal swipes inside */
     }
     .modal{
-      width:min(980px, 96vw);
-      background:#0b1220;
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:18px;
+      width:100vw;
+      height:100vh;
+      background:#000;
+      border:none;
+      border-radius:0;
       overflow:hidden;
-      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      box-shadow:none;
+      position:relative;
     }
+
     .modal-head{
+      position:absolute;
+      top:0;left:0;right:0;
       display:flex;align-items:center;justify-content:space-between;gap:.75rem;
       padding:.65rem .85rem;
-      border-bottom:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,0));
       color:#e5e7eb;
+      z-index:5;
+      pointer-events:none; /* allow swipe on image area */
     }
-    .modal-title{font-weight:900;font-size:.9rem;opacity:.95;}
+    .modal-title{font-weight:900;font-size:.9rem;opacity:.95;pointer-events:none;}
     .modal-close{
-      height:36px;min-width:36px;border-radius:10px;border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.08);color:#fff;
+      height:36px;min-width:36px;border-radius:10px;border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.10);color:#fff;
       font-weight:900;cursor:pointer;
+      pointer-events:auto;
     }
 
     .modal-body{
+      width:100%;
+      height:100%;
       display:flex;
       align-items:center;
       justify-content:center;
       background:#000;
-      height:calc(100vh - 64px);
-      max-height:85vh;
+      position:relative;
+      touch-action: pan-y; /* we’ll detect horizontal swipe */
     }
     .modal-body img{
       max-width:100%;
@@ -207,6 +219,37 @@
       height:auto;
       object-fit:contain;
       display:block;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+    }
+
+    /* Prev/Next tap zones + buttons */
+    .nav-zone{
+      position:absolute;top:0;bottom:0;width:33%;
+      z-index:4;
+    }
+    .nav-zone.left{left:0;}
+    .nav-zone.right{right:0;}
+
+    .nav-btn{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      height:44px;width:44px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      font-weight:900;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      z-index:6;
+    }
+    .nav-btn:active{transform:translateY(-50%) scale(.98);}
+    .nav-btn.prev{left:14px;}
+    .nav-btn.next{right:14px;}
+    @media (max-width:700px){
+      .nav-btn{display:none;} /* rely on swipe/tap zones on mobile */
     }
   </style>
 </head>
@@ -246,14 +289,19 @@
     </section>
   </main>
 
-  <!-- Fullscreen image modal -->
+  <!-- Fullscreen image modal (swipeable) -->
   <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal">
+    <div id="modalBox" class="modal">
       <div class="modal-head">
         <div id="modalTitle" class="modal-title">Photo</div>
         <button id="modalClose" class="modal-close" type="button">✕</button>
       </div>
-      <div class="modal-body">
+
+      <div id="modalBody" class="modal-body">
+        <div class="nav-zone left" aria-hidden="true"></div>
+        <div class="nav-zone right" aria-hidden="true"></div>
+        <button id="prevBtn" class="nav-btn prev" type="button" aria-label="Previous photo">‹</button>
+        <button id="nextBtn" class="nav-btn next" type="button" aria-label="Next photo">›</button>
         <img id="modalImg" alt="Full size photo" />
       </div>
     </div>
@@ -313,14 +361,25 @@
     const modalClose = document.getElementById("modalClose");
     const modalImg = document.getElementById("modalImg");
     const modalTitle = document.getElementById("modalTitle");
+    const modalBox = document.getElementById("modalBox");
+    const modalBody = document.getElementById("modalBody");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const leftZone = modalBody.querySelector(".nav-zone.left");
+    const rightZone = modalBody.querySelector(".nav-zone.right");
 
     let players  = {};
     let matches  = {};
     let photos   = {};
 
-    // NEW: signatures so we only re-render when relevant fields change
     let lastPlayersSig = "";
     let lastMatchesSig = "";
+
+    // Swipe/gallery state
+    let gallery = [];           // flattened list in the same order as displayed (newest->oldest groups, then newest->oldest inside)
+    let galleryIndexById = {};  // photo _id -> index
+    let currentIndex = -1;
 
     function esc(s) {
       return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -369,23 +428,6 @@
       }
     }
 
-    function openModal(url, title) {
-      modalImg.src = url;
-      modalTitle.textContent = title || "Photo";
-      modalBackdrop.style.display = "flex";
-    }
-    function closeModal() {
-      modalBackdrop.style.display = "none";
-      modalImg.src = "";
-    }
-    modalClose.addEventListener("click", closeModal);
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) closeModal();
-    });
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeModal();
-    });
-
     function toArray(obj) {
       const out = [];
       if (!obj) return out;
@@ -417,7 +459,6 @@
       }).sort((a, b) => b.newest - a.newest);
     }
 
-    // NEW: signatures (only fields used by Photos page)
     function computePlayersSig(pl) {
       const entries = Object.entries(pl || {}).map(([id, p]) => `${id}:${String(p?.name || "")}`);
       entries.sort();
@@ -433,6 +474,110 @@
       return entries.join("||");
     }
 
+    // Fullscreen helpers
+    async function requestFullscreen(el) {
+      try {
+        if (document.fullscreenElement) return;
+        if (el?.requestFullscreen) await el.requestFullscreen();
+      } catch {}
+    }
+    async function exitFullscreen() {
+      try {
+        if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+      } catch {}
+    }
+
+    function setModalIndex(idx) {
+      if (!gallery.length) return;
+      if (idx < 0) idx = gallery.length - 1;
+      if (idx >= gallery.length) idx = 0;
+      currentIndex = idx;
+
+      const p = gallery[currentIndex];
+      if (!p) return;
+
+      modalImg.src = p.url || "";
+      modalTitle.textContent = p._modalTitle || "Photo";
+    }
+
+    function openModalById(photoId) {
+      const idx = galleryIndexById[photoId];
+      if (idx == null) return;
+      modalBackdrop.style.display = "flex";
+      setModalIndex(idx);
+      requestFullscreen(modalBox);
+    }
+
+    async function closeModal() {
+      modalBackdrop.style.display = "none";
+      modalImg.src = "";
+      currentIndex = -1;
+      await exitFullscreen();
+    }
+
+    function nextPhoto() { setModalIndex(currentIndex + 1); }
+    function prevPhoto() { setModalIndex(currentIndex - 1); }
+
+    modalClose.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+
+    // Swipe detection
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touching = false;
+
+    modalBody.addEventListener("touchstart", (e) => {
+      if (!modalBackdrop.style.display || modalBackdrop.style.display === "none") return;
+      const t = e.touches?.[0];
+      if (!t) return;
+      touching = true;
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    }, { passive: true });
+
+    modalBody.addEventListener("touchend", (e) => {
+      if (!touching) return;
+      touching = false;
+
+      const t = e.changedTouches?.[0];
+      if (!t) return;
+
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+
+      // Only treat as swipe if horizontal dominates + passes threshold
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        if (dx < 0) nextPhoto();
+        else prevPhoto();
+      }
+    }, { passive: true });
+
+    // Click/tap navigation
+    prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevPhoto(); });
+    nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextPhoto(); });
+    leftZone.addEventListener("click", (e) => { e.stopPropagation(); prevPhoto(); });
+    rightZone.addEventListener("click", (e) => { e.stopPropagation(); nextPhoto(); });
+
+    // Keyboard navigation + Esc
+    window.addEventListener("keydown", (e) => {
+      const open = modalBackdrop.style.display === "flex";
+      if (!open) return;
+
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowRight") nextPhoto();
+      if (e.key === "ArrowLeft") prevPhoto();
+    });
+
+    // If user exits fullscreen via iOS/gesture, keep state sane
+    document.addEventListener("fullscreenchange", () => {
+      const open = modalBackdrop.style.display === "flex";
+      if (open && !document.fullscreenElement) {
+        // Fullscreen ended but modal still open — that's fine; leave it open.
+      }
+    });
+
     function render() {
       const list = sortByNewest(toArray(photos));
 
@@ -440,6 +585,8 @@
         photosRoot.className = "empty-state";
         photosRoot.textContent = "No photos yet.";
         subtitleEl.textContent = "Photos";
+        gallery = [];
+        galleryIndexById = {};
         return;
       }
 
@@ -447,6 +594,11 @@
 
       const groups = buildGroups(list);
       const html = [];
+
+      // Build a flattened gallery in the same visual order the page renders:
+      // groups newest->oldest; each group items newest->oldest
+      gallery = [];
+      galleryIndexById = {};
 
       for (const g of groups) {
         const isLabelGroup = g.key.startsWith("label::");
@@ -486,11 +638,16 @@
 
                 const modalTitleText = groupModalTitle + (holeLabel ? ` · ${holeLabel}` : "");
 
+                // store into gallery
+                const gp = { ...p, _modalTitle: modalTitleText };
+                const idx = gallery.length;
+                gallery.push(gp);
+                galleryIndexById[p._id] = idx;
+
                 return `
                   <div class="photo-card">
                     <div class="thumb"
-                      data-full="${esc(p.url)}"
-                      data-title="${esc(modalTitleText)}"
+                      data-id="${esc(p._id)}"
                       role="button"
                       tabindex="0"
                       aria-label="Open photo">
@@ -513,7 +670,8 @@
       photosRoot.innerHTML = html.join("");
 
       photosRoot.querySelectorAll(".thumb").forEach((el) => {
-        const open = () => openModal(el.getAttribute("data-full"), el.getAttribute("data-title"));
+        const id = el.getAttribute("data-id");
+        const open = () => openModalById(id);
         el.addEventListener("click", open);
         el.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -524,7 +682,6 @@
       });
     }
 
-    // IMPORTANT: only render on players/matches changes if relevant fields changed (prevents flashing on mulligans)
     onValue(playersRef, (snap) => {
       const next = snap.val() || {};
       const sig = computePlayersSig(next);
@@ -545,7 +702,6 @@
       }
     });
 
-    // Photos changes should always re-render
     onValue(photosRef, (snap) => {
       photos = snap.val() || {};
       render();
