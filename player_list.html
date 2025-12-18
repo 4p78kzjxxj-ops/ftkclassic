@@ -13,6 +13,8 @@
       --border: #d1d5db;
       --text: #111827;
       --muted: #6b7280;
+      --shadow: 0 14px 40px rgba(15,23,42,0.14);
+      --tap: 44px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -22,11 +24,113 @@
       padding: 1rem;
     }
 
+    /* Top bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
     .title {
       font-size: 1.4rem;
       font-weight: 700;
-      margin-bottom: 1rem;
       text-align: center;
+      flex: 1;
+      padding-left: var(--tap);
+    }
+
+    .hamburger {
+      height: var(--tap);
+      width: var(--tap);
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+    }
+
+    .hamburger svg { width: 22px; height: 22px; }
+
+    /* Drawer */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,24,39,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+      z-index: 50;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: min(84vw, 320px);
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transform: translateX(105%);
+      transition: transform 0.22s ease;
+      z-index: 60;
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .drawer.show { transform: translateX(0); }
+
+    .drawerHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawerTitle {
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .closeBtn {
+      height: var(--tap);
+      width: var(--tap);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      border-radius: 0.65rem;
+      cursor: pointer;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      border-radius: 0.75rem;
+      padding: 0.75rem 0.85rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .nav a span {
+      color: var(--muted);
     }
 
     .table {
@@ -47,11 +151,6 @@
     th {
       background: #f9fafb;
       font-weight: 700;
-      color: var(--text);
-    }
-
-    td {
-      color: var(--text);
     }
 
     td.hcp {
@@ -70,7 +169,32 @@
 </head>
 
 <body>
-  <div class="title">Player List</div>
+  <!-- Drawer -->
+  <div id="overlay" class="overlay"></div>
+
+  <aside id="drawer" class="drawer">
+    <div class="drawerHeader">
+      <div class="drawerTitle">FTK Classic</div>
+      <button id="closeDrawer" class="closeBtn">✕</button>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html">Home <span>›</span></a>
+      <a href="spectator.html">Scores <span>›</span></a>
+      <a href="photos.html">Photos <span>›</span></a>
+    </nav>
+  </aside>
+
+  <div class="topbar">
+    <div class="title">Player List</div>
+    <button id="openDrawer" class="hamburger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 6h16"></path>
+        <path d="M4 12h16"></path>
+        <path d="M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
 
   <table class="table">
     <thead>
@@ -85,13 +209,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      onValue
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
       authDomain: "ftkclassicdb.firebaseapp.com",
@@ -109,24 +228,33 @@
     const listEl = document.getElementById("playerList");
 
     onValue(playersRef, (snap) => {
-      const data = snap.val() || {};
-      const players = Object.values(data);
-
-      // Sort by handicap ascending
+      const players = Object.values(snap.val() || {});
       players.sort((a, b) => (parseFloat(a.handicap ?? 999) - parseFloat(b.handicap ?? 999)));
 
-      listEl.innerHTML = players
-        .map(
-          (p, i) => `
-            <tr>
-              <td class="num">${i + 1}</td>
-              <td>${p.name || "Unknown Player"}</td>
-              <td class="hcp">${p.handicap ?? "N/A"}</td>
-            </tr>
-          `
-        )
-        .join("");
+      listEl.innerHTML = players.map((p, i) => `
+        <tr>
+          <td class="num">${i + 1}</td>
+          <td>${p.name || "Unknown Player"}</td>
+          <td class="hcp">${p.handicap ?? "N/A"}</td>
+        </tr>
+      `).join("");
     });
+
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+
+    document.getElementById("openDrawer").onclick = () => {
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+    };
+
+    function closeDrawer() {
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+
+    document.getElementById("closeDrawer").onclick = closeDrawer;
+    overlay.onclick = closeDrawer;
   </script>
 </body>
 </html>
