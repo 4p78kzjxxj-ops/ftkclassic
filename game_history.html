@@ -9,8 +9,6 @@
     :root{
       --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280;
       --border:#d1d5db; --shadow-soft:0 10px 30px rgba(15,23,42,.12);
-      --good:#166534; --good-soft:#dcfce7;
-      --warn:#9a3412; --warn-soft:#ffedd5;
     }
     *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;}
     html,body{-webkit-text-size-adjust:100%;background:var(--bg);color:var(--text);min-height:100%;}
@@ -52,54 +50,58 @@
     @media (max-width:700px){ .nav-desktop{display:none;} .hamburger{display:inline-flex;align-items:center;justify-content:center;} }
 
     main{margin-top:.75rem;display:flex;flex-direction:column;gap:.75rem;}
-
-    .card{
-      background:var(--card);border-radius:.9rem;padding:.85rem;border:1px solid var(--border);
-      box-shadow:var(--shadow-soft);
-    }
+    .card{background:var(--card);border-radius:.9rem;padding:.85rem;border:1px solid var(--border);box-shadow:var(--shadow-soft);}
     .section-title{
       font-size:.82rem;font-weight:650;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
       border-bottom:1px dashed #e5e7eb;padding-bottom:.35rem;margin-bottom:.55rem;
     }
+    .hint{font-size:.86rem;color:var(--muted);line-height:1.25rem;}
+    .toolbar{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.55rem;}
+    select{padding:.5rem .6rem;border-radius:.65rem;border:1px solid var(--border);background:#fff;font-size:.9rem;min-height:42px;}
 
-    .controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.6rem;}
-    .controls input,.controls select{
-      padding:.5rem .6rem;border-radius:.65rem;border:1px solid var(--border);background:#fff;font-size:.9rem;min-height:42px;
+    .list{display:flex;flex-direction:column;gap:.55rem;margin-top:.6rem;}
+    .row{
+      border:1px solid #e5e7eb;background:#fff;border-radius:.85rem;padding:.7rem;
+      display:flex;gap:.75rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
     }
-    .controls input{flex:1;min-width:240px;}
-    .controls select{width:220px;}
+    .left{display:flex;gap:.65rem;align-items:flex-start;min-width:0;flex:1;}
+    .icon{height:34px;width:34px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #e5e7eb;background:#f9fafb;font-size:1.05rem;flex-shrink:0;}
+    .name{font-weight:950;}
+    .meta{font-size:.84rem;color:var(--muted);margin-top:.15rem;}
+    .actions{display:flex;align-items:center;gap:.5rem;}
+    .btn{border-radius:999px;border:1px solid var(--border);background:#f9fafb;padding:.45rem .75rem;font-size:.85rem;cursor:pointer;min-height:38px;font-weight:650;}
+    .btn-primary{background:#111827;color:#f9fafb;border-color:#111827;}
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.55rem;}
-    .session-card{
-      border:1px solid #e5e7eb;background:#fff;border-radius:.85rem;padding:.75rem;
-      transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
+    .lb-mini{
+      margin-top:.55rem;
+      display:flex;
+      flex-direction:column;
+      gap:.35rem;
+      padding:.6rem .65rem;
+      border-radius:.75rem;
+      border:1px dashed #e5e7eb;
+      background:#fafafa;
+      width:100%;
     }
-    .session-card:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(15,23,42,.12);border-color:#cbd5f5;}
-    .row{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline;flex-wrap:wrap;}
-    .game-title{font-weight:950;font-size:1.05rem;}
-    .meta{font-size:.82rem;color:var(--muted);margin-top:.25rem;line-height:1.2rem;}
-    .pill{
-      display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .6rem;border-radius:999px;
-      border:1px solid #e5e7eb;background:#f9fafb;font-size:.78rem;color:#374151;white-space:nowrap;
+    .lb-mini-title{
+      font-size:.72rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:750;
     }
-    .pill.live{border-color:#fed7aa;background:var(--warn-soft);color:var(--warn);}
-    .pill.ended{border-color:#bbf7d0;background:var(--good-soft);color:var(--good);}
-    .btnlink{
-      display:inline-flex;align-items:center;justify-content:center;gap:.25rem;
-      border-radius:999px;border:1px solid var(--border);background:#f9fafb;padding:.4rem .75rem;
-      font-size:.88rem;font-weight:750;min-height:38px;margin-top:.55rem;width:fit-content;
+    .lb-mini-row{
+      display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+      font-size:.92rem;
     }
-    .lb{margin-top:.55rem;border-top:1px dashed #e5e7eb;padding-top:.55rem;display:flex;flex-direction:column;gap:.25rem;}
-    .lb-item{display:flex;justify-content:space-between;gap:.6rem;font-size:.88rem;align-items:baseline;}
-    .lb-name{font-weight:850;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .lb-score{font-weight:950;white-space:nowrap;}
-    .empty{color:var(--muted);text-align:center;padding:.8rem .5rem;font-size:.9rem;}
-    .err{
-      margin-top:.6rem;font-size:.85rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;
-      padding:.5rem .65rem;border-radius:.75rem;display:none;
-    }
+    .lb-mini-rank{font-weight:900;color:#111827;min-width:44px;}
+    .lb-mini-name{font-weight:800;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .lb-mini-score{font-weight:950;font-variant-numeric:tabular-nums;}
+    .empty{padding:.65rem .7rem;border-radius:.75rem;border:1px dashed #e5e7eb;color:var(--muted);background:#fff;}
+    .err{margin-top:.6rem;font-size:.85rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;padding:.5rem .65rem;border-radius:.75rem;display:none;}
   </style>
 </head>
+
 <body>
   <div id="menuOverlay" class="menu-overlay"></div>
 
@@ -108,7 +110,7 @@
       <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
       <div class="site-title-group">
         <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Game history</div>
+        <div class="site-subtitle">Game History</div>
       </div>
     </div>
 
@@ -131,29 +133,27 @@
 
   <main>
     <section class="card">
-      <div class="section-title">Bingo Bango Bongo sessions</div>
-
-      <div class="controls">
-        <input id="search" type="text" placeholder="Search by game # or player name…" />
-        <select id="filter">
-          <option value="all">Show: All</option>
-          <option value="live">Show: Live</option>
-          <option value="ended">Show: Ended</option>
-        </select>
+      <div class="section-title">Filter</div>
+      <div class="toolbar">
+        <label class="hint" style="display:flex;flex-direction:column;gap:.25rem;">
+          Game
+          <select id="gameFilter">
+            <option value="all">All games</option>
+            <option value="bingoBangoBongo">Bingo Bango Bongo</option>
+            <option value="wolf">WOLF</option>
+          </select>
+        </label>
       </div>
-
-      <div id="grid" class="grid">
-        <div class="empty">Loading…</div>
-      </div>
-
       <div id="error" class="err"></div>
     </section>
+
+    <div id="list"></div>
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -169,193 +169,293 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    const GAMES = {
+      bingoBangoBongo: {
+        key:"bingoBangoBongo",
+        name:"Bingo Bango Bongo",
+        icon:"🎯",
+        href:(sid)=>`bingo_bango_bongo.html?session=${encodeURIComponent(sid)}`
+      },
+      wolf: {
+        key:"wolf",
+        name:"WOLF",
+        icon:"🐺",
+        href:(sid)=>`wolf.html?session=${encodeURIComponent(sid)}`
+      },
+    };
+
+    const $ = (id)=>document.getElementById(id);
+
+    function safeText(s){
+      return String(s||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+    }
+
+    function fmtDate(ts){
+      const n = Number(ts||0);
+      if(!n) return "—";
+      try {
+        return new Date(n).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+      } catch(e) {
+        return new Date(n).toDateString();
+      }
+    }
+
+    function setError(msg){
+      const el = $("error");
+      if (!el) return;
+      el.textContent = msg || "";
+      el.style.display = msg ? "block" : "none";
+    }
+
     async function ensureAnonAuth(){
       return new Promise((resolve,reject)=>{
         const unsub = onAuthStateChanged(auth, async (user)=>{
           try{
             if(user){ unsub(); return resolve(user); }
             const cred = await signInAnonymously(auth);
-            unsub();
-            resolve(cred.user);
-          }catch(e){
-            unsub(); reject(e);
-          }
+            unsub(); resolve(cred.user);
+          }catch(e){ unsub(); reject(e); }
         });
       });
     }
 
-    const els = {
-      grid: document.getElementById("grid"),
-      search: document.getElementById("search"),
-      filter: document.getElementById("filter"),
-      error: document.getElementById("error"),
-      hamburgerBtn: document.getElementById("hamburgerBtn"),
-      hamburgerMenu: document.getElementById("hamburgerMenu"),
-      menuOverlay: document.getElementById("menuOverlay")
-    };
-
-    function setError(msg){
-      els.error.textContent = msg || "";
-      els.error.style.display = msg ? "block" : "none";
-    }
-    function safeText(s){
-      return String(s||"").replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[m]));
-    }
-    function normalize(s){ return String(s||"").trim().toLowerCase(); }
-    function fmtDate(ts){
-      if(!ts) return "—";
-      try{
-        return new Date(ts).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
-      }catch{ return "—"; }
+    function sortSessions(obj){
+      const out = [];
+      if(!obj) return out;
+      for (const [sid, s] of Object.entries(obj)){
+        out.push({
+          sid,
+          createdAt: Number(s?.createdAt || 0),
+          status: (s?.status || "live"),
+          data: s || {}
+        });
+      }
+      // newest first for display
+      out.sort((a,b)=> (b.createdAt - a.createdAt) || a.sid.localeCompare(b.sid));
+      return out;
     }
 
-    // Hamburger
-    function openMenu(){
-      els.hamburgerMenu.style.display="flex";
-      els.menuOverlay.style.display="block";
-      els.hamburgerBtn.setAttribute("aria-expanded","true");
-    }
-    function closeMenu(){
-      els.hamburgerMenu.style.display="none";
-      els.menuOverlay.style.display="none";
-      els.hamburgerBtn.setAttribute("aria-expanded","false");
-    }
-    els.hamburgerBtn?.addEventListener("click",(e)=>{
-      e.stopPropagation();
-      (els.hamburgerMenu.style.display==="flex") ? closeMenu() : openMenu();
-    });
-    els.menuOverlay?.addEventListener("click", closeMenu);
-    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeMenu(); });
-
-    let sessions = {};
-
-    function computeLeaderboardTop3(sess){
-      const players = sess?.players || {};
-      const scores = sess?.scores || {};
-      const rows = Object.keys(players).map(pid=>{
-        const name = players[pid]?.name || "Player";
-        const s = scores[pid] || {};
-        const total = Number(s.bingo||0) + Number(s.bango||0) + Number(s.bongo||0);
-        return { name, total };
-      });
-
-      rows.sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
-      return rows.slice(0,3);
-    }
-
-    function computeGameNumbers(allSessions){
-      // oldest -> newest = Game 1 -> Game N
-      const arr = Object.entries(allSessions || {}).map(([sid, sess]) => ({
-        sid,
-        createdAt: Number(sess?.createdAt || 0)
-      }));
-      arr.sort((a,b) => (a.createdAt - b.createdAt) || a.sid.localeCompare(b.sid));
-
+    function computeGameNumbers(sessionsNewestFirst){
+      // Game # should be chronological (oldest = Game 1)
+      const asc = [...sessionsNewestFirst].sort((a,b)=> (a.createdAt - b.createdAt) || a.sid.localeCompare(b.sid));
       const map = {};
-      arr.forEach((x, i) => { map[x.sid] = i + 1; });
+      asc.forEach((s,i)=>{ map[s.sid] = i+1; });
       return map;
     }
 
-    function buildModel(){
-      const q = normalize(els.search.value);
-      const f = els.filter.value;
+    function topNLeaderboardRows(rows, n=3){
+      const out = (rows || []).slice(0, n);
+      return out;
+    }
 
-      const gameNumMap = computeGameNumbers(sessions);
-
-      const out = Object.entries(sessions || {}).map(([sid, sess])=>{
-        const status = (sess?.status || "live");
-        const playersObj = sess?.players || {};
-        const names = Object.values(playersObj).map(p=>p?.name||"").filter(Boolean);
-        const createdAt = Number(sess?.createdAt || 0);
-        const top3 = computeLeaderboardTop3(sess);
-        const gameNum = gameNumMap[sid] || 0;
-        return { sid, status, names, createdAt, top3, gameNum };
+    function computeBBBLeaderboard(session){
+      const playersObj = session?.players || {};
+      const scoresObj = session?.scores || {};
+      const rows = Object.keys(playersObj).map(pid=>{
+        const name = playersObj?.[pid]?.name || "Player";
+        const b = Number(scoresObj?.[pid]?.bingo || 0);
+        const ba = Number(scoresObj?.[pid]?.bango || 0);
+        const bo = Number(scoresObj?.[pid]?.bongo || 0);
+        const total = b + ba + bo;
+        return { pid, name, score: total };
       });
+      rows.sort((a,b)=> (b.score - a.score) || a.name.localeCompare(b.name));
+      return rows;
+    }
 
-      let filtered = out;
+    function computeWolfTotals(playersObj, holesObj, settings){
+      const totals = {};
+      const pids = Object.keys(playersObj || {});
+      pids.forEach(pid => totals[pid] = 0);
 
-      if (f === "live") filtered = filtered.filter(x => x.status !== "ended");
-      if (f === "ended") filtered = filtered.filter(x => x.status === "ended");
+      const stake = Math.max(1, parseInt(settings?.stake ?? 1, 10));
+      const loneStake = Math.max(1, parseInt(settings?.loneStake ?? 2, 10));
 
-      if (q){
-        filtered = filtered.filter(x=>{
-          const gameLabel = `game ${x.gameNum}`;
-          if (normalize(gameLabel).includes(q)) return true;
-          return x.names.some(n => normalize(n).includes(q));
+      for (let h=1; h<=18; h++){
+        const rec = holesObj?.[String(h)];
+        if (!rec) continue;
+
+        const wolf = rec.wolf || "";
+        if (!wolf || !Object.prototype.hasOwnProperty.call(totals, wolf)) continue;
+
+        const isLone = !!rec.lone;
+        const partner = (!isLone && rec.partner) ? rec.partner : "";
+        const result = rec.result || "tie";
+        if (result === "tie") continue;
+
+        const winnersWolfSide = [wolf].concat((!isLone && partner && partner !== wolf) ? [partner] : []);
+        const winnersOtherSide = pids.filter(pid => !winnersWolfSide.includes(pid));
+
+        const s = isLone ? loneStake : stake;
+
+        function apply(winners, losers){
+          winners.forEach(w => { totals[w] += s * losers.length; });
+          losers.forEach(l => { totals[l] -= s * winners.length; });
+        }
+
+        if (result === "wolf"){
+          apply(winnersWolfSide, winnersOtherSide);
+        } else if (result === "others"){
+          apply(winnersOtherSide, winnersWolfSide);
+        }
+      }
+
+      return totals;
+    }
+
+    function computeWolfLeaderboard(session){
+      const playersObj = session?.players || {};
+      const holesObj = session?.holes || {};
+      const settings = session?.settings || {};
+      const totals = computeWolfTotals(playersObj, holesObj, settings);
+
+      const rows = Object.keys(playersObj).map(pid=>({
+        pid,
+        name: playersObj?.[pid]?.name || "Player",
+        score: Number(totals?.[pid] ?? 0)
+      }));
+
+      rows.sort((a,b)=> (b.score - a.score) || a.name.localeCompare(b.name));
+      return rows;
+    }
+
+    function leaderboardHtml(gameKey, sessionData){
+      let rows = [];
+      if (gameKey === "bingoBangoBongo") rows = computeBBBLeaderboard(sessionData);
+      else if (gameKey === "wolf") rows = computeWolfLeaderboard(sessionData);
+
+      const top = topNLeaderboardRows(rows, 3);
+      if (!top.length) return "";
+
+      const title = "Leaderboard (Top 3)";
+      return `
+        <div class="lb-mini">
+          <div class="lb-mini-title">${title}</div>
+          ${top.map((r, i)=>`
+            <div class="lb-mini-row">
+              <div class="lb-mini-rank">${i+1}.</div>
+              <div class="lb-mini-name">${safeText(r.name)}</div>
+              <div class="lb-mini-score">${(gameKey==="wolf" && r.score>0) ? "+" : ""}${safeText(r.score)}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderAll(allByGame){
+      const filter = $("gameFilter")?.value || "all";
+      const root = $("list");
+      if (!root) return;
+      root.innerHTML = "";
+
+      const keys = (filter === "all") ? Object.keys(GAMES) : [filter];
+      let any = false;
+
+      for (const k of keys){
+        const game = GAMES[k];
+        if(!game) continue;
+
+        const sessions = allByGame[k] || [];
+        if(!sessions.length) continue;
+
+        const gameNumMap = computeGameNumbers(sessions);
+
+        const wrap = document.createElement("section");
+        wrap.className = "card";
+        wrap.innerHTML = `
+          <div class="section-title">${safeText(game.name)}</div>
+          <div class="hint">Most recent sessions first. Tap a session to open it.</div>
+          <div class="list" id="list_${game.key}"></div>
+        `;
+        root.appendChild(wrap);
+
+        const list = wrap.querySelector("#list_"+game.key);
+
+        sessions.slice(0, 50).forEach(s=>{
+          any = true;
+
+          const n = gameNumMap[s.sid] || "";
+          const endedAt = Number(s.data?.endedAt || 0);
+          const statusLabel = (String(s.status || "").toLowerCase() === "ended") ? "Ended" : "Active";
+
+          const row = document.createElement("div");
+          row.className = "row";
+          row.innerHTML = `
+            <div class="left">
+              <div class="icon" aria-hidden="true">${game.icon}</div>
+              <div style="min-width:0;flex:1;">
+                <div class="name">${safeText(statusLabel)} • ${n ? `Game ${n}` : "Game"}</div>
+                <div class="meta">Date: ${fmtDate(s.createdAt)}${endedAt ? ` • Ended: ${fmtDate(endedAt)}` : ""}</div>
+                ${leaderboardHtml(game.key, s.data)}
+              </div>
+            </div>
+            <div class="actions">
+              <a class="btn btn-primary" href="${game.href(s.sid)}">Open</a>
+            </div>
+          `;
+          list.appendChild(row);
         });
       }
 
-      // newest first in list
-      filtered.sort((a,b)=> (Number(b.createdAt||0) - Number(a.createdAt||0)));
-      return filtered;
-    }
-
-    function render(){
-      const model = buildModel();
-      if (!model.length){
-        els.grid.innerHTML = `<div class="empty">No sessions found.</div>`;
-        return;
+      if(!any){
+        root.innerHTML = `<div class="empty">No game sessions found yet. Start a game session, then come back here.</div>`;
       }
-
-      els.grid.innerHTML = model.map(x=>{
-        const pillClass = (x.status === "ended") ? "pill ended" : "pill live";
-        const pillText = (x.status === "ended") ? "Ended" : "Live";
-        const playerCount = x.names.length;
-
-        const topHtml = x.top3.length
-          ? `<div class="lb">
-              ${x.top3.map((r,i)=>`
-                <div class="lb-item">
-                  <div class="lb-name">${i+1}. ${safeText(r.name)}</div>
-                  <div class="lb-score">${safeText(r.total)}</div>
-                </div>
-              `).join("")}
-            </div>`
-          : `<div class="meta">No scores yet.</div>`;
-
-        return `
-          <div class="session-card">
-            <div class="row">
-              <div class="game-title">Game ${safeText(x.gameNum)}</div>
-              <div class="${pillClass}">${pillText}</div>
-            </div>
-            <div class="meta">
-              <div><strong>${playerCount}</strong> player${playerCount===1?"":"s"}</div>
-              <div>Created: ${safeText(fmtDate(x.createdAt))}</div>
-            </div>
-
-            <a class="btnlink" href="bingo_bango_bongo.html?session=${encodeURIComponent(x.sid)}">Open →</a>
-            ${topHtml}
-          </div>
-        `;
-      }).join("");
     }
 
-    els.search.addEventListener("input", render);
-    els.filter.addEventListener("change", render);
-
-    async function init(){
+    async function boot(){
       try{
         await ensureAnonAuth();
+        setError("");
+
+        const allByGame = { bingoBangoBongo: [], wolf: [] };
+
+        const rBingo = ref(db, "games/bingoBangoBongo/sessions");
+        const rWolf = ref(db, "games/wolf/sessions");
+
+        onValue(
+          rBingo,
+          (snap)=>{ allByGame.bingoBangoBongo = sortSessions(snap.val()); renderAll(allByGame); },
+          (err)=>{ console.error(err); setError("Read failed: " + (err?.code || err?.message || "unknown")); }
+        );
+
+        onValue(
+          rWolf,
+          (snap)=>{ allByGame.wolf = sortSessions(snap.val()); renderAll(allByGame); },
+          (err)=>{ console.error(err); setError("Read failed: " + (err?.code || err?.message || "unknown")); }
+        );
+
+        $("gameFilter")?.addEventListener("change", ()=>renderAll(allByGame));
       }catch(e){
         console.error(e);
-        setError("Auth failed. Make sure Anonymous sign-in is enabled.");
-        return;
+        setError("Auth/init failed: " + (e?.code || e?.message || "unknown"));
       }
-
-      const sessionsRef = ref(db, "games/bingoBangoBongo/sessions");
-      onValue(sessionsRef, (snap)=>{
-        sessions = snap.val() || {};
-        render();
-      }, (err)=>{
-        console.error(err);
-        setError("Read failed: " + (err?.code || err?.message || "unknown"));
-      });
     }
 
-    init();
+    // FIX: wait for DOM (prevents the “blank page” / null element errors)
+    window.addEventListener("DOMContentLoaded", boot);
+  </script>
+
+  <script>
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const hamburgerMenu = document.getElementById("hamburgerMenu");
+    const menuOverlay = document.getElementById("menuOverlay");
+
+    function openMenu(){
+      hamburgerMenu.style.display="flex";
+      menuOverlay.style.display="block";
+      hamburgerBtn.setAttribute("aria-expanded","true");
+    }
+    function closeMenu(){
+      hamburgerMenu.style.display="none";
+      menuOverlay.style.display="none";
+      hamburgerBtn.setAttribute("aria-expanded","false");
+    }
+    hamburgerBtn?.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      (hamburgerMenu.style.display==="flex") ? closeMenu() : openMenu();
+    });
+    menuOverlay?.addEventListener("click", closeMenu);
+    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeMenu(); });
   </script>
 </body>
 </html>

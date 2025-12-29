@@ -71,7 +71,16 @@
       transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
     }
     .game-tile:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(15,23,42,.12);border-color:#cbd5f5;}
-    .game-name{font-size:1rem;font-weight:850;margin-bottom:.2rem;}
+
+    .game-head{display:flex;align-items:center;gap:.55rem;margin-bottom:.2rem;}
+    .game-icon{
+      height:34px;width:34px;border-radius:999px;
+      display:inline-flex;align-items:center;justify-content:center;
+      border:1px solid #e5e7eb;background:#f9fafb;
+      font-size:1.05rem;flex-shrink:0;
+    }
+    .game-name{font-size:1rem;font-weight:850;margin:0;}
+
     .game-desc{font-size:.86rem;color:var(--muted);line-height:1.25rem;}
     .pill{
       display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .6rem;border-radius:999px;
@@ -96,6 +105,7 @@
       <div class="nav-desktop">
         <a href="index.html" class="nav-btn secondary">Home</a>
         <a href="spectator.html" class="nav-btn secondary">Scores</a>
+        <a href="game_history.html" class="nav-btn secondary">Game History</a>
       </div>
 
       <button id="hamburgerBtn" class="hamburger" aria-label="Menu" aria-expanded="false">☰</button>
@@ -103,6 +113,7 @@
       <div id="hamburgerMenu" class="hamburger-menu" aria-label="Navigation Menu">
         <a href="index.html">Home</a>
         <a href="spectator.html">Scores</a>
+        <a href="game_history.html">Game History</a>
       </div>
     </nav>
   </header>
@@ -113,9 +124,17 @@
 
       <div class="game-grid">
         <a class="game-tile" href="bingo_bango_bongo.html">
-          <div class="game-name">Bingo Bango Bongo</div>
+          <div class="game-head"><span class="game-icon" aria-hidden="true">🎯</span><div class="game-name">Bingo Bango Bongo</div></div>
           <div class="game-desc">
             Select players, then track Bingo / Bango / Bongo points and totals in a shared session.
+          </div>
+          <div class="pill">Tap to start →</div>
+        </a>
+
+        <a class="game-tile" href="wolf.html">
+          <div class="game-head"><span class="game-icon" aria-hidden="true">🐺</span><div class="game-name">WOLF</div></div>
+          <div class="game-desc">
+            Rotate the Wolf each hole, pick a partner (or go Lone Wolf), then record who won the hole. Totals update live.
           </div>
           <div class="pill">Tap to start →</div>
         </a>
