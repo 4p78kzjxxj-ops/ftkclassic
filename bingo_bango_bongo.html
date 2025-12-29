@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Bingo Bango Bongo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root{
+      --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280;
+      --border:#d1d5db; --shadow-soft:0 10px 30px rgba(15,23,42,.12);
+      --accent:#111827;
+      --danger:#7f1d1d; --danger-soft:#fef2f2;
+      --warn:#9a3412; --warn-soft:#ffedd5;
+      --good:#166534; --good-soft:#dcfce7;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;}
+    html,body{-webkit-text-size-adjust:100%;background:var(--bg);color:var(--text);min-height:100%;}
+    body{min-height:100vh;padding:.75rem;touch-action:manipulation;}
+    @media (min-width:768px){ body{max-width:1100px;margin:0 auto;} }
+    a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+    button{-webkit-tap-highlight-color:transparent;}
+
+    .menu-overlay{position:fixed;inset:0;display:none;z-index:1000;background:rgba(17,24,39,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+
+    .site-header{display:flex;align-items:center;gap:.75rem;position:relative;}
+    .site-header-left{display:flex;align-items:center;gap:.6rem;min-width:0;}
+    .site-logo{height:32px;width:auto;border-radius:.45rem;object-fit:cover;background:#e5e7eb;flex-shrink:0;}
+    .site-title-group{display:flex;flex-direction:column;gap:.15rem;min-width:0;}
+    .site-title{font-size:1.05rem;font-weight:800;white-space:nowrap;}
+    .site-subtitle{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+
+    .nav-links{margin-left:auto;display:flex;gap:.4rem;align-items:center;}
+    .nav-desktop{display:flex;gap:.4rem;align-items:center;}
+    .nav-btn{
+      font-size:.85rem;border-radius:999px;padding:.3rem .9rem;border:1px solid var(--border);
+      background:#fff;color:var(--text);white-space:nowrap;min-height:32px;
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    .nav-btn.secondary{background:#f9fafb;}
+
+    .hamburger{
+      display:none;font-size:1.35rem;background:#fff;border:1px solid var(--border);
+      border-radius:999px;padding:.25rem .7rem;min-height:32px;cursor:pointer;line-height:1;
+    }
+    .hamburger-menu{
+      position:absolute;top:44px;right:0;background:#fff;border:1px solid var(--border);
+      border-radius:.9rem;box-shadow:var(--shadow-soft);display:none;flex-direction:column;
+      min-width:220px;z-index:1001;overflow:hidden;
+    }
+    .hamburger-menu a{padding:.7rem .85rem;font-size:.9rem;border-top:1px solid #f3f4f6;}
+    .hamburger-menu a:first-child{border-top:none;}
+    .hamburger-menu a:hover{background:#f3f4f6;}
+    @media (max-width:700px){ .nav-desktop{display:none;} .hamburger{display:inline-flex;align-items:center;justify-content:center;} }
+
+    main{margin-top:.75rem;display:flex;flex-direction:column;gap:.75rem;}
+
+    .card{
+      background:var(--card);border-radius:.9rem;padding:.85rem;border:1px solid var(--border);
+      box-shadow:var(--shadow-soft);
+    }
+    .section-title{
+      font-size:.82rem;font-weight:650;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+      border-bottom:1px dashed #e5e7eb;padding-bottom:.35rem;margin-bottom:.55rem;
+    }
+    .hint{font-size:.84rem;color:var(--muted);line-height:1.25rem;}
+    .pill{display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .6rem;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;font-size:.78rem;color:#374151;white-space:nowrap;}
+    .pill.good{border-color:#bbf7d0;background:var(--good-soft);color:var(--good);}
+    .err{
+      margin-top:.6rem;font-size:.85rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;
+      padding:.5rem .65rem;border-radius:.75rem;display:none;
+    }
+    .status{margin-top:.45rem;font-size:.82rem;color:var(--muted);min-height:1.1em;}
+
+    .top-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.75rem;align-items:start;}
+    @media (max-width:900px){ .top-grid{grid-template-columns:minmax(0,1fr);} }
+
+    .controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.55rem;}
+    .controls select, .controls input{
+      padding:.5rem .6rem;border-radius:.65rem;border:1px solid var(--border);background:#fff;font-size:.9rem;min-height:42px;
+    }
+    .controls select{min-width:220px;}
+
+    .btn{
+      border-radius:999px;border:1px solid var(--border);background:#f9fafb;padding:.55rem .9rem;
+      font-size:.9rem;cursor:pointer;min-height:42px;font-weight:650;
+    }
+    .btn-primary{background:var(--accent);color:#f9fafb;border-color:var(--accent);}
+    .btn-warn{background:var(--warn-soft);color:var(--warn);border-color:#fed7aa;}
+
+    .player-pick-list{display:flex;flex-direction:column;gap:.35rem;margin-top:.45rem;}
+    .pick-row{
+      display:flex;align-items:center;gap:.5rem;border:1px solid #e5e7eb;background:#fff;border-radius:.75rem;
+      padding:.45rem .55rem;
+    }
+    .pick-row input{width:18px;height:18px;}
+    .pick-name{font-weight:800;}
+    .pick-sub{font-size:.8rem;color:var(--muted);}
+
+    .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.55rem;margin-top:.6rem;}
+    .player-card{
+      border:1px solid #e5e7eb;background:#fff;border-radius:.85rem;padding:.7rem;
+      transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
+    }
+    .player-card:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(15,23,42,.12);border-color:#cbd5f5;}
+    .player-head{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline;margin-bottom:.35rem;}
+    .player-name{font-size:1rem;font-weight:950;}
+    .total-pill{font-size:.82rem;border-radius:999px;padding:.18rem .6rem;border:1px solid #e5e7eb;background:#f9fafb;white-space:nowrap;}
+
+    .bbb-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem;margin-top:.35rem;}
+    .bbb-box{
+      border:1px solid #e5e7eb;border-radius:.75rem;padding:.5rem;background:#f9fafb;
+      display:flex;flex-direction:column;gap:.25rem;
+    }
+    .bbb-title{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;}
+    .bbb-score{font-size:1.1rem;font-weight:950;}
+    .bbb-actions{display:flex;gap:.35rem;flex-wrap:wrap;}
+    .mini{
+      border-radius:999px;border:1px solid var(--border);background:#fff;padding:.25rem .6rem;
+      font-size:.9rem;cursor:pointer;min-height:32px;font-weight:900;
+    }
+
+    .leaderboard{margin-top:.55rem;border-top:1px dashed #e5e7eb;padding-top:.55rem;}
+    .lb-list{display:flex;flex-direction:column;gap:.3rem;margin-top:.35rem;}
+    .lb-row{
+      display:flex;justify-content:space-between;gap:.6rem;align-items:baseline;flex-wrap:wrap;
+      border:1px solid #eef2f7;background:#fff;border-radius:.75rem;padding:.45rem .55rem;
+    }
+    .lb-left{display:flex;gap:.5rem;align-items:baseline;min-width:0;}
+    .lb-rank{font-weight:950;white-space:nowrap;}
+    .lb-name{font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;}
+    .lb-breakdown{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+    .lb-total{font-weight:950;white-space:nowrap;}
+  </style>
+</head>
+<body>
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div class="site-title-group">
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Bingo Bango Bongo</div>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <div class="nav-desktop">
+        <a href="index.html" class="nav-btn secondary">Home</a>
+        <a href="spectator.html" class="nav-btn secondary">Scores</a>
+        <a href="games.html" class="nav-btn secondary">Games</a>
+        <a href="game_history.html" class="nav-btn secondary">Game History</a>
+      </div>
+
+      <button id="hamburgerBtn" class="hamburger" aria-label="Menu" aria-expanded="false">☰</button>
+
+      <div id="hamburgerMenu" class="hamburger-menu" aria-label="Navigation Menu">
+        <a href="index.html">Home</a>
+        <a href="spectator.html">Scores</a>
+        <a href="games.html">Games</a>
+        <a href="game_history.html">Game History</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">Course & hole</div>
+      <div class="hint">
+        The game tracks a <strong>current hole</strong>. Once <strong>3 total points</strong> are awarded on a hole, it advances to the next hole.
+      </div>
+
+      <div class="controls">
+        <label class="hint" style="display:flex;flex-direction:column;gap:.25rem;">
+          Course
+          <select id="courseSelect">
+            <option value="southern_oaks">Southern Oaks</option>
+          </select>
+        </label>
+
+        <label class="hint" style="display:flex;flex-direction:column;gap:.25rem;">
+          Current hole
+          <select id="holeSelect"></select>
+        </label>
+
+        <span class="pill" id="holeMetaPill">—</span>
+        <span class="pill" id="holeAwardPill">Hole awards: 0 / 3</span>
+      </div>
+    </section>
+
+    <section class="top-grid">
+      <section class="card">
+        <div class="section-title">Session</div>
+
+        <div class="hint">
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+            <span class="pill">Session:</span>
+            <strong id="sessionLabel">Not started</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="newSessionBtn" class="btn btn-primary" type="button">Start new session</button>
+          <button id="endSessionBtn" class="btn btn-warn" type="button" style="display:none;">End session</button>
+        </div>
+
+        <div id="status" class="status"></div>
+        <div id="error" class="err"></div>
+
+        <div id="pickWrap" style="margin-top:.65rem;">
+          <div class="section-title" style="margin-bottom:.45rem;">Select players</div>
+          <div id="pickList" class="player-pick-list">
+            <div class="hint">Loading players…</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Leaderboard</div>
+        <div class="hint">Sorted by total points (Bingo + Bango + Bongo). No player IDs shown.</div>
+
+        <div id="leaderboard" class="leaderboard" style="display:none;">
+          <div class="lb-list" id="lbList"></div>
+        </div>
+
+        <div class="section-title" style="margin-top:.75rem;">Scoreboard</div>
+        <div class="hint">Tap + / − to add points. Totals update automatically.</div>
+
+        <div id="scoreGrid" class="score-grid" style="margin-top:.6rem;">
+          <div class="hint">Start a session to begin scoring.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const COURSES = {
+      southern_oaks: {
+        name: "Southern Oaks",
+        holes: [
+          { n:1,  par:4, yards:343 }, { n:2,  par:4, yards:316 }, { n:3,  par:4, yards:364 },
+          { n:4,  par:3, yards:142 }, { n:5,  par:5, yards:484 }, { n:6,  par:3, yards:202 },
+          { n:7,  par:5, yards:578 }, { n:8,  par:4, yards:305 }, { n:9,  par:4, yards:363 },
+          { n:10, par:4, yards:405 }, { n:11, par:3, yards:171 }, { n:12, par:4, yards:344 },
+          { n:13, par:3, yards:138 }, { n:14, par:4, yards:279 }, { n:15, par:5, yards:516 },
+          { n:16, par:4, yards:346 }, { n:17, par:4, yards:333 }, { n:18, par:5, yards:471 }
+        ]
+      }
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    async function ensureAnonAuth(){
+      return new Promise((resolve,reject)=>{
+        const unsub = onAuthStateChanged(auth, async (user)=>{
+          try{
+            if(user){ unsub(); return resolve(user); }
+            const cred = await signInAnonymously(auth);
+            unsub();
+            resolve(cred.user);
+          }catch(e){
+            unsub(); reject(e);
+          }
+        });
+      });
+    }
+
+    const els = {
+      courseSelect: document.getElementById("courseSelect"),
+      holeSelect: document.getElementById("holeSelect"),
+      holeMetaPill: document.getElementById("holeMetaPill"),
+      holeAwardPill: document.getElementById("holeAwardPill"),
+
+      sessionLabel: document.getElementById("sessionLabel"),
+      newSessionBtn: document.getElementById("newSessionBtn"),
+      endSessionBtn: document.getElementById("endSessionBtn"),
+      pickWrap: document.getElementById("pickWrap"),
+      pickList: document.getElementById("pickList"),
+
+      scoreGrid: document.getElementById("scoreGrid"),
+      status: document.getElementById("status"),
+      error: document.getElementById("error"),
+
+      leaderboardWrap: document.getElementById("leaderboard"),
+      lbList: document.getElementById("lbList"),
+
+      hamburgerBtn: document.getElementById("hamburgerBtn"),
+      hamburgerMenu: document.getElementById("hamburgerMenu"),
+      menuOverlay: document.getElementById("menuOverlay")
+    };
+
+    function setError(msg){
+      els.error.textContent = msg || "";
+      els.error.style.display = msg ? "block" : "none";
+    }
+    function setStatus(msg){ els.status.textContent = msg || ""; }
+    function safeText(s){
+      return String(s||"").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+    function qp(){
+      const p = new URLSearchParams(location.search || "");
+      const o = {};
+      for (const [k,v] of p.entries()) o[k]=v;
+      return o;
+    }
+
+    // Hamburger
+    function openMenu(){
+      els.hamburgerMenu.style.display="flex";
+      els.menuOverlay.style.display="block";
+      els.hamburgerBtn.setAttribute("aria-expanded","true");
+    }
+    function closeMenu(){
+      els.hamburgerMenu.style.display="none";
+      els.menuOverlay.style.display="none";
+      els.hamburgerBtn.setAttribute("aria-expanded","false");
+    }
+    els.hamburgerBtn?.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      (els.hamburgerMenu.style.display==="flex") ? closeMenu() : openMenu();
+    });
+    els.menuOverlay?.addEventListener("click", closeMenu);
+    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeMenu(); });
+
+    // State
+    let players = {};
+    let selected = new Set();
+    let sessionId = qp().session || null;
+    let lastSnapshot = null;
+    let currentCourseKey = els.courseSelect.value || "southern_oaks";
+
+    // Game numbering map (sid -> Game #)
+    let gameNumMap = {};
+    let gameNumForThisSession = null;
+
+    const playersRef = ref(db, "players");
+    const sessionsRootRef = ref(db, "games/bingoBangoBongo/sessions");
+
+    function sessionRoot(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}`); }
+    function sessionLogRef(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}/log`); }
+
+    function computeGameNumbers(allSessions){
+      const arr = Object.entries(allSessions || {}).map(([sid, sess]) => ({
+        sid,
+        createdAt: Number(sess?.createdAt || 0)
+      }));
+      arr.sort((a,b) => (a.createdAt - b.createdAt) || a.sid.localeCompare(b.sid));
+      const map = {};
+      arr.forEach((x,i)=> { map[x.sid] = i+1; });
+      return map;
+    }
+
+    function setSessionLabel(){
+      if (!sessionId){ els.sessionLabel.textContent = "Not started"; return; }
+      const n = gameNumMap[sessionId];
+      if (n) els.sessionLabel.textContent = `Game ${n}`;
+      else els.sessionLabel.textContent = "Game";
+      gameNumForThisSession = n || null;
+    }
+
+    function buildHoleSelect(){
+      const course = COURSES[currentCourseKey];
+      els.holeSelect.innerHTML = course.holes.map(h => `<option value="${h.n}">Hole ${h.n}</option>`).join("");
+    }
+
+    function setHoleMeta(holeNum){
+      const course = COURSES[currentCourseKey];
+      const h = course.holes.find(x => x.n === Number(holeNum));
+      if (!h){ els.holeMetaPill.textContent = "—"; return; }
+      els.holeMetaPill.textContent = `Hole ${h.n} · Par ${h.par} · ${h.yards} yds`;
+    }
+
+    function setHoleAwardCount(count){
+      const c = Number(count||0);
+      els.holeAwardPill.textContent = `Hole awards: ${c} / 3`;
+      els.holeAwardPill.className = "pill" + (c >= 3 ? " good" : "");
+    }
+
+    function renderPlayerPicker(){
+      const ids = Object.keys(players || {});
+      if (!ids.length){
+        els.pickList.innerHTML = `<div class="hint">No players found.</div>`;
+        return;
+      }
+      ids.sort((a,b)=> (players[a]?.name||"").localeCompare(players[b]?.name||""));
+
+      els.pickList.innerHTML = ids.map(pid=>{
+        const p = players[pid] || {};
+        const checked = selected.has(pid) ? "checked" : "";
+        return `
+          <label class="pick-row">
+            <input type="checkbox" data-pick="${safeText(pid)}" ${checked} />
+            <div style="display:flex;flex-direction:column;gap:.05rem;min-width:0;">
+              <div class="pick-name">${safeText(p.name||"Unknown")}</div>
+              <div class="pick-sub">&nbsp;</div>
+            </div>
+          </label>
+        `;
+      }).join("");
+    }
+
+    function getScore(scoresObj, pid){
+      const s = scoresObj?.[pid] || {};
+      const bingo = Number(s.bingo||0);
+      const bango = Number(s.bango||0);
+      const bongo = Number(s.bongo||0);
+      return { bingo, bango, bongo, total: bingo+bango+bongo };
+    }
+
+    function scoreBoxHtml(pid, bucket, title, val){
+      return `
+        <div class="bbb-box">
+          <div class="bbb-title">${safeText(title)}</div>
+          <div class="bbb-score">${val}</div>
+          <div class="bbb-actions">
+            <button class="mini" data-action="inc" data-bucket="${safeText(bucket)}" data-pid="${safeText(pid)}">+1</button>
+            <button class="mini" data-action="dec" data-bucket="${safeText(bucket)}" data-pid="${safeText(pid)}">−1</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLeaderboard(sessionPlayersObj, scoresObj){
+      const pids = Object.keys(sessionPlayersObj || {});
+      if (!pids.length){
+        els.leaderboardWrap.style.display = "none";
+        return;
+      }
+
+      const rows = pids.map(pid=>{
+        const name = players[pid]?.name || sessionPlayersObj[pid]?.name || "Player";
+        const s = getScore(scoresObj, pid);
+        return { pid, name, ...s };
+      });
+
+      rows.sort((a,b)=> b.total - a.total || b.bingo - a.bingo || b.bango - a.bango || b.bongo - a.bongo || a.name.localeCompare(b.name));
+
+      els.leaderboardWrap.style.display = "block";
+      els.lbList.innerHTML = rows.map((r, idx)=>`
+        <div class="lb-row">
+          <div class="lb-left">
+            <div class="lb-rank">${idx+1}.</div>
+            <div style="min-width:0;">
+              <div class="lb-name">${safeText(r.name)}</div>
+              <div class="lb-breakdown">Bingo ${r.bingo} · Bango ${r.bango} · Bongo ${r.bongo}</div>
+            </div>
+          </div>
+          <div class="lb-total">Total ${r.total}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderScoreboard(sessionPlayersObj, scoresObj){
+      const pids = Object.keys(sessionPlayersObj || {});
+      if (!pids.length){
+        els.scoreGrid.innerHTML = `<div class="hint">No players in this session.</div>`;
+        return;
+      }
+
+      pids.sort((a,b)=>{
+        const na = players[a]?.name || sessionPlayersObj[a]?.name || "";
+        const nb = players[b]?.name || sessionPlayersObj[b]?.name || "";
+        return na.localeCompare(nb);
+      });
+
+      els.scoreGrid.innerHTML = pids.map(pid=>{
+        const name = players[pid]?.name || sessionPlayersObj[pid]?.name || "Player";
+        const s = getScore(scoresObj, pid);
+        return `
+          <div class="player-card" data-pid="${safeText(pid)}">
+            <div class="player-head">
+              <div class="player-name">${safeText(name)}</div>
+              <div class="total-pill"><strong>Total: ${s.total}</strong></div>
+            </div>
+            <div class="bbb-row">
+              ${scoreBoxHtml(pid, "bingo", "Bingo", s.bingo)}
+              ${scoreBoxHtml(pid, "bango", "Bango", s.bango)}
+              ${scoreBoxHtml(pid, "bongo", "Bongo", s.bongo)}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function startNewSession(){
+      setError(""); setStatus("");
+
+      const chosen = Array.from(selected);
+      if (chosen.length < 1){
+        setError("Select at least 1 player.");
+        return;
+      }
+
+      try{
+        await ensureAnonAuth();
+        setStatus("Creating session…");
+
+        const newRef = push(sessionsRootRef);
+
+        const playersObj = {};
+        const scoresObj = {};
+        chosen.forEach(pid=>{
+          playersObj[pid] = { name: players[pid]?.name || "Player" };
+          scoresObj[pid] = { bingo: 0, bango: 0, bongo: 0 };
+        });
+
+        const courseKey = els.courseSelect.value || "southern_oaks";
+
+        await set(newRef, {
+          createdAt: Date.now(),
+          createdAtServer: serverTimestamp(),
+          status: "live",
+          game: "bingoBangoBongo",
+          courseKey,
+          courseName: COURSES[courseKey]?.name || "Course",
+          currentHole: 1,
+          players: playersObj,
+          scores: scoresObj
+        });
+
+        sessionId = newRef.key;
+        const url = new URL(location.href);
+        url.searchParams.set("session", sessionId);
+        location.href = url.toString();
+      }catch(e){
+        console.error(e);
+        setError("Create failed: " + (e?.code || e?.message || "unknown"));
+        setStatus("");
+      }
+    }
+
+    async function endSession(){
+      if (!sessionId) return;
+      try{
+        await ensureAnonAuth();
+        setStatus("Ending session…");
+        await update(sessionRoot(sessionId), {
+          status: "ended",
+          endedAt: Date.now(),
+          endedAtServer: serverTimestamp()
+        });
+
+        setStatus("Session ended. Returning to games…");
+        // Give the UI a beat, then go back to the games page
+        setTimeout(()=>{ window.location.href = "games.html"; }, 400);
+
+      }catch(e){
+        console.error(e);
+        setError("End failed: " + (e?.code || e?.message || "unknown"));
+      }
+    }
+
+    async function setSessionCourseAndHole(courseKey, holeNum){
+      if (!sessionId) return;
+      try{
+        await ensureAnonAuth();
+        await update(sessionRoot(sessionId), {
+          courseKey,
+          courseName: COURSES[courseKey]?.name || "Course",
+          currentHole: holeNum
+        });
+      }catch(e){
+        console.error(e);
+        setError("Update failed: " + (e?.code || e?.message || "unknown"));
+      }
+    }
+
+    async function applyDelta(pid, bucket, delta){
+      if (!sessionId) return;
+      setError("");
+
+      try{
+        await ensureAnonAuth();
+        if (!lastSnapshot) { setError("Session not loaded yet."); return; }
+
+        const curHole = Number(lastSnapshot.currentHole || 1);
+        const curCourseKey = lastSnapshot.courseKey || "southern_oaks";
+        const holeNum = (Number.isFinite(curHole) && curHole >= 1 && curHole <= 18) ? curHole : 1;
+
+        const cur = Number(lastSnapshot.scores?.[pid]?.[bucket] || 0);
+        const next = Math.max(0, cur + delta);
+
+        const updates = {};
+        updates[`games/bingoBangoBongo/sessions/${sessionId}/scores/${pid}/${bucket}`] = next;
+
+        if (delta > 0) {
+          const prevCount = Number(lastSnapshot.holeAwards?.[holeNum]?.count || 0);
+          const newCount = prevCount + 1;
+          updates[`games/bingoBangoBongo/sessions/${sessionId}/holeAwards/${holeNum}/count`] = newCount;
+          updates[`games/bingoBangoBongo/sessions/${sessionId}/holeAwards/${holeNum}/lastUpdatedAt`] = Date.now();
+
+          if (newCount >= 3) {
+            const nextHole = Math.min(18, holeNum + 1);
+            updates[`games/bingoBangoBongo/sessions/${sessionId}/currentHole`] = nextHole;
+          }
+        }
+
+        await update(ref(db), updates);
+
+        const logPush = push(sessionLogRef(sessionId));
+        await set(logPush, {
+          createdAt: Date.now(),
+          createdAtServer: serverTimestamp(),
+          pid,
+          playerName: (players[pid]?.name || lastSnapshot.players?.[pid]?.name || "Player"),
+          bucket,
+          delta: (delta > 0 ? 1 : -1),
+          hole: holeNum,
+          courseKey: curCourseKey
+        });
+      }catch(e){
+        console.error(e);
+        setError("Update failed: " + (e?.code || e?.message || "unknown"));
+      }
+    }
+
+    function syncCourseHoleUIFromSession(){
+      if (!lastSnapshot) return;
+
+      const courseKey = lastSnapshot.courseKey || "southern_oaks";
+      currentCourseKey = courseKey;
+
+      if (els.courseSelect.value !== courseKey) els.courseSelect.value = courseKey;
+
+      buildHoleSelect();
+
+      const holeNum = Number(lastSnapshot.currentHole || 1);
+      els.holeSelect.value = String((holeNum >= 1 && holeNum <= 18) ? holeNum : 1);
+
+      setHoleMeta(els.holeSelect.value);
+
+      const count = Number(lastSnapshot.holeAwards?.[holeNum]?.count || 0);
+      setHoleAwardCount(count);
+    }
+
+    async function init(){
+      try{
+        setStatus("Signing in…");
+        await ensureAnonAuth();
+        setStatus("");
+      }catch(e){
+        console.error(e);
+        setError("Auth failed. Make sure Anonymous sign-in is enabled in Firebase Auth.");
+        return;
+      }
+
+      // Init course/hole UI
+      buildHoleSelect();
+      setHoleMeta(1);
+      setHoleAwardCount(0);
+
+      // Watch sessions list to compute Game # mapping
+      onValue(sessionsRootRef, (snap)=>{
+        const all = snap.val() || {};
+        gameNumMap = computeGameNumbers(all);
+        setSessionLabel();
+      });
+
+      // Players
+      onValue(playersRef, (snap)=>{
+        players = snap.val() || {};
+        if (!sessionId) renderPlayerPicker();
+        if (lastSnapshot) {
+          renderLeaderboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
+          renderScoreboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
+        }
+      });
+
+      if (!sessionId){
+        setSessionLabel();
+        els.endSessionBtn.style.display = "none";
+        els.pickWrap.style.display = "block";
+        return;
+      }
+
+      els.endSessionBtn.style.display = "inline-flex";
+      els.pickWrap.style.display = "none";
+      setSessionLabel();
+
+      onValue(sessionRoot(sessionId), (snap)=>{
+        const data = snap.val();
+        if (!data){
+          setError("Session not found. Start a new one.");
+          els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
+          els.leaderboardWrap.style.display = "none";
+          els.endSessionBtn.style.display = "none";
+          return;
+        }
+        lastSnapshot = data;
+
+        if (data.status === "ended") setStatus("Session ended.");
+        else setStatus("");
+
+        syncCourseHoleUIFromSession();
+
+        renderLeaderboard(data.players || {}, data.scores || {});
+        renderScoreboard(data.players || {}, data.scores || {});
+      }, (err)=>{
+        console.error(err);
+        setError("Read failed: " + (err?.code || err?.message || "unknown"));
+      });
+    }
+
+    // Picker interactions
+    els.pickList.addEventListener("change", (e)=>{
+      const cb = e.target.closest("input[type='checkbox'][data-pick]");
+      if (!cb) return;
+      const pid = cb.getAttribute("data-pick");
+      if (!pid) return;
+      cb.checked ? selected.add(pid) : selected.delete(pid);
+    });
+
+    els.newSessionBtn.addEventListener("click", startNewSession);
+    els.endSessionBtn.addEventListener("click", endSession);
+
+    els.scoreGrid.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const action = btn.getAttribute("data-action");
+      const pid = btn.getAttribute("data-pid");
+      const bucket = btn.getAttribute("data-bucket");
+      if (!pid || !bucket) return;
+
+      if (action === "inc") applyDelta(pid, bucket, +1);
+      if (action === "dec") applyDelta(pid, bucket, -1);
+    });
+
+    els.courseSelect.addEventListener("change", async ()=>{
+      currentCourseKey = els.courseSelect.value || "southern_oaks";
+      buildHoleSelect();
+      setHoleMeta(1);
+
+      if (sessionId && lastSnapshot) {
+        await setSessionCourseAndHole(currentCourseKey, 1);
+      } else {
+        els.holeSelect.value = "1";
+        setHoleAwardCount(0);
+      }
+    });
+
+    els.holeSelect.addEventListener("change", async ()=>{
+      const holeNum = Number(els.holeSelect.value || 1);
+      setHoleMeta(holeNum);
+
+      if (sessionId && lastSnapshot) {
+        await setSessionCourseAndHole(currentCourseKey, holeNum);
+      } else {
+        setHoleAwardCount(0);
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

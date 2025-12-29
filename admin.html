@@ -520,7 +520,8 @@
           <button id="menuDeletePhotosBtn" class="menu-item danger" type="button">Delete photos</button>
           <button id="menuDeleteMatchPhotosBtn" class="menu-item danger" type="button">Delete match photos only</button>
           <button id="menuResetScoresBtn" class="menu-item danger" type="button">Reset match scores</button>
-        </div>
+                  <button id="menuClearGamesBtn" class="menu-item danger" type="button">Clear games</button>
+</div>
 
         <div class="menu-section">
           <div class="menu-section-title">Fall 2025</div>
@@ -876,7 +877,9 @@
     const menuDeletePhotosBtn = document.getElementById("menuDeletePhotosBtn");
     const menuDeleteMatchPhotosBtn = document.getElementById("menuDeleteMatchPhotosBtn");
     const menuResetScoresBtn = document.getElementById("menuResetScoresBtn");
-    const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
+    
+    const menuClearGamesBtn = document.getElementById("menuClearGamesBtn");
+const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
     const fall2025FileInput = document.getElementById("fall2025FileInput");
 
     let settings = {};
@@ -1391,6 +1394,30 @@
       }, {
         title: "Reset match scores",
         message: "Enter the admin code to reset ALL match scores.",
+      });
+    
+    });
+
+    // Clear games (delete ALL game sessions)
+    menuClearGamesBtn?.addEventListener("click", () => {
+      closeMenu();
+      const confirmed = confirm("Clear ALL game sessions (this removes every previous game session)? This cannot be undone.");
+      if (!confirmed) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          adminToolsStatus.textContent = "Clearing games…";
+          await set(ref(db, "games"), null);
+          adminToolsStatus.textContent = "Games cleared.";
+          setTimeout(() => (adminToolsStatus.textContent = ""), 3500);
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to clear games: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Clear games",
+        message: "Enter the admin code to clear ALL game sessions.",
       });
     });
 
