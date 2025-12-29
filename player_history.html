@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Player History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.12);
+      --tap-target: 44px;
+
+      --accent: #111827;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
+
+    html, body {
+      -webkit-text-size-adjust: 100%;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 0.75rem;
+      touch-action: manipulation;
+    }
+
+    @media (min-width: 768px) { body { max-width: 1100px; margin: 0 auto; } }
+
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .site-header { display: flex; align-items: center; gap: 0.75rem; position: relative; }
+    .site-header-left { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+    .site-logo { height: 32px; width: auto; border-radius: 0.45rem; object-fit: cover; background: #e5e7eb; flex-shrink: 0; }
+
+    .site-title-group { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+    .site-title { font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
+    .site-subtitle { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+    .nav-links { margin-left: auto; display: flex; gap: 0.4rem; align-items: center; }
+    .nav-desktop { display: flex; gap: 0.4rem; align-items: center; }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      white-space: nowrap;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+    .nav-btn.secondary { background: #f9fafb; }
+    .nav-btn.current { background: var(--accent); color: #f9fafb; border-color: var(--accent); }
+
+    .hamburger {
+      display: none;
+      font-size: 1.35rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      min-height: 32px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .hamburger-menu {
+      position: absolute;
+      top: 44px;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 0.9rem;
+      box-shadow: var(--shadow-soft);
+      display: none;
+      flex-direction: column;
+      min-width: 220px;
+      z-index: 1001;
+      overflow: hidden;
+    }
+
+    .hamburger-menu a { padding: 0.7rem 0.85rem; font-size: 0.9rem; border-top: 1px solid #f3f4f6; }
+    .hamburger-menu a:first-child { border-top: none; }
+    .hamburger-menu a:hover { background: #f3f4f6; }
+
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 1000;
+      background: rgba(17, 24, 39, 0.08);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    @media (max-width: 700px) {
+      .nav-desktop { display: none; }
+      .hamburger { display: inline-flex; align-items: center; justify-content: center; }
+    }
+
+    main { margin-top: 0.6rem; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.9rem;
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-title {
+      font-size: 0.82rem;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px dashed #e5e7eb;
+      padding-bottom: 0.35rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.45rem;
+    }
+
+    .player-name { font-size: 1.05rem; font-weight: 750; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.8rem;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .muted { color: var(--muted); }
+
+    .grid { display: grid; grid-template-columns: 1fr 130px; gap: 0.55rem; }
+    @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+
+    label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 0.2rem; }
+    input {
+      width: 100%;
+      padding: 0.55rem 0.6rem;
+      border-radius: 0.65rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: 1fr 140px 160px;
+      gap: 0.55rem;
+      margin-top: 0.55rem;
+    }
+    @media (max-width: 720px) { .row3 { grid-template-columns: 1fr; } }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      min-height: 42px;
+      font-weight: 650;
+    }
+
+    .btn-primary { background: var(--accent); color: #f9fafb; border-color: var(--accent); }
+    .btn-danger { background: var(--danger-soft); color: #7f1d1d; border-color: #fecaca; }
+
+    .status { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; min-height: 1.1em; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    th, td { padding: 0.55rem 0.6rem; border-bottom: 1px solid #eef2f7; font-size: 0.88rem; vertical-align: top; }
+    th {
+      background: #f9fafb;
+      text-align: left;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    td.num { width: 92px; text-align: right; white-space: nowrap; }
+    td.actions { width: 70px; text-align: right; }
+    .tiny { font-size: 0.78rem; color: var(--muted); }
+
+    .empty { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 0.8rem 0.5rem; }
+
+    .err {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 0.5rem 0.65rem;
+      border-radius: 0.75rem;
+      display: none;
+    }
+
+    .hint { margin-top: 0.45rem; font-size: 0.8rem; color: var(--muted); line-height: 1.25rem; }
+  </style>
+</head>
+<body>
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div class="site-title-group">
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Player history</div>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <div class="nav-desktop">
+        <a href="index.html" class="nav-btn secondary">Home</a>
+        <a id="backToPlayer" href="player.html" class="nav-btn secondary">Player</a>
+        <a href="history_all.html" class="nav-btn secondary">All History</a>
+      </div>
+
+      <button id="hamburgerBtn" class="hamburger" aria-label="Menu" aria-expanded="false">☰</button>
+
+      <div id="hamburgerMenu" class="hamburger-menu" aria-label="Navigation Menu">
+        <a href="index.html">Home</a>
+        <a id="backToPlayerMobile" href="player.html">Player</a>
+        <a href="history_all.html">All History</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <div class="section-title">Add a round</div>
+
+      <div class="player-row">
+        <div>
+          <div id="playerName" class="player-name">Player</div>
+          <div class="hint">Add your past rounds here. Everyone can see them on <strong>All History</strong>.</div>
+        </div>
+        <div class="pill">
+          <span class="muted">Avg:</span>
+          <strong id="avgScore">—</strong>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="courseInput">Course name</label>
+          <input id="courseInput" type="text" placeholder="Dawgleg GC" maxlength="60" />
+        </div>
+        <div>
+          <label for="scoreInput">Score</label>
+          <input id="scoreInput" type="number" min="40" max="140" step="1" placeholder="84" />
+        </div>
+      </div>
+
+      <div class="row3">
+        <div>
+          <label for="dateInput">Date</label>
+          <input id="dateInput" type="date" />
+        </div>
+
+        <div>
+          <label for="teeInput">Tees (optional)</label>
+          <input id="teeInput" type="text" placeholder="White" maxlength="25" />
+        </div>
+
+        <div style="align-self:end;">
+          <button id="addBtn" class="btn btn-primary" type="button">Save round</button>
+        </div>
+      </div>
+
+      <div id="status" class="status"></div>
+      <div id="error" class="err"></div>
+
+      <div class="hint">
+        Tip: open with <span class="pill" style="margin-left:.25rem;">player_history.html?code=0369</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Your rounds</div>
+
+      <table class="table" aria-label="Player rounds">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Course</th>
+            <th class="num">Score</th>
+            <th class="actions"></th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td class="empty" colspan="4">Loading…</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hint" style="margin-top:0.55rem;">
+        Delete is available when opened with a player code (<span class="pill">?code=####</span>).
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      push,
+      set,
+      remove,
+      serverTimestamp,
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    // ✅ Anonymous Auth
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInAnonymously,
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb-firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    async function ensureAnonAuth() {
+      return new Promise((resolve, reject) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+          try {
+            if (user) { unsub(); return resolve(user); }
+            const cred = await signInAnonymously(auth);
+            unsub();
+            resolve(cred.user);
+          } catch (e) {
+            unsub();
+            reject(e);
+          }
+        });
+      });
+    }
+
+    const PLAYER_CODES = {
+      "0369": "David Wolf",
+      "7022": "Jake Smith",
+      "7971": "Jon Wall",
+      "9611": "Justin Vaughn",
+      "8202": "Will Miller",
+      "7377": "Ivan Bolds",
+      "2838": "Taylor Harbin",
+      "3608": "Eric Tomeo",
+      "5327": "Matt Ruff",
+      "2303": "Eric Crowe",
+      "9724": "Brett Cooper",
+      "8817": "Jordan Fiedler",
+      "0296": "Michael Godwin",
+      "2374": "Tyler Huff",
+      "6441": "Phil Nelson",
+      "4861": "Steven Hopkins",
+      "2563": "Brett Robinson"
+    };
+
+    const els = {
+      playerName: document.getElementById("playerName"),
+      avgScore: document.getElementById("avgScore"),
+      course: document.getElementById("courseInput"),
+      score: document.getElementById("scoreInput"),
+      date: document.getElementById("dateInput"),
+      tee: document.getElementById("teeInput"),
+      addBtn: document.getElementById("addBtn"),
+      status: document.getElementById("status"),
+      error: document.getElementById("error"),
+      rows: document.getElementById("rows"),
+      backToPlayer: document.getElementById("backToPlayer"),
+      backToPlayerMobile: document.getElementById("backToPlayerMobile"),
+      hamburgerBtn: document.getElementById("hamburgerBtn"),
+      hamburgerMenu: document.getElementById("hamburgerMenu"),
+      menuOverlay: document.getElementById("menuOverlay"),
+    };
+
+    function openMenu() {
+      els.hamburgerMenu.style.display = "flex";
+      els.menuOverlay.style.display = "block";
+      els.hamburgerBtn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() {
+      els.hamburgerMenu.style.display = "none";
+      els.menuOverlay.style.display = "none";
+      els.hamburgerBtn.setAttribute("aria-expanded", "false");
+    }
+    els.hamburgerBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = els.hamburgerMenu.style.display === "flex";
+      isOpen ? closeMenu() : openMenu();
+    });
+    els.menuOverlay?.addEventListener("click", () => closeMenu());
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+
+    function setError(msg) {
+      els.error.textContent = msg || "";
+      els.error.style.display = msg ? "block" : "none";
+    }
+    function setStatus(msg) { els.status.textContent = msg || ""; }
+
+    function safeText(s) {
+      return String(s || "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    function normalizeName(s) {
+      return String(s || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search || "");
+      const out = {};
+      for (const [k, v] of params.entries()) out[k] = v;
+      return out;
+    }
+
+    const urlParams = getQueryParams();
+    const requestedCode = urlParams.code || null;
+    const requestedId = urlParams.id || urlParams.playerId || null;
+    const requestedName = urlParams.name || null;
+
+    const storedCode = (() => {
+      try { return localStorage.getItem("playerCode"); } catch { return null; }
+    })();
+
+    const effectiveCode = requestedCode || storedCode || null;
+
+    // keep "back to player" links aligned to this player
+    function updateBackLinks() {
+      const q = effectiveCode ? ("?code=" + encodeURIComponent(effectiveCode)) : "";
+      const href = "player.html" + q;
+      els.backToPlayer.href = href;
+      els.backToPlayerMobile.href = href;
+    }
+    updateBackLinks();
+
+    function resolvePlayerId(playersById) {
+      if (requestedId && playersById[requestedId]) return requestedId;
+
+      if (effectiveCode) {
+        const codeName = PLAYER_CODES[effectiveCode];
+        if (codeName) {
+          const target = normalizeName(codeName);
+          for (const [pid, p] of Object.entries(playersById || {})) {
+            if (normalizeName(p?.name || "") === target) return pid;
+          }
+        }
+      }
+
+      if (requestedName) {
+        const target = normalizeName(requestedName);
+        for (const [pid, p] of Object.entries(playersById || {})) {
+          if (normalizeName(p?.name || "") === target) return pid;
+        }
+      }
+
+      return null;
+    }
+
+    function formatDateLabel(dateISO) {
+      if (!dateISO) return "—";
+      const [y, m, d] = dateISO.split("-").map(Number);
+      if (!y || !m || !d) return dateISO;
+      const dt = new Date(y, m - 1, d);
+      return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function computeAvg(entries) {
+      const scores = entries.map((e) => Number(e.score)).filter((n) => Number.isFinite(n) && n > 0);
+      if (!scores.length) return null;
+      const sum = scores.reduce((a, b) => a + b, 0);
+      return sum / scores.length;
+    }
+
+    // Default date input = today
+    try {
+      const now = new Date();
+      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      els.date.value = iso;
+    } catch {}
+
+    let playersCache = {};
+    let playerId = null;
+    let historyListenerAttached = false;
+
+    async function init() {
+      // ✅ Ensure signed-in (anonymous) BEFORE attaching any listeners or doing writes.
+      try {
+        setStatus("Signing in…");
+        await ensureAnonAuth();
+        setStatus("");
+      } catch (e) {
+        console.error(e);
+        setError("Auth failed. Make sure Anonymous sign-in is enabled in Firebase Auth.");
+        els.rows.innerHTML = `<tr><td class="empty" colspan="4">Auth required.</td></tr>`;
+        return;
+      }
+
+      const playersRef = ref(db, "players");
+
+      onValue(playersRef, (snap) => {
+        playersCache = snap.val() || {};
+        playerId = resolvePlayerId(playersCache);
+
+        const displayName =
+          (playerId && playersCache[playerId]?.name) ||
+          (effectiveCode && PLAYER_CODES[effectiveCode]) ||
+          requestedName ||
+          "Player";
+
+        els.playerName.textContent = displayName;
+
+        if (!playerId) {
+          setError("Could not resolve this player. Open with ?code=#### (or ?id=playerId).");
+          els.rows.innerHTML = `<tr><td class="empty" colspan="4">No player selected.</td></tr>`;
+          return;
+        }
+
+        setError("");
+        attachHistoryListener();
+      });
+    }
+
+    function attachHistoryListener() {
+      if (!playerId || historyListenerAttached) return;
+      historyListenerAttached = true;
+
+      const myHistoryRef = ref(db, "playerHistory/" + playerId);
+
+      onValue(myHistoryRef, (snap) => {
+        const obj = snap.val() || {};
+        const entries = Object.entries(obj).map(([id, e]) => ({
+          id,
+          course: e?.course || "",
+          score: e?.score,
+          dateISO: e?.dateISO || "",
+          tees: e?.tees || "",
+          createdAt: e?.createdAt || 0,
+        }));
+
+        // sort newest-first
+        entries.sort((a, b) => {
+          const da = a.dateISO || "";
+          const dbb = b.dateISO || "";
+          if (da !== dbb) return dbb.localeCompare(da);
+          return (Number(b.createdAt || 0) - Number(a.createdAt || 0));
+        });
+
+        const avg = computeAvg(entries);
+        els.avgScore.textContent = (avg == null) ? "—" : avg.toFixed(1);
+
+        if (!entries.length) {
+          els.rows.innerHTML = `<tr><td class="empty" colspan="4">No rounds yet.</td></tr>`;
+          return;
+        }
+
+        const canDelete = !!effectiveCode;
+
+        els.rows.innerHTML = entries.map((e) => `
+          <tr data-id="${safeText(e.id)}">
+            <td>${safeText(formatDateLabel(e.dateISO))}</td>
+            <td>
+              <div style="font-weight:650;">${safeText(e.course || "—")}</div>
+              ${e.tees ? `<div class="tiny">Tees: ${safeText(e.tees)}</div>` : `<div class="tiny"> </div>`}
+            </td>
+            <td class="num"><strong>${safeText(e.score)}</strong></td>
+            <td class="actions">
+              ${canDelete ? `<button class="btn btn-danger" data-action="del" title="Delete">✕</button>` : ``}
+            </td>
+          </tr>
+        `).join("");
+      }, (err) => {
+        console.error(err);
+        setError("Read failed: " + (err?.code || err?.message || "unknown error"));
+      });
+    }
+
+    // Add round
+    els.addBtn.addEventListener("click", async () => {
+      setError("");
+      setStatus("");
+
+      if (!playerId) { setError("No player selected."); return; }
+
+      const course = (els.course.value || "").trim();
+      const score = Number((els.score.value || "").trim());
+      const dateISO = (els.date.value || "").trim();
+      const tees = (els.tee.value || "").trim();
+
+      if (!course) { setError("Course name is required."); return; }
+      if (!Number.isFinite(score) || score < 40 || score > 140) { setError("Score must be a number between 40 and 140."); return; }
+      if (!dateISO) { setError("Date is required."); return; }
+
+      try {
+        // ✅ Make sure auth is present right before write (handles edge cases)
+        await ensureAnonAuth();
+
+        setStatus("Saving…");
+        const newRef = push(ref(db, "playerHistory/" + playerId));
+        await set(newRef, {
+          course,
+          score: Math.round(score),
+          dateISO,
+          tees,
+          createdAt: Date.now(),
+          createdAtServer: serverTimestamp(),
+          playerName: (playersCache[playerId]?.name || (effectiveCode ? PLAYER_CODES[effectiveCode] : "") || ""),
+        });
+
+        els.course.value = "";
+        els.score.value = "";
+        els.tee.value = "";
+        setStatus("Saved.");
+        setTimeout(() => setStatus(""), 2500);
+      } catch (err) {
+        console.error(err);
+        setError("Save failed: " + (err?.code || err?.message || "unknown error"));
+        setStatus("");
+      }
+    });
+
+    // Delete round
+    els.rows.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-action='del']");
+      if (!btn) return;
+
+      const tr = btn.closest("tr[data-id]");
+      const id = tr?.getAttribute("data-id");
+      if (!id || !playerId) return;
+
+      if (!effectiveCode) {
+        setError("Delete is only allowed when you open this page with a player code (?code=####).");
+        return;
+      }
+
+      if (!confirm("Delete this round?")) return;
+
+      try {
+        await ensureAnonAuth();
+
+        setStatus("Deleting…");
+        await remove(ref(db, "playerHistory/" + playerId + "/" + id));
+        setStatus("Deleted.");
+        setTimeout(() => setStatus(""), 2000);
+      } catch (err) {
+        console.error(err);
+        setError("Delete failed: " + (err?.code || err?.message || "unknown error"));
+        setStatus("");
+      }
+    });
+
+    // start
+    init();
+  </script>
+</body>
+</html>

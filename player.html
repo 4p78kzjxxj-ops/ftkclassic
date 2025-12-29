@@ -602,6 +602,7 @@
           <a href="chat.html" class="nav-btn secondary">Chat</a>
           <a href="calendar.html" class="nav-btn secondary">Calendar</a>
           <a id="myCalendarLink" href="#" class="nav-btn secondary" style="pointer-events:none; opacity:.6;">My Availability</a>
+          <a id="historyLink" href="player_history.html" class="nav-btn secondary">Player History</a>
         </div>
 
         <!-- Hamburger (mobile) -->
@@ -614,6 +615,7 @@
           <a href="chat.html">Chat</a>
           <a href="calendar.html">Calendar</a>
           <a id="myCalendarLinkMobile" href="#" class="disabled">My Availability</a>
+          <a id="historyLinkMobile" href="player_history.html">Player History</a>
         </div>
       </nav>
     </header>
@@ -1040,6 +1042,18 @@
           myCalMobile.href = href;
           myCalMobile.classList.remove("disabled");
         }
+      }
+
+      // Player History link (desktop + mobile)
+      const historyLink = document.getElementById("historyLink");
+      const historyLinkMobile = document.getElementById("historyLinkMobile");
+      if (historyLink || historyLinkMobile) {
+        let qs = "";
+        if (requestedCode) qs = "?code=" + encodeURIComponent(requestedCode);
+        else if (playerId) qs = "?id=" + encodeURIComponent(playerId);
+        const href = "player_history.html" + qs;
+        if (historyLink) historyLink.href = href;
+        if (historyLinkMobile) historyLinkMobile.href = href;
       }
 
       if (playerTeamRowEl) playerTeamRowEl.style.display = "none";

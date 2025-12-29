@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – All Player History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root {
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --shadow-soft:0 10px 30px rgba(15,23,42,0.12);
+      --tap:44px;
+    }
+
+    * { box-sizing:border-box; margin:0; padding:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
+    html, body { -webkit-text-size-adjust:100%; background:var(--bg); color:var(--text); min-height:100%; }
+    body { min-height:100vh; padding:0.75rem; touch-action: manipulation; }
+    @media (min-width:768px){ body{ max-width:1100px; margin:0 auto; } }
+
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    /* Header / nav */
+    .site-header {
+      display:flex;
+      align-items:center;
+      gap:0.6rem;
+      margin-bottom:0.65rem;
+      position: relative; /* for hamburger menu positioning */
+    }
+    .site-header-left { display:flex; align-items:center; gap:0.6rem; min-width:0; }
+    .site-logo { height:32px; width:auto; border-radius:0.45rem; object-fit:cover; background:#e5e7eb; flex-shrink:0; }
+    .site-title { font-size:1rem; font-weight:800; }
+    .site-subtitle { font-size:0.78rem; color:var(--muted); }
+
+    .nav-links { margin-left:auto; display:flex; gap:0.35rem; align-items:center; }
+    .nav-desktop { display:flex; gap:0.35rem; align-items:center; }
+
+    .nav-btn {
+      font-size:0.78rem;
+      border-radius:999px;
+      padding:0.22rem 0.65rem;
+      border:1px solid var(--border);
+      background:#fff;
+      text-decoration:none;
+      color:var(--text);
+      min-height:32px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+    .nav-btn.secondary { background:#f3f4f6; }
+
+    /* Hamburger */
+    .hamburger {
+      display:none;
+      font-size:1.35rem;
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:0.25rem 0.7rem;
+      min-height:32px;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .hamburger-menu {
+      position:absolute;
+      top:44px;
+      right:0;
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:0.9rem;
+      box-shadow: var(--shadow-soft);
+      display:none;
+      flex-direction:column;
+      min-width:200px;
+      z-index:1001;
+      overflow:hidden;
+    }
+
+    .hamburger-menu a {
+      padding:0.7rem 0.85rem;
+      font-size:0.9rem;
+      border-top:1px solid #f3f4f6;
+      text-decoration:none;
+      color:var(--text);
+    }
+    .hamburger-menu a:first-child { border-top:none; }
+    .hamburger-menu a:hover { background:#f3f4f6; }
+
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 1000;
+      background: rgba(17, 24, 39, 0.08);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    @media (max-width:700px){
+      .nav-desktop { display:none; }
+      .hamburger { display:inline-flex; align-items:center; justify-content:center; }
+    }
+
+    main { display:flex; flex-direction:column; gap:0.6rem; padding-bottom:1.5rem; }
+
+    .card {
+      background:var(--card);
+      border-radius:0.9rem;
+      padding:0.75rem;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-title {
+      font-size:0.85rem;
+      font-weight:650;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:var(--muted);
+      margin-bottom:0.45rem;
+      border-bottom:1px dashed #e5e7eb;
+      padding-bottom:0.3rem;
+    }
+
+    .controls {
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      align-items:center;
+      margin-bottom:0.6rem;
+    }
+
+    .controls input, .controls select {
+      padding:0.5rem 0.6rem;
+      border-radius:0.65rem;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:0.9rem;
+      min-height:42px;
+    }
+
+    .controls input { flex:1; min-width:220px; }
+    .controls select { width: 190px; }
+
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap:0.55rem;
+    }
+
+    .player-card {
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:0.85rem;
+      padding:0.65rem 0.7rem;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
+    }
+
+    .player-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+      border-color: #cbd5f5;
+    }
+
+    .player-head {
+      display:flex;
+      justify-content:space-between;
+      gap:0.5rem;
+      align-items:baseline;
+      margin-bottom:0.35rem;
+    }
+
+    .player-name { font-size:0.98rem; font-weight:800; }
+    .avg-pill {
+      font-size:0.8rem;
+      border-radius:999px;
+      padding:0.18rem 0.6rem;
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      white-space:nowrap;
+      color:#374151;
+    }
+
+    .tiny { font-size:0.78rem; color:var(--muted); }
+    .list { display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem; }
+
+    .round {
+      display:flex;
+      justify-content:space-between;
+      gap:0.5rem;
+      font-size:0.86rem;
+      border-top:1px solid #f3f4f6;
+      padding-top:0.25rem;
+    }
+    .round:first-child { border-top:none; padding-top:0; }
+
+    .round-left { min-width:0; }
+    .round-course { font-weight:650; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 170px; display:block; }
+    .round-date { font-size:0.78rem; color:var(--muted); }
+    .round-score { font-weight:850; white-space:nowrap; }
+
+    .empty {
+      text-align:center;
+      color:var(--muted);
+      padding:0.8rem 0.5rem;
+      font-size:0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div>
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">All player history (read-only)</div>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <!-- Desktop links -->
+      <div class="nav-desktop">
+        <a href="index.html" class="nav-btn secondary">Home</a>
+        <a href="spectator.html" class="nav-btn secondary">Scores</a>
+      </div>
+
+      <!-- Hamburger (mobile) -->
+      <button id="hamburgerBtn" class="hamburger" aria-label="Menu" aria-expanded="false">☰</button>
+
+      <!-- Hamburger menu -->
+      <div id="hamburgerMenu" class="hamburger-menu" aria-label="Navigation Menu">
+        <a href="index.html">Home</a>
+        <a href="spectator.html">Scores</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">Player scores</div>
+
+      <div class="controls">
+        <input id="search" type="text" placeholder="Search player…" />
+        <select id="sort">
+          <option value="name">Sort: Name</option>
+          <option value="avgAsc">Sort: Avg (low → high)</option>
+          <option value="avgDesc">Sort: Avg (high → low)</option>
+          <option value="lastDateDesc">Sort: Last round (newest)</option>
+        </select>
+      </div>
+
+      <div id="grid" class="grid">
+        <div class="empty">Loading…</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+      authDomain: "ftkclassicdb.firebaseapp.com",
+      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
+      projectId: "ftkclassicdb",
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const playersRef = ref(db, "players");
+    const historyRootRef = ref(db, "playerHistory");
+
+    const gridEl = document.getElementById("grid");
+    const searchEl = document.getElementById("search");
+    const sortEl = document.getElementById("sort");
+
+    // Hamburger behavior
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const hamburgerMenu = document.getElementById("hamburgerMenu");
+    const menuOverlay = document.getElementById("menuOverlay");
+
+    function openMenu() {
+      hamburgerMenu.style.display = "flex";
+      menuOverlay.style.display = "block";
+      hamburgerBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function closeMenu() {
+      hamburgerMenu.style.display = "none";
+      menuOverlay.style.display = "none";
+      hamburgerBtn.setAttribute("aria-expanded", "false");
+    }
+
+    hamburgerBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = hamburgerMenu.style.display === "flex";
+      isOpen ? closeMenu() : openMenu();
+    });
+
+    menuOverlay?.addEventListener("click", () => closeMenu());
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+
+    let players = {};
+    let historyByPlayer = {};
+
+    function safeText(s) {
+      return String(s || "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    function formatDateLabel(dateISO) {
+      if (!dateISO) return "—";
+      const [y,m,d] = dateISO.split("-").map(Number);
+      if (!y || !m || !d) return dateISO;
+      const dt = new Date(y, m-1, d);
+      return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+    }
+
+    function computeAvg(entries) {
+      const scores = entries.map(e => Number(e.score)).filter(n => Number.isFinite(n) && n > 0);
+      if (!scores.length) return null;
+      const sum = scores.reduce((a,b) => a + b, 0);
+      return sum / scores.length;
+    }
+
+    function normalize(s) { return String(s||"").trim().toLowerCase(); }
+
+    function buildModel() {
+      const query = normalize(searchEl.value);
+      const sortMode = sortEl.value;
+
+      const out = Object.entries(players || {}).map(([pid, p]) => {
+        const name = p?.name || "Unknown Player";
+        const hObj = historyByPlayer?.[pid] || {};
+        const entries = Object.entries(hObj).map(([id, e]) => ({
+          id,
+          course: e?.course || "",
+          score: e?.score,
+          dateISO: e?.dateISO || "",
+          createdAt: e?.createdAt || 0,
+        }));
+
+        entries.sort((a,b) => {
+          const da = a.dateISO || "";
+          const dbb = b.dateISO || "";
+          if (da !== dbb) return dbb.localeCompare(da);
+          return (Number(b.createdAt||0) - Number(a.createdAt||0));
+        });
+
+        const avg = computeAvg(entries);
+        const lastDate = entries[0]?.dateISO || "";
+        const lastTs = lastDate ? (new Date(lastDate + "T00:00:00").getTime()) : 0;
+
+        return { pid, name, entries, avg, lastTs };
+      });
+
+      const filtered = query ? out.filter(x => normalize(x.name).includes(query)) : out;
+
+      filtered.sort((a,b) => {
+        if (sortMode === "avgAsc") {
+          const aa = (a.avg == null) ? Number.POSITIVE_INFINITY : a.avg;
+          const bb = (b.avg == null) ? Number.POSITIVE_INFINITY : b.avg;
+          if (aa !== bb) return aa - bb;
+          return a.name.localeCompare(b.name);
+        }
+        if (sortMode === "avgDesc") {
+          const aa = (a.avg == null) ? Number.NEGATIVE_INFINITY : a.avg;
+          const bb = (b.avg == null) ? Number.NEGATIVE_INFINITY : b.avg;
+          if (aa !== bb) return bb - aa;
+          return a.name.localeCompare(b.name);
+        }
+        if (sortMode === "lastDateDesc") {
+          if (a.lastTs !== b.lastTs) return b.lastTs - a.lastTs;
+          return a.name.localeCompare(b.name);
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      return filtered;
+    }
+
+    function render() {
+      const model = buildModel();
+
+      if (!model.length) {
+        gridEl.innerHTML = `<div class="empty">No players found.</div>`;
+        return;
+      }
+
+      gridEl.innerHTML = model.map((x) => {
+        const top = x.entries.slice(0, 4);
+        const avgLabel = (x.avg == null) ? "Avg: —" : ("Avg: " + x.avg.toFixed(1));
+
+        const roundsHtml = top.length
+          ? `<div class="list">
+              ${top.map(r => `
+                <div class="round">
+                  <div class="round-left">
+                    <span class="round-course">${safeText(r.course || "—")}</span>
+                    <div class="round-date">${safeText(formatDateLabel(r.dateISO))}</div>
+                  </div>
+                  <div class="round-score">${safeText(r.score)}</div>
+                </div>
+              `).join("")}
+            </div>`
+          : `<div class="tiny">No rounds yet.</div>`;
+
+        return `
+          <div class="player-card">
+            <div class="player-head">
+              <div class="player-name">${safeText(x.name)}</div>
+              <div class="avg-pill"><strong>${safeText(avgLabel)}</strong></div>
+            </div>
+            ${roundsHtml}
+          </div>
+        `;
+      }).join("");
+    }
+
+    searchEl.addEventListener("input", render);
+    sortEl.addEventListener("change", render);
+
+    onValue(playersRef, (snap) => { players = snap.val() || {}; render(); });
+    onValue(historyRootRef, (snap) => { historyByPlayer = snap.val() || {}; render(); });
+  </script>
+</body>
+</html>
