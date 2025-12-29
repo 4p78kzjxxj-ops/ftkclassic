@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FTK Classic – WOLF</title>
+  <title>FTK Classic – Wolf</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
@@ -27,8 +27,8 @@
     a{color:inherit;text-decoration:none;}
     button,select,input{font:inherit;}
 
-    /* Header + hamburger (matches the rest of the site) */
-    header{position:sticky;top:0;z-index:50;background:rgba(243,244,246,.92);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid rgba(17,24,39,.06);}
+    /* Header + hamburger */
+    header{position:sticky;top:0;z-index:80;background:rgba(243,244,246,.92);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid rgba(17,24,39,.06);}
     .site-header{max-width:1050px;margin:0 auto;padding:.65rem .85rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;position:relative;}
     .site-header-left{display:flex;align-items:center;gap:.6rem;min-width:0;}
     .site-logo{width:36px;height:36px;border-radius:10px;object-fit:cover;box-shadow:0 8px 18px rgba(15,23,42,.12);}
@@ -38,7 +38,7 @@
     .hamburger-menu a{display:block;padding:.7rem .85rem;font-size:.95rem;border-top:1px solid rgba(17,24,39,.06);}
     .hamburger-menu a:first-child{border-top:none}
     .hamburger-menu a:hover{background:#f9fafb}
-    .menu-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.25);z-index:40}
+    .menu-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.25);z-index:70}
 
     main{max-width:1050px;margin:0 auto;padding:.85rem;}
     .card{background:var(--card);border:1px solid rgba(17,24,39,.08);border-radius:18px;box-shadow:var(--shadow-soft);padding:.9rem;margin-bottom:.85rem;}
@@ -50,6 +50,7 @@
     .row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
     .spacer{flex:1}
     .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .55rem;border-radius:999px;border:1px solid rgba(17,24,39,.10);background:#fff;font-size:.85rem;color:var(--muted);}
+
     .btn{height:44px;padding:0 .9rem;border-radius:14px;border:1px solid rgba(17,24,39,.12);background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 8px 18px rgba(15,23,42,.10)}
     .btn-primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border-color:rgba(29,78,216,.6);color:#fff}
     .btn-warn{background:linear-gradient(180deg,#f59e0b,#d97706);border-color:rgba(217,119,6,.55);color:#111827}
@@ -57,14 +58,17 @@
 
     .field{display:flex;flex-direction:column;gap:.25rem;min-width:160px;}
     .label{font-size:.85rem;color:var(--muted);}
-    select{height:44px;border-radius:14px;border:1px solid rgba(17,24,39,.12);padding:0 .75rem;background:#fff;min-width:160px;}
     input[type="number"]{height:44px;border-radius:14px;border:1px solid rgba(17,24,39,.12);padding:0 .75rem;background:#fff;min-width:120px;}
+    select{height:44px;border-radius:14px;border:1px solid rgba(17,24,39,.12);padding:0 .75rem;background:#fff;min-width:160px;}
 
     .player-pick-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:.45rem;}
     .pick-item{display:flex;align-items:center;gap:.55rem;padding:.55rem .6rem;border-radius:14px;border:1px solid rgba(17,24,39,.10);background:#fff;}
     .pick-item input{width:18px;height:18px}
     .pick-name{font-weight:700}
     .pick-sub{font-size:.85rem;color:var(--muted)}
+
+    /* Sticky leaderboard card */
+    .sticky-leader{position: sticky; top: 64px; z-index: 60;}
 
     .lb{display:flex;flex-direction:column;gap:.5rem;margin-top:.65rem;}
     .lb-row{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border-radius:14px;border:1px solid rgba(17,24,39,.10);background:#fff;}
@@ -81,13 +85,56 @@
     .tag.blue{background:var(--blue-soft);border-color:rgba(29,78,216,.22);color:#1e3a8a}
     .hist-sub{margin-top:.25rem;color:var(--muted);font-size:.92rem;line-height:1.35}
 
+    /* Bubble selectors */
+    .bubble-group{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;min-height:44px;}
+    .bubble{
+      border:1px solid rgba(17,24,39,.12);
+      background:#fff;
+      border-radius:999px;
+      padding:.45rem .75rem;
+      min-height:44px;
+      display:inline-flex;
+      align-items:center;
+      gap:.4rem;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+      user-select:none;
+    }
+    .bubble .sub{font-size:.82rem;color:var(--muted);font-weight:650;}
+    .bubble.selected{
+      border-color:rgba(29,78,216,.55);
+      box-shadow:0 10px 22px rgba(29,78,216,.12);
+      background:linear-gradient(180deg,#ffffff,#eff6ff);
+    }
+    .bubble.danger.selected{
+      border-color:rgba(185,28,28,.45);
+      box-shadow:0 10px 22px rgba(185,28,28,.10);
+      background:linear-gradient(180deg,#ffffff,#fff1f2);
+    }
+
+    /* Bottom fixed end-session bar */
+    .bottom-bar{
+      position:fixed; left:0; right:0; bottom:0;
+      padding:.7rem .85rem calc(.7rem + env(safe-area-inset-bottom));
+      background:rgba(243,244,246,.92);
+      backdrop-filter:saturate(1.2) blur(10px);
+      border-top:1px solid rgba(17,24,39,.08);
+      z-index:90;
+      display:none;
+    }
+    .bottom-bar .inner{max-width:1050px;margin:0 auto;display:flex;gap:.6rem;align-items:center;}
+    .bottom-bar .inner .spacer{flex:1}
+    .bottom-bar .mini{color:var(--muted);font-size:.9rem;}
+
+    .pad-bottom{padding-bottom:88px;}
+
     @media (min-width: 820px){
       .player-pick-list{grid-template-columns:repeat(3,minmax(0,1fr));}
       .history{grid-template-columns:repeat(2,minmax(0,1fr));}
     }
   </style>
 
-  <!-- Firebase -->
+  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -100,7 +147,7 @@
     <div class="site-header">
       <div class="site-header-left">
         <img class="site-logo" src="IMG_7296.jpg" alt="FTK Classic" />
-        <div class="site-title">WOLF</div>
+        <div class="site-title">Wolf</div>
       </div>
 
       <button id="hamburgerBtn" class="hamburger-btn" aria-label="Menu" aria-expanded="false">☰</button>
@@ -109,28 +156,25 @@
         <a href="index.html">Home</a>
         <a href="games.html">Games</a>
         <a href="game_history.html">Game History</a>
-        <a href="scores.html">Scores</a>
+        <a href="spectator.html">Scores</a>
       </div>
     </div>
   </header>
 
-  <main>
-    <section class="card">
+  <main id="main">
+    <!-- Session / Setup -->
+    <section class="card" id="sessionCard">
       <div class="row">
         <div>
           <div class="section-title">Session</div>
-          <div class="hint">Start a shared WOLF session, then record each hole: Wolf, partner (or Lone Wolf), and who won.</div>
+          <div class="hint">Start a shared Wolf session, then record each hole: Wolf, partner (or Lone Wolf), and who won.</div>
         </div>
         <div class="spacer"></div>
         <div class="pill" id="sessionLabel">No session</div>
       </div>
 
-      <div class="row" style="margin-top:.65rem;">
-        <div class="field">
-          <div class="label">Hole</div>
-          <select id="holeSelect"></select>
-        </div>
-
+      <!-- Setup row (hidden once session is active) -->
+      <div class="row" id="setupRow" style="margin-top:.65rem;">
         <div class="field">
           <div class="label">Stake (partner hole)</div>
           <input id="stakeInput" type="number" min="1" step="1" value="1" />
@@ -143,10 +187,7 @@
 
         <div class="spacer"></div>
 
-        <div class="row" style="gap:.5rem;">
-          <button id="newSessionBtn" class="btn btn-primary" type="button">Start new session</button>
-          <button id="endSessionBtn" class="btn btn-warn" type="button" style="display:none;">End session</button>
-        </div>
+        <button id="newSessionBtn" class="btn btn-primary" type="button">Start new session</button>
       </div>
 
       <div id="status" class="status" style="display:none;"></div>
@@ -161,28 +202,44 @@
       </div>
     </section>
 
+    <!-- Sticky leaderboard -->
+    <section class="card sticky-leader" id="leaderCard" style="display:none;">
+      <div class="section-title">Leaderboard</div>
+      <div class="hint">Live totals (positive / negative). Sorted by points.</div>
+      <div id="lb" class="lb"></div>
+    </section>
+
+    <!-- Hole entry -->
     <section class="card" id="holeCard" style="display:none;">
-      <div class="section-title">Hole entry</div>
-      <div class="hint">Choose Wolf, partner (or Lone Wolf), and the hole winner. This updates live for everyone in the session.</div>
+      <div class="row" style="align-items:flex-start;">
+        <div style="min-width:240px;">
+          <div class="section-title">Hole entry</div>
+          <div class="hint">Wolf is auto-assigned in a randomized, fair order. You can still tap a different Wolf if you need to.</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="field" style="min-width:160px;">
+          <div class="label">Hole</div>
+          <select id="holeSelect"></select>
+        </div>
+      </div>
 
-      <div class="row" style="margin-top:.65rem;">
-        <div class="field">
-          <div class="label">Wolf</div>
-          <select id="wolfSelect"></select>
+      <div class="row" style="margin-top:.65rem; align-items:flex-start;">
+        <div style="flex:1; min-width:260px;">
+          <div class="label" style="font-size:.85rem;color:var(--muted); margin-bottom:.25rem;">Wolf</div>
+          <div id="wolfBubbles" class="bubble-group"></div>
+          <input id="wolfValue" type="hidden" value="" />
         </div>
 
-        <div class="field">
-          <div class="label">Partner / Lone</div>
-          <select id="partnerSelect"></select>
+        <div style="flex:1; min-width:260px;">
+          <div class="label" style="font-size:.85rem;color:var(--muted); margin-bottom:.25rem;">Partner / Lone</div>
+          <div id="partnerBubbles" class="bubble-group"></div>
+          <input id="partnerValue" type="hidden" value="__LONE__" />
         </div>
 
-        <div class="field">
-          <div class="label">Result</div>
-          <select id="resultSelect">
-            <option value="tie">Tie / Push</option>
-            <option value="wolf">Wolf side wins</option>
-            <option value="others">Other side wins</option>
-          </select>
+        <div style="flex:1; min-width:260px;">
+          <div class="label" style="font-size:.85rem;color:var(--muted); margin-bottom:.25rem;">Result</div>
+          <div id="resultBubbles" class="bubble-group"></div>
+          <input id="resultValue" type="hidden" value="tie" />
         </div>
 
         <div class="spacer"></div>
@@ -191,15 +248,8 @@
       </div>
 
       <div class="hint" style="margin-top:.55rem;">
-        Points are calculated as a “pay per opponent” style:
-        winners gain stake × number of opponents; losers lose stake × number of winners. Lone Wolf uses the Lone stake.
+        Winners gain stake × number of opponents; losers lose stake × number of winners. Lone Wolf uses the Lone stake.
       </div>
-    </section>
-
-    <section class="card" id="leaderCard" style="display:none;">
-      <div class="section-title">Leaderboard</div>
-      <div class="hint">Live totals (positive / negative). Sorted by points.</div>
-      <div id="lb" class="lb"></div>
     </section>
 
     <section class="card" id="historyCard" style="display:none;">
@@ -208,6 +258,15 @@
       <div id="history" class="history"></div>
     </section>
   </main>
+
+  <!-- Bottom bar (only End Session when active) -->
+  <div id="bottomBar" class="bottom-bar">
+    <div class="inner">
+      <div class="mini" id="bottomMini">Session active</div>
+      <div class="spacer"></div>
+      <button id="endSessionBtn" class="btn btn-warn" type="button">End session</button>
+    </div>
+  </div>
 
   <script>
     // Hamburger
@@ -232,15 +291,15 @@
     menuOverlay.addEventListener("click", closeMenu);
     document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
 
-    // Firebase init (same project)
+    // Firebase init (matches your other FTK Classic pages)
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
       authDomain: "ftkclassicdb.firebaseapp.com",
       databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
       projectId: "ftkclassicdb",
-      storageBucket: "ftkclassicdb.appspot.com",
-      messagingSenderId: "1057588758308",
-      appId: "1:1057588758308:web:7c7c5c09fba6c8fb1f1a5d"
+      storageBucket: "ftkclassicdb.firebasestorage.app",
+      messagingSenderId: "963469808092",
+      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -248,6 +307,14 @@
 
     // Helpers
     function $(id){ return document.getElementById(id); }
+    function escapeHtml(str){
+      return String(str || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
     function setError(msg){
       const el = $("error");
       if (!msg){ el.style.display="none"; el.textContent=""; return; }
@@ -257,6 +324,14 @@
       const el = $("status");
       if (!msg){ el.style.display="none"; el.textContent=""; return; }
       el.style.display="block"; el.textContent=msg;
+    }
+    function shuffle(arr){
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
     }
 
     async function ensureAnonAuth(){
@@ -276,7 +351,6 @@
     // DB roots
     const playersRef = db.ref("players");
     const sessionsRootRef = db.ref("games/wolf/sessions");
-
     function sessionRoot(id){ return db.ref("games/wolf/sessions/" + id); }
 
     // Populate hole select 1..18
@@ -289,7 +363,9 @@
     }
 
     function setSessionLabel(){
-      $("sessionLabel").textContent = sessionId ? ("Session: " + sessionId.slice(0,6).toUpperCase()) : "No session";
+      // Never show the session ID
+      $("sessionLabel").textContent = sessionId ? "Session active" : "No session";
+      $("bottomMini").textContent = sessionId ? "Session active" : "";
     }
     setSessionLabel();
 
@@ -319,22 +395,6 @@
         });
     }
 
-    function escapeHtml(str){
-      return String(str || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    // Read /players
-    playersRef.on("value", (snap)=>{
-      playersIndex = snap.val() || {};
-      if (!sessionId) renderPlayerPicker();
-      syncHoleEntryFromSession();
-    });
-
     // Picker interactions
     $("pickList").addEventListener("change", (e)=>{
       const cb = e.target.closest("input[type='checkbox'][data-pick]");
@@ -344,12 +404,31 @@
       cb.checked ? selected.add(pid) : selected.delete(pid);
     });
 
+    // Create a fair randomized wolfOrder for 18 holes
+    function buildFairWolfOrder(playerIds){
+      const n = playerIds.length;
+      const base = Math.floor(18 / n);
+      const rem = 18 % n;
+
+      // start with a shuffled list so the "extra" assignments aren't always the same people
+      const shuffledPlayers = shuffle(playerIds);
+
+      const bag = [];
+      shuffledPlayers.forEach(pid=>{
+        for (let i=0; i<base; i++) bag.push(pid);
+      });
+      // give remainder to first rem (already shuffled)
+      for (let i=0; i<rem; i++) bag.push(shuffledPlayers[i]);
+
+      return shuffle(bag); // final randomized hole order
+    }
+
     // Start session
     async function startNewSession(){
       setError(""); setStatus("");
       const chosen = Array.from(selected);
       if (chosen.length < 3){
-        setError("Select at least 3 players for WOLF.");
+        setError("Select at least 3 players for Wolf.");
         return;
       }
 
@@ -366,6 +445,8 @@
         const stake = Math.max(1, parseInt($("stakeInput").value || "1", 10));
         const loneStake = Math.max(1, parseInt($("loneStakeInput").value || "2", 10));
 
+        const wolfOrder = buildFairWolfOrder(chosen);
+
         await newRef.set({
           createdAt: Date.now(),
           createdAtServer: firebase.database.ServerValue.TIMESTAMP,
@@ -373,6 +454,7 @@
           game: "wolf",
           settings: { stake, loneStake },
           currentHole: 1,
+          wolfOrder: wolfOrder, // ✅ persistent + shared
           players: playersObj,
           holes: {}
         });
@@ -400,7 +482,7 @@
         });
 
         setStatus("Session ended. Returning to games…");
-        setTimeout(()=>{ window.location.href = "games.html"; }, 400);
+        setTimeout(()=>{ window.location.href = "games.html"; }, 350);
       }catch(e){
         console.error(e);
         setError("End failed: " + (e?.code || e?.message || "unknown"));
@@ -410,13 +492,19 @@
     $("newSessionBtn").addEventListener("click", startNewSession);
     $("endSessionBtn").addEventListener("click", endSession);
 
-    // When session changes/loads
+    // UI mode switching
     function enterSessionUI(){
       $("pickWrap").style.display = "none";
       $("holeCard").style.display = "block";
       $("leaderCard").style.display = "block";
       $("historyCard").style.display = "block";
-      $("endSessionBtn").style.display = "inline-flex";
+
+      // Hide stakes + start button once session active
+      $("setupRow").style.display = "none";
+
+      // Show only end session in fixed bottom bar
+      $("bottomBar").style.display = "block";
+      $("main").classList.add("pad-bottom");
     }
 
     function exitSessionUI(){
@@ -424,9 +512,128 @@
       $("holeCard").style.display = "none";
       $("leaderCard").style.display = "none";
       $("historyCard").style.display = "none";
-      $("endSessionBtn").style.display = "none";
+
+      $("setupRow").style.display = "flex";
+
+      $("bottomBar").style.display = "none";
+      $("main").classList.remove("pad-bottom");
     }
 
+    // Bubble helpers
+    function setSelectedBubble(container, value){
+      [...container.querySelectorAll(".bubble")].forEach(b=>{
+        b.classList.toggle("selected", b.getAttribute("data-value") === value);
+      });
+    }
+
+    // Result bubbles
+    function renderResultBubbles(){
+      const wrap = $("resultBubbles");
+      wrap.innerHTML = "";
+
+      const items = [
+        { value:"tie", label:"Tie / Push" },
+        { value:"wolf", label:"Wolf wins" },
+        { value:"others", label:"Others win" }
+      ];
+
+      items.forEach(it=>{
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.setAttribute("role","button");
+        b.setAttribute("tabindex","0");
+        b.setAttribute("data-value", it.value);
+        b.innerHTML = `<strong>${escapeHtml(it.label)}</strong>`;
+        b.addEventListener("click", ()=>{
+          $("resultValue").value = it.value;
+          setSelectedBubble(wrap, it.value);
+        });
+        b.addEventListener("keydown",(e)=>{ if(e.key==="Enter"||e.key===" ") b.click(); });
+        wrap.appendChild(b);
+      });
+
+      setSelectedBubble(wrap, $("resultValue").value || "tie");
+    }
+
+    // Wolf bubbles (NEW)
+    function renderWolfBubbles(playersObj){
+      const wrap = $("wolfBubbles");
+      wrap.innerHTML = "";
+
+      const ids = Object.keys(playersObj || {})
+        .map(pid => ({ pid, name: playersObj[pid]?.name || "Player" }))
+        .sort((a,b)=>a.name.localeCompare(b.name));
+
+      ids.forEach(p=>{
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.setAttribute("role","button");
+        b.setAttribute("tabindex","0");
+        b.setAttribute("data-value", p.pid);
+        b.innerHTML = `<strong>${escapeHtml(p.name)}</strong>`;
+        b.addEventListener("click", ()=>{
+          $("wolfValue").value = p.pid;
+          setSelectedBubble(wrap, p.pid);
+          // partner bubbles depend on current wolf
+          renderPartnerBubbles(playersObj, p.pid);
+          // keep partner selection (if now invalid, it will fall back to Lone)
+          setSelectedBubble($("partnerBubbles"), $("partnerValue").value || "__LONE__");
+        });
+        b.addEventListener("keydown",(e)=>{ if(e.key==="Enter"||e.key===" ") b.click(); });
+        wrap.appendChild(b);
+      });
+
+      const cur = $("wolfValue").value || "";
+      if (cur) setSelectedBubble(wrap, cur);
+    }
+
+    // Partner bubbles
+    function renderPartnerBubbles(playersObj, wolfId){
+      const wrap = $("partnerBubbles");
+      wrap.innerHTML = "";
+
+      // Lone bubble
+      const lone = document.createElement("div");
+      lone.className = "bubble danger";
+      lone.setAttribute("role","button");
+      lone.setAttribute("tabindex","0");
+      lone.setAttribute("data-value", "__LONE__");
+      lone.innerHTML = `<strong>Lone Wolf</strong> <span class="sub">(solo)</span>`;
+      lone.addEventListener("click", ()=>{
+        $("partnerValue").value = "__LONE__";
+        setSelectedBubble(wrap, "__LONE__");
+      });
+      lone.addEventListener("keydown",(e)=>{ if(e.key==="Enter"||e.key===" ") lone.click(); });
+      wrap.appendChild(lone);
+
+      const ids = Object.keys(playersObj || {})
+        .filter(pid => pid && pid !== wolfId)
+        .map(pid => ({ pid, name: playersObj[pid]?.name || "Player" }))
+        .sort((a,b)=>a.name.localeCompare(b.name));
+
+      ids.forEach(p=>{
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.setAttribute("role","button");
+        b.setAttribute("tabindex","0");
+        b.setAttribute("data-value", p.pid);
+        b.innerHTML = `<strong>${escapeHtml(p.name)}</strong>`;
+        b.addEventListener("click", ()=>{
+          $("partnerValue").value = p.pid;
+          setSelectedBubble(wrap, p.pid);
+        });
+        b.addEventListener("keydown",(e)=>{ if(e.key==="Enter"||e.key===" ") b.click(); });
+        wrap.appendChild(b);
+      });
+
+      // Validate current partner
+      const cur = $("partnerValue").value || "__LONE__";
+      const stillValid = (cur === "__LONE__") || ids.some(x=>x.pid === cur);
+      $("partnerValue").value = stillValid ? cur : "__LONE__";
+      setSelectedBubble(wrap, $("partnerValue").value);
+    }
+
+    // Leaderboard math
     function computeTotals(playersObj, holesObj, settings){
       const totals = {};
       const pids = Object.keys(playersObj || {});
@@ -439,7 +646,7 @@
         const rec = holesObj?.[String(h)];
         if (!rec) continue;
         const wolf = rec.wolf || "";
-        if (!wolf || !totals.hasOwnProperty(wolf)) continue;
+        if (!wolf || !Object.prototype.hasOwnProperty.call(totals, wolf)) continue;
 
         const isLone = !!rec.lone;
         const partner = (!isLone && rec.partner) ? rec.partner : "";
@@ -474,12 +681,8 @@
       })).sort((a,b)=> (b.pts - a.pts) || a.name.localeCompare(b.name));
 
       const wrap = $("lb");
-      if (!rows.length){
-        wrap.innerHTML = '<div class="hint">No players.</div>';
-        return;
-      }
+      wrap.innerHTML = rows.length ? "" : '<div class="hint">No players.</div>';
 
-      wrap.innerHTML = "";
       rows.forEach((r, i)=>{
         const div = document.createElement("div");
         div.className = "lb-row";
@@ -495,8 +698,8 @@
     function renderHistory(playersObj, holesObj, settings){
       const stake = Math.max(1, parseInt(settings?.stake ?? 1, 10));
       const loneStake = Math.max(1, parseInt(settings?.loneStake ?? 2, 10));
-
       const pName = (pid)=> playersObj?.[pid]?.name || "Player";
+
       const wrap = $("history");
       wrap.innerHTML = "";
 
@@ -534,108 +737,64 @@
       }
     }
 
-    function fillHoleEntry(playersObj){
-      // hole selection state
-      const h = parseInt(holeSelect.value || "1", 10);
+    // Auto-apply Wolf from wolfOrder for the selected hole
+    async function applyAutoWolfForHole(holeNum){
+      if (!sessionId || !sessionSnap) return;
 
-      const wolfSel = $("wolfSelect");
-      const partnerSel = $("partnerSelect");
+      const order = sessionSnap.wolfOrder || [];
+      const playersObj = sessionSnap.players || {};
+      const holesObj = sessionSnap.holes || {};
+      const hKey = String(holeNum);
 
-      const ids = Object.keys(playersObj || {});
-      wolfSel.innerHTML = '<option value="">Select…</option>';
-      ids.forEach(pid=>{
-        const opt = document.createElement("option");
-        opt.value = pid;
-        opt.textContent = playersObj[pid]?.name || "Player";
-        wolfSel.appendChild(opt);
-      });
+      // If hole already has a wolf saved, keep it
+      const existing = holesObj?.[hKey]?.wolf;
+      const desired = existing || order[holeNum - 1] || "";
 
-      // partner is dependent on wolf selection
-      function rebuildPartner(){
-        const wolf = wolfSel.value || "";
-        partnerSel.innerHTML = "";
-        // Lone option
-        const lone = document.createElement("option");
-        lone.value = "__LONE__";
-        lone.textContent = "Lone Wolf";
-        partnerSel.appendChild(lone);
-
-        ids
-          .filter(pid => pid && pid !== wolf)
-          .forEach(pid=>{
-            const opt = document.createElement("option");
-            opt.value = pid;
-            opt.textContent = playersObj[pid]?.name || "Player";
-            partnerSel.appendChild(opt);
-          });
+      if (desired && desired !== $("wolfValue").value){
+        $("wolfValue").value = desired;
       }
 
-      wolfSel.addEventListener("change", rebuildPartner);
-      rebuildPartner();
+      renderWolfBubbles(playersObj);
+      setSelectedBubble($("wolfBubbles"), $("wolfValue").value || "");
+
+      // Partner depends on wolf
+      renderPartnerBubbles(playersObj, $("wolfValue").value || "");
     }
 
-    function syncHoleEntryFromSession(){
+    // Ensure wolfOrder exists for legacy sessions (created before this update)
+    async function ensureWolfOrder(){
       if (!sessionId || !sessionSnap) return;
-      const data = sessionSnap;
-      const playersObj = data.players || {};
-      fillHoleEntry(playersObj);
+      if (Array.isArray(sessionSnap.wolfOrder) && sessionSnap.wolfOrder.length === 18) return;
 
-      const settings = data.settings || {};
-      $("stakeInput").value = settings.stake ?? 1;
-      $("loneStakeInput").value = settings.loneStake ?? 2;
+      const playerIds = Object.keys(sessionSnap.players || {});
+      if (playerIds.length < 3) return;
 
-      // default hole
-      const cur = parseInt(data.currentHole || 1, 10);
-      holeSelect.value = String(Math.min(18, Math.max(1, cur)));
-      applyHoleToForm();
-    }
-
-    function applyHoleToForm(){
-      if (!sessionId || !sessionSnap) return;
-      const h = String(parseInt(holeSelect.value || "1", 10));
-      const rec = (sessionSnap.holes || {})[h] || {};
-      // set wolf first
-      $("wolfSelect").value = rec.wolf || "";
-      // rebuild partner list after wolf
-      const evt = new Event("change");
-      $("wolfSelect").dispatchEvent(evt);
-
-      if (rec.lone){
-        $("partnerSelect").value = "__LONE__";
-      } else {
-        $("partnerSelect").value = rec.partner || "__LONE__";
+      const wolfOrder = buildFairWolfOrder(playerIds);
+      try{
+        await sessionRoot(sessionId).update({ wolfOrder });
+      }catch(e){
+        console.warn("wolfOrder update failed", e);
       }
-      $("resultSelect").value = rec.result || "tie";
     }
 
-    holeSelect.addEventListener("change", ()=>{
-      if (!sessionId) return;
-      const h = parseInt(holeSelect.value || "1", 10);
-      // store current hole for convenience
-      sessionRoot(sessionId).update({ currentHole: h }).catch(()=>{});
-      applyHoleToForm();
-    });
-
+    // Save hole
     async function saveHole(){
       if (!sessionId) return;
       setError(""); setStatus("");
+
       const h = String(parseInt(holeSelect.value || "1", 10));
 
-      const wolf = $("wolfSelect").value || "";
+      const wolf = $("wolfValue").value || "";
       if (!wolf){
         setError("Select a Wolf.");
         return;
       }
 
-      const partnerRaw = $("partnerSelect").value || "__LONE__";
+      const partnerRaw = $("partnerValue").value || "__LONE__";
       const lone = (partnerRaw === "__LONE__");
       const partner = lone ? "" : partnerRaw;
 
-      const result = $("resultSelect").value || "tie";
-
-      // update settings too (if changed)
-      const stake = Math.max(1, parseInt($("stakeInput").value || "1", 10));
-      const loneStake = Math.max(1, parseInt($("loneStakeInput").value || "2", 10));
+      const result = $("resultValue").value || "tie";
 
       try{
         await ensureAnonAuth();
@@ -650,20 +809,26 @@
           updatedAt: Date.now(),
           updatedAtServer: firebase.database.ServerValue.TIMESTAMP
         };
-        updateObj["settings"] = { stake, loneStake };
 
         await sessionRoot(sessionId).update(updateObj);
 
         setStatus("Saved.");
-        // Auto-advance to next hole
-        try{
-          const cur = parseInt(h, 10) || 1;
-          const next = Math.min(18, cur + 1);
-          holeSelect.value = String(next);
-          // Persist currentHole so all devices follow
-          sessionRoot(sessionId).update({ currentHole: next }).catch(()=>{});
-          applyHoleToForm();
-        }catch(_e){}
+
+        // Auto-advance to next hole + auto-apply next wolf
+        const cur = parseInt(h, 10) || 1;
+        const next = Math.min(18, cur + 1);
+        holeSelect.value = String(next);
+        sessionRoot(sessionId).update({ currentHole: next }).catch(()=>{});
+
+        // apply wolf for next hole
+        await applyAutoWolfForHole(next);
+
+        // reset partner/result defaults for next hole (keeps your last choice if it exists in DB once saved)
+        $("partnerValue").value = "__LONE__";
+        $("resultValue").value = "tie";
+        renderResultBubbles();
+        setSelectedBubble($("partnerBubbles"), "__LONE__");
+
         setTimeout(()=>setStatus(""), 600);
       }catch(e){
         console.error(e);
@@ -674,15 +839,66 @@
 
     $("saveHoleBtn").addEventListener("click", saveHole);
 
-    // If session param, subscribe
+    holeSelect.addEventListener("change", ()=>{
+      if (!sessionId) return;
+      const h = parseInt(holeSelect.value || "1", 10);
+      sessionRoot(sessionId).update({ currentHole: h }).catch(()=>{});
+      // apply auto wolf for selected hole
+      applyAutoWolfForHole(h);
+      // apply saved hole selections if present
+      applyHoleToForm();
+    });
+
+    // Apply DB hole record to UI
+    function applyHoleToForm(){
+      if (!sessionId || !sessionSnap) return;
+
+      const playersObj = sessionSnap.players || {};
+      const h = String(parseInt(holeSelect.value || "1", 10));
+      const rec = (sessionSnap.holes || {})[h] || {};
+
+      // Wolf (from record or wolfOrder)
+      const wolfFromRec = rec.wolf || "";
+      if (wolfFromRec) $("wolfValue").value = wolfFromRec;
+
+      renderWolfBubbles(playersObj);
+      setSelectedBubble($("wolfBubbles"), $("wolfValue").value || "");
+
+      // Partner bubbles depend on wolf
+      const wolfId = $("wolfValue").value || "";
+      renderPartnerBubbles(playersObj, wolfId);
+
+      if (rec.lone){
+        $("partnerValue").value = "__LONE__";
+      } else {
+        $("partnerValue").value = rec.partner || "__LONE__";
+      }
+      setSelectedBubble($("partnerBubbles"), $("partnerValue").value);
+
+      // Result
+      $("resultValue").value = rec.result || "tie";
+      renderResultBubbles();
+      setSelectedBubble($("resultBubbles"), $("resultValue").value);
+    }
+
+    // Read /players
+    playersRef.on("value", (snap)=>{
+      playersIndex = snap.val() || {};
+      if (!sessionId) renderPlayerPicker();
+    });
+
+    // Subscribe to session
     if (sessionId){
       enterSessionUI();
       setSessionLabel();
 
-      sessionRoot(sessionId).on("value", (snap)=>{
+      sessionRoot(sessionId).on("value", async (snap)=>{
         const data = snap.val();
         if (!data){
           setError("Session not found. Start a new one.");
+          sessionSnap = null;
+          sessionId = "";
+          setSessionLabel();
           exitSessionUI();
           return;
         }
@@ -691,26 +907,31 @@
 
         if (data.status === "ended"){
           setStatus("Session ended.");
-          $("endSessionBtn").style.display = "none";
+          $("bottomBar").style.display = "none";
+          $("main").classList.remove("pad-bottom");
         } else {
           setStatus("");
-          $("endSessionBtn").style.display = "inline-flex";
+          $("bottomBar").style.display = "block";
+          $("main").classList.add("pad-bottom");
         }
 
-        // Keep UI in sync
-        const settings = data.settings || {};
-        $("stakeInput").value = settings.stake ?? 1;
-        $("loneStakeInput").value = settings.loneStake ?? 2;
+        // Ensure wolfOrder exists for old sessions
+        await ensureWolfOrder();
 
-        if (data.currentHole){
-          holeSelect.value = String(Math.min(18, Math.max(1, parseInt(data.currentHole,10)||1)));
-        }
+        // Sync hole
+        const cur = parseInt(data.currentHole || 1, 10);
+        holeSelect.value = String(Math.min(18, Math.max(1, cur)));
 
-        // Build selects / apply hole record
-        const playersObj = data.players || {};
-        fillHoleEntry(playersObj);
+        // Auto-select wolf for this hole based on order (unless already saved)
+        await applyAutoWolfForHole(cur);
+
+        // Apply saved selections for this hole if they exist
+        renderResultBubbles();
         applyHoleToForm();
 
+        // Leader + history
+        const playersObj = data.players || {};
+        const settings = data.settings || {};
         const totals = computeTotals(playersObj, data.holes || {}, settings);
         renderLeaderboard(playersObj, totals);
         renderHistory(playersObj, data.holes || {}, settings);
@@ -718,9 +939,15 @@
         console.error(err);
         setError("Read failed: " + (err?.code || err?.message || "unknown"));
       });
-    }else{
+
+    } else {
       exitSessionUI();
     }
+
+    $("newSessionBtn").addEventListener("click", startNewSession);
+    $("endSessionBtn").addEventListener("click", endSession);
+
+    setSessionLabel();
   </script>
 </body>
 </html>
