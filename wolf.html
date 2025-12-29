@@ -481,23 +481,27 @@
     }
 
     async function endSession(){
-      if (!sessionId) return;
-      try{
-        await ensureAnonAuth();
-        setStatus("Ending session…");
-        await sessionRoot(sessionId).update({
-          status: "ended",
-          endedAt: Date.now(),
-          endedAtServer: firebase.database.ServerValue.TIMESTAMP
-        });
+  if (!sessionId) return;
 
-        setStatus("Session ended. Returning to games…");
-        setTimeout(()=>{ window.location.href = "games.html"; }, 350);
-      }catch(e){
-        console.error(e);
-        setError("End failed: " + (e?.code || e?.message || "unknown"));
-      }
-    }
+  const ok = window.confirm("Are you sure you want to end this session?");
+  if (!ok) return;
+
+  try{
+    await ensureAnonAuth();
+    setStatus("Ending session…");
+    await sessionRoot(sessionId).update({
+      status: "ended",
+      endedAt: Date.now(),
+      endedAtServer: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    setStatus("Session ended. Returning to games…");
+    setTimeout(()=>{ window.location.href = "games.html"; }, 350);
+  }catch(e){
+    console.error(e);
+    setError("End failed: " + (e?.code || e?.message || "unknown"));
+  }
+}
 
     $("newSessionBtn").addEventListener("click", startNewSession);
     $("endSessionBtn").addEventListener("click", endSession);
