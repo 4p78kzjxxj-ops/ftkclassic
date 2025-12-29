@@ -67,19 +67,20 @@
     .pick-name{font-weight:700}
     .pick-sub{font-size:.85rem;color:var(--muted)}
 
-    /* Sticky leaderboard card (smaller + compact) */
-    .sticky-leader{position: sticky; top: 64px; z-index: 60;}
-    .lb{display:flex;flex-direction:column;gap:.4rem;margin-top:.35rem;}
+    /* Sticky leaderboard card (smaller) */
+    .sticky-leader{position: sticky; top: 64px; z-index: 60; padding:.65rem .7rem;}
+    .sticky-leader .section-title{margin-bottom:.3rem;font-size:.95rem;}
+    .lb{display:flex;flex-direction:column;gap:.28rem;margin-top:.25rem;}
     .lb-row{
-      display:flex;align-items:center;gap:.5rem;
-      padding:.45rem .55rem;border-radius:12px;border:1px solid rgba(17,24,39,.10);background:#fff;
+      display:flex;align-items:center;gap:.4rem;
+      padding:.32rem .45rem;border-radius:10px;border:1px solid rgba(17,24,39,.10);background:#fff;
     }
     .lb-rank{
-      width:24px;height:24px;border-radius:9px;background:#f3f4f6;border:1px solid rgba(17,24,39,.08);
-      display:flex;align-items:center;justify-content:center;font-weight:900;color:#374151;font-size:.85rem;
+      width:20px;height:20px;border-radius:8px;background:#f3f4f6;border:1px solid rgba(17,24,39,.08);
+      display:flex;align-items:center;justify-content:center;font-weight:900;color:#374151;font-size:.78rem;
     }
-    .lb-name{font-weight:900;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.92rem;}
-    .lb-pts{font-weight:950;font-variant-numeric:tabular-nums;font-size:.92rem;}
+    .lb-name{font-weight:900;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.86rem;}
+    .lb-pts{font-weight:950;font-variant-numeric:tabular-nums;font-size:.86rem;}
 
     .history{margin-top:.75rem;display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:.55rem;}
     .hist-row{border:1px solid rgba(17,24,39,.10);background:#fff;border-radius:14px;padding:.65rem .75rem;}
@@ -115,6 +116,36 @@
       box-shadow:0 10px 22px rgba(185,28,28,.10);
       background:linear-gradient(180deg,#ffffff,#fff1f2);
     }
+
+    /* Wolf display pill */
+    .wolf-display{
+      width:100%;
+      border:1px dashed rgba(17,24,39,.18);
+      background:#fafafa;
+      border-radius:14px;
+      padding:.55rem .7rem;
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.6rem;
+    }
+    .wolf-display .left{display:flex;align-items:center;gap:.55rem;min-width:0;}
+    .wolf-badge{
+      width:30px;height:30px;border-radius:12px;
+      background:linear-gradient(180deg,#ffffff,#eff6ff);
+      border:1px solid rgba(29,78,216,.22);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:950;
+    }
+    .wolf-name{
+      font-weight:950;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .wolf-note{font-size:.85rem;color:var(--muted);}
 
     .bottom-bar{
       position:fixed; left:0; right:0; bottom:0;
@@ -164,13 +195,9 @@
   </header>
 
   <main id="main">
-    <!-- Session / Setup -->
     <section class="card" id="sessionCard">
       <div class="row">
-        <div>
-          <div class="section-title">Session</div>
-          <!-- ✅ Removed session instructions line -->
-        </div>
+        <div><div class="section-title">Session</div></div>
         <div class="spacer"></div>
         <div class="pill" id="sessionLabel">No session</div>
       </div>
@@ -202,18 +229,16 @@
       </div>
     </section>
 
-    <!-- Sticky leaderboard (smaller + no “Live totals” line) -->
     <section class="card sticky-leader" id="leaderCard" style="display:none;">
       <div class="section-title">Leaderboard</div>
       <div id="lb" class="lb"></div>
     </section>
 
-    <!-- Hole entry -->
     <section class="card" id="holeCard" style="display:none;">
       <div class="row" style="align-items:flex-start;">
         <div style="min-width:240px;">
           <div class="section-title">Hole entry</div>
-          <div class="hint">Wolf is auto-assigned. Tap to override if needed.</div>
+          <div class="hint">Wolf is auto-assigned.</div>
         </div>
         <div class="spacer"></div>
         <div class="field" style="min-width:160px;">
@@ -223,9 +248,16 @@
       </div>
 
       <div class="row" style="margin-top:.65rem; align-items:flex-start;">
+        <!-- ✅ Wolf is display-only now -->
         <div style="flex:1; min-width:260px;">
           <div class="label" style="font-size:.85rem;color:var(--muted); margin-bottom:.25rem;">Wolf</div>
-          <div id="wolfBubbles" class="bubble-group"></div>
+          <div id="wolfDisplay" class="wolf-display">
+            <div class="left">
+              <div class="wolf-badge">🐺</div>
+              <div class="wolf-name" id="wolfName">—</div>
+            </div>
+            <div class="wolf-note" id="wolfNote">Auto</div>
+          </div>
           <input id="wolfValue" type="hidden" value="" />
         </div>
 
@@ -245,9 +277,7 @@
         <button id="saveHoleBtn" class="btn btn-primary" type="button">Save hole</button>
       </div>
 
-      <div class="hint" style="margin-top:.55rem;">
-        Winners gain stake × opponents; losers lose stake × winners. Lone Wolf uses Lone stake.
-      </div>
+      <!-- ✅ Removed “Winners gain stake…” line -->
     </section>
 
     <section class="card" id="historyCard" style="display:none;">
@@ -348,7 +378,7 @@
     const sessionsRootRef = db.ref("games/wolf/sessions");
     function sessionRoot(id){ return db.ref("games/wolf/sessions/" + id); }
 
-    // Populate holes 1..18
+    // Populate holes
     const holeSelect = $("holeSelect");
     for (let h=1; h<=18; h++){
       const opt = document.createElement("option");
@@ -396,12 +426,11 @@
       cb.checked ? selected.add(pid) : selected.delete(pid);
     });
 
-    // ✅ ROTATION: each player appears once per cycle before any repeat
+    // Rotating wolf order: everyone once per cycle before repeat
     function buildRotatingWolfOrder(playerIds){
       const out = [];
       while (out.length < 18){
-        const cycle = shuffle(playerIds); // randomized order for this cycle
-        out.push(...cycle);
+        out.push(...shuffle(playerIds));
       }
       return out.slice(0, 18);
     }
@@ -426,7 +455,6 @@
 
         const stake = Math.max(1, parseInt($("stakeInput").value || "1", 10));
         const loneStake = Math.max(1, parseInt($("loneStakeInput").value || "2", 10));
-
         const wolfOrder = buildRotatingWolfOrder(chosen);
 
         await newRef.set({
@@ -483,7 +511,6 @@
       $("bottomBar").style.display = "block";
       $("main").classList.add("pad-bottom");
     }
-
     function exitSessionUI(){
       $("pickWrap").style.display = "block";
       $("holeCard").style.display = "none";
@@ -526,35 +553,6 @@
       });
 
       setSelectedBubble(wrap, $("resultValue").value || "tie");
-    }
-
-    function renderWolfBubbles(playersObj){
-      const wrap = $("wolfBubbles");
-      wrap.innerHTML = "";
-
-      const ids = Object.keys(playersObj || {})
-        .map(pid => ({ pid, name: playersObj[pid]?.name || "Player" }))
-        .sort((a,b)=>a.name.localeCompare(b.name));
-
-      ids.forEach(p=>{
-        const b = document.createElement("div");
-        b.className = "bubble";
-        b.setAttribute("role","button");
-        b.setAttribute("tabindex","0");
-        b.setAttribute("data-value", p.pid);
-        b.innerHTML = `<strong>${escapeHtml(p.name)}</strong>`;
-        b.addEventListener("click", ()=>{
-          $("wolfValue").value = p.pid;
-          setSelectedBubble(wrap, p.pid);
-          renderPartnerBubbles(playersObj, p.pid);
-          setSelectedBubble($("partnerBubbles"), $("partnerValue").value || "__LONE__");
-        });
-        b.addEventListener("keydown",(e)=>{ if(e.key==="Enter"||e.key===" ") b.click(); });
-        wrap.appendChild(b);
-      });
-
-      const cur = $("wolfValue").value || "";
-      if (cur) setSelectedBubble(wrap, cur);
     }
 
     function renderPartnerBubbles(playersObj, wolfId){
@@ -726,10 +724,13 @@
 
       if (desired) $("wolfValue").value = desired;
 
-      renderWolfBubbles(playersObj);
-      setSelectedBubble($("wolfBubbles"), $("wolfValue").value || "");
+      // update display-only wolf UI
+      const wolfId = $("wolfValue").value || "";
+      const wolfName = playersObj?.[wolfId]?.name || "—";
+      $("wolfName").textContent = wolfName;
+      $("wolfNote").textContent = existing ? "Saved" : "Auto";
 
-      renderPartnerBubbles(playersObj, $("wolfValue").value || "");
+      renderPartnerBubbles(playersObj, wolfId);
     }
 
     function applyHoleToForm(){
@@ -741,10 +742,11 @@
 
       if (rec.wolf) $("wolfValue").value = rec.wolf;
 
-      renderWolfBubbles(playersObj);
-      setSelectedBubble($("wolfBubbles"), $("wolfValue").value || "");
+      const wolfId = $("wolfValue").value || "";
+      $("wolfName").textContent = playersObj?.[wolfId]?.name || "—";
+      $("wolfNote").textContent = rec.wolf ? "Saved" : "Auto";
 
-      renderPartnerBubbles(playersObj, $("wolfValue").value || "");
+      renderPartnerBubbles(playersObj, wolfId);
 
       if (rec.lone) $("partnerValue").value = "__LONE__";
       else $("partnerValue").value = rec.partner || "__LONE__";
@@ -761,7 +763,7 @@
 
       const h = String(parseInt(holeSelect.value || "1", 10));
       const wolf = $("wolfValue").value || "";
-      if (!wolf){ setError("Select a Wolf."); return; }
+      if (!wolf){ setError("Wolf is missing for this hole."); return; }
 
       const partnerRaw = $("partnerValue").value || "__LONE__";
       const lone = (partnerRaw === "__LONE__");
