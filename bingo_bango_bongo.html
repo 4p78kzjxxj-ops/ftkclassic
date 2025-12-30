@@ -3,188 +3,420 @@
 <head>
   <meta charset="UTF-8" />
   <title>FTK Classic – Bingo Bango Bongo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" type="image/png" href="IMG_7296.jpg" />
   <style>
     :root{
-      --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280;
-      --border:#d1d5db; --shadow-soft:0 10px 30px rgba(15,23,42,.12);
-      --accent:#111827;
-      --danger:#7f1d1d; --danger-soft:#fef2f2;
-      --warn:#9a3412; --warn-soft:#ffedd5;
-      --good:#166534; --good-soft:#dcfce7;
+      /* Modern 2025-ish palette + elevation */
+      --bg0:#0b1220;
+      --bg1:#0f172a;
+      --glass:rgba(255,255,255,.06);
+      --glass2:rgba(255,255,255,.09);
+      --stroke:rgba(255,255,255,.12);
+      --text:#e5e7eb;
+      --muted:rgba(229,231,235,.72);
+      --muted2:rgba(229,231,235,.55);
+
+      --accent:#60a5fa;       /* blue */
+      --accent2:#34d399;      /* green */
+      --warn:#fb923c;         /* orange */
+      --danger:#f87171;       /* red */
+
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --shadow2: 0 8px 24px rgba(0,0,0,.28);
+
+      --r-xl: 22px;
+      --r-lg: 18px;
+      --r-md: 14px;
+
+      --tap: 46px;
+
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
-    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;}
-    html,body{-webkit-text-size-adjust:100%;background:var(--bg);color:var(--text);min-height:100%;}
-    body{min-height:100vh;padding:.75rem;touch-action:manipulation;}
-    @media (min-width:768px){ body{max-width:1100px;margin:0 auto;} }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+    html,body{height:100%;-webkit-text-size-adjust:100%;}
+    body{
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(96,165,250,.35), transparent 55%),
+        radial-gradient(900px 520px at 90% 10%, rgba(52,211,153,.26), transparent 55%),
+        radial-gradient(800px 500px at 40% 110%, rgba(251,146,60,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100%;
+      padding: 12px;
+      padding-bottom: calc(88px + var(--safe-bottom));
+      touch-action: manipulation;
+    }
+    @media (min-width: 900px){
+      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(92px + var(--safe-bottom));}
+    }
+
     a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
-    button{-webkit-tap-highlight-color:transparent;}
+    button{border:0;background:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+    :focus-visible{outline:2px solid rgba(96,165,250,.75);outline-offset:2px;border-radius:12px;}
 
-    .menu-overlay{position:fixed;inset:0;display:none;z-index:1000;background:rgba(17,24,39,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+    /* ====== Top App Bar ====== */
+    .appbar{
+      position: sticky;
+      top: calc(10px + var(--safe-top));
+      z-index: 60;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--r-xl);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;min-width:0;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:12px;object-fit:cover;
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      flex-shrink:0;
+    }
+    .brand-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+    .title{font-weight:900;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-    .site-header{display:flex;align-items:center;gap:.75rem;position:relative;}
-    .site-header-left{display:flex;align-items:center;gap:.6rem;min-width:0;}
-    .site-logo{height:32px;width:auto;border-radius:.45rem;object-fit:cover;background:#e5e7eb;flex-shrink:0;}
-    .site-title-group{display:flex;flex-direction:column;gap:.15rem;min-width:0;}
-    .site-title{font-size:1.05rem;font-weight:800;white-space:nowrap;}
-    .site-subtitle{font-size:.78rem;color:var(--muted);white-space:nowrap;}
-
-    .nav-links{margin-left:auto;display:flex;gap:.4rem;align-items:center;}
-    .nav-desktop{display:flex;gap:.4rem;align-items:center;}
-    .nav-btn{
-      font-size:.85rem;border-radius:999px;padding:.3rem .9rem;border:1px solid var(--border);
-      background:#fff;color:var(--text);white-space:nowrap;min-height:32px;
+    .appbar-actions{display:flex;align-items:center;gap:8px;}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      font-size: .86rem;
+      color: var(--text);
+      max-width: 200px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .chip strong{font-weight:900;}
+    .menuBtn{
+      height: 40px; min-width: 40px;
+      border-radius: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
       display:inline-flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      cursor:pointer;
+      font-size: 18px;
     }
-    .nav-btn.secondary{background:#f9fafb;}
 
-    .hamburger{
-      display:none;font-size:1.35rem;background:#fff;border:1px solid var(--border);
-      border-radius:999px;padding:.25rem .7rem;min-height:32px;cursor:pointer;line-height:1;
+    .menu-overlay{
+      position:fixed;inset:0;display:none;z-index:999;
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
-    .hamburger-menu{
-      position:absolute;top:44px;right:0;background:#fff;border:1px solid var(--border);
-      border-radius:.9rem;box-shadow:var(--shadow-soft);display:none;flex-direction:column;
-      min-width:220px;z-index:1001;overflow:hidden;
+    .menu-sheet{
+      position: fixed;
+      left: 12px; right: 12px;
+      top: calc(64px + var(--safe-top));
+      z-index: 1000;
+      display:none;
+      border-radius: var(--r-xl);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.07));
+      border:1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      overflow:hidden;
     }
-    .hamburger-menu a{padding:.7rem .85rem;font-size:.9rem;border-top:1px solid #f3f4f6;}
-    .hamburger-menu a:first-child{border-top:none;}
-    .hamburger-menu a:hover{background:#f3f4f6;}
-    @media (max-width:700px){ .nav-desktop{display:none;} .hamburger{display:inline-flex;align-items:center;justify-content:center;} }
+    .menu-sheet a{
+      display:flex;align-items:center;justify-content:space-between;
+      padding: 14px 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      font-weight: 750;
+      color: var(--text);
+    }
+    .menu-sheet a:first-child{border-top:none;}
+    .menu-sheet a:hover{background: rgba(255,255,255,.06);}
+    .menu-sheet .hintline{font-size:.82rem;color:var(--muted);font-weight:600;}
 
-    main{margin-top:.75rem;display:flex;flex-direction:column;gap:.75rem;}
-
+    /* ====== Layout blocks ====== */
+    main{margin-top: 12px;display:flex;flex-direction:column;gap:12px;}
     .card{
-      background:var(--card);border-radius:.9rem;padding:.85rem;border:1px solid var(--border);
-      box-shadow:var(--shadow-soft);
+      border-radius: var(--r-xl);
+      background: linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.06));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 14px;
     }
-    .section-title{
-      font-size:.82rem;font-weight:650;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
-      border-bottom:1px dashed #e5e7eb;padding-bottom:.35rem;margin-bottom:.55rem;
-    }
-    .hint{font-size:.84rem;color:var(--muted);line-height:1.25rem;}
-    .pill{display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .6rem;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;font-size:.78rem;color:#374151;white-space:nowrap;}
-    .pill.good{border-color:#bbf7d0;background:var(--good-soft);color:var(--good);}
-    .err{
-      margin-top:.6rem;font-size:.85rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;
-      padding:.5rem .65rem;border-radius:.75rem;display:none;
-    }
-    .status{margin-top:.45rem;font-size:.82rem;color:var(--muted);min-height:1.1em;}
 
-    .controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.55rem;}
-    .controls select, .controls input{
-      padding:.5rem .6rem;border-radius:.65rem;border:1px solid var(--border);background:#fff;font-size:.9rem;min-height:42px;
+    .section-title{
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    .controls select{min-width:220px;}
+    .hint{font-size:.92rem;color:var(--muted);line-height:1.35rem;}
+    .divider{height:1px;background:rgba(255,255,255,.09);margin:12px 0;}
+
+    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px;}
+    label{display:flex;flex-direction:column;gap:6px;min-width: 210px;}
+    select, input{
+      height: var(--tap);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(2,6,23,.35);
+      color: var(--text);
+      padding: 0 12px;
+      font-size: 1rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    select option{background:#0b1220;color:var(--text);}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-size: .9rem;
+      color: var(--text);
+      height: var(--tap);
+      white-space:nowrap;
+    }
+    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: #bbf7d0;}
 
     .btn{
-      border-radius:999px;border:1px solid var(--border);background:#f9fafb;padding:.55rem .9rem;
-      font-size:.9rem;cursor:pointer;min-height:42px;font-weight:650;
+      height: var(--tap);
+      border-radius: 999px;
+      padding: 0 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-weight: 900;
+      letter-spacing:.1px;
+      cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;
+      gap: 10px;
+      box-shadow: 0 12px 28px rgba(0,0,0,.20);
     }
-    .btn-primary{background:var(--accent);color:#f9fafb;border-color:var(--accent);}
-    .btn-warn{background:var(--warn-soft);color:var(--warn);border-color:#fed7aa;}
-
-    .player-pick-list{display:flex;flex-direction:column;gap:.35rem;margin-top:.45rem;}
-    .pick-row{
-      display:flex;align-items:center;gap:.5rem;border:1px solid #e5e7eb;background:#fff;border-radius:.75rem;
-      padding:.45rem .55rem;
+    .btn:active{transform: translateY(1px);}
+    .btn-primary{
+      background: linear-gradient(180deg, rgba(96,165,250,.95), rgba(59,130,246,.75));
+      border-color: rgba(96,165,250,.6);
+      color: #071123;
     }
-    .pick-row input{width:18px;height:18px;}
-    .pick-name{font-weight:800;}
-    .pick-sub{font-size:.8rem;color:var(--muted);}
-
-    .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.55rem;margin-top:.6rem;}
-    .player-card{
-      border:1px solid #e5e7eb;background:#fff;border-radius:.85rem;padding:.7rem;
-      transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
-    }
-    .player-card:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(15,23,42,.12);border-color:#cbd5f5;}
-    .player-head{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline;margin-bottom:.35rem;}
-    .player-name{font-size:1rem;font-weight:950;}
-    .total-pill{font-size:.82rem;border-radius:999px;padding:.18rem .6rem;border:1px solid #e5e7eb;background:#f9fafb;white-space:nowrap;}
-
-    .bbb-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem;margin-top:.35rem;}
-    .bbb-box{
-      border:1px solid #e5e7eb;border-radius:.75rem;padding:.5rem;background:#f9fafb;
-      display:flex;flex-direction:column;gap:.25rem;
-    }
-    .bbb-title{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;}
-    .bbb-score{font-size:1.1rem;font-weight:950;}
-    .bbb-actions{display:flex;gap:.35rem;flex-wrap:wrap;}
-    .mini{
-      border-radius:999px;border:1px solid var(--border);background:#fff;padding:.25rem .6rem;
-      font-size:.9rem;cursor:pointer;min-height:32px;font-weight:900;
+    .btn-warn{
+      background: linear-gradient(180deg, rgba(251,146,60,.35), rgba(251,146,60,.18));
+      border-color: rgba(251,146,60,.35);
+      color: #ffe6d0;
     }
 
-    /* Sticky, compact leaderboard (top) */
+    .err{
+      margin-top:10px;
+      font-size:.92rem;
+      color:#fecaca;
+      background: rgba(248,113,113,.10);
+      border: 1px solid rgba(248,113,113,.28);
+      padding: 10px 12px;
+      border-radius: 16px;
+      display:none;
+    }
+    .status{margin-top:8px;font-size:.9rem;color:var(--muted);min-height:1.1em;}
+
+    /* Sticky leaderboard (compact, modern) */
     .sticky-lb{
-      position:sticky;
-      top:.5rem;
-      z-index:50;
-      padding:.6rem .75rem;
+      position: sticky;
+      top: calc(78px + var(--safe-top));
+      z-index: 55;
+      padding: 12px 14px;
     }
-    .sticky-row{
-      display:flex;gap:.5rem;align-items:center;justify-content:space-between;
-      border:1px solid #eef2f7;background:#fff;border-radius:.75rem;padding:.35rem .5rem;
-    }
-    .sticky-left{display:flex;gap:.45rem;align-items:baseline;min-width:0;}
-    .sticky-rank{font-weight:950;white-space:nowrap;font-size:.82rem;}
-    .sticky-name{
-      font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-      max-width:180px;font-size:.86rem;
-    }
-    .sticky-total{font-weight:950;white-space:nowrap;font-size:.82rem;}
-    .sticky-sub{font-size:.74rem;color:var(--muted);white-space:nowrap;}
-    .sticky-list{display:flex;flex-direction:column;gap:.28rem;margin-top:.4rem;}
-    .sticky-meta{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-top:.45rem;}
-    .sticky-hidden{display:none;}
+    .sticky-lb.sticky-hidden{display:none;}
+    .sticky-meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;}
+    .sticky-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
 
-    /* Bottom end-session area */
+    .sticky-row{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.25);
+    }
+    .sticky-left{display:flex;gap:10px;align-items:center;min-width:0;}
+    .rankBubble{
+      width: 28px;height:28px;border-radius: 999px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(96,165,250,.18);
+      border: 1px solid rgba(96,165,250,.25);
+      font-weight: 950;
+      font-size: .85rem;
+      flex-shrink:0;
+    }
+    .sticky-name{
+      font-weight: 950;
+      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .sticky-sub{font-size:.82rem;color:var(--muted);white-space:nowrap;}
+    .sticky-total{
+      font-weight: 950;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+
+    /* Score grid */
+    .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px;}
+    .player-card{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.22);
+      padding: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.20);
+      transition: transform .08s ease, border-color .08s ease, background .08s ease;
+    }
+    .player-card:hover{transform: translateY(-1px);border-color: rgba(96,165,250,.28);background: rgba(2,6,23,.28);}
+    .player-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+    .player-name{font-size:1.05rem;font-weight: 950;letter-spacing:.2px;}
+    .total-pill{
+      font-size:.9rem;
+      border-radius: 999px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      white-space:nowrap;
+    }
+
+    .bbb-row{display:grid;grid-template-columns: 1fr 1fr 1fr;gap:10px;}
+    @media (max-width:430px){ .bbb-row{grid-template-columns: 1fr;} }
+
+    .bbb-box{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .bbb-title{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);font-weight: 950;}
+    .bbb-score{font-size:1.35rem;font-weight: 1000;letter-spacing:.3px;}
+    .bbb-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .mini{
+      height: 40px;
+      border-radius: 999px;
+      padding: 0 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-weight: 1000;
+      cursor:pointer;
+    }
+    .mini:active{transform: translateY(1px);}
+    .mini[data-action="inc"]{border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.10);}
+    .mini[data-action="dec"]{border-color: rgba(248,113,113,.22); background: rgba(248,113,113,.08);}
+
+    /* Player picker */
+    .player-pick-list{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+    .pick-row{
+      display:flex;align-items:center;gap:12px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.22);
+    }
+    .pick-row input{width:20px;height:20px;accent-color: var(--accent);}
+    .pick-name{font-weight: 950;}
+    .pick-sub{font-size:.85rem;color:var(--muted);}
+
+    /* Bottom bar */
     .bottom-bar{
-      margin-top:.25rem;
+      position: fixed;
+      left: 0; right: 0;
+      bottom: 0;
+      padding: 12px;
+      padding-bottom: calc(12px + var(--safe-bottom));
+      z-index: 80;
+      pointer-events:none;
     }
-    .bottom-actions{
-      display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap;
+    .bottom-inner{
+      pointer-events:auto;
+      max-width: 980px;
+      margin: 0 auto;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.07));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 10px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
     }
+    .bottom-left{
+      display:flex;flex-direction:column;gap:2px;min-width:0;
+      padding-left: 10px;
+    }
+    .bottom-title{font-weight: 950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .bottom-sub{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .bottom-actions{display:flex;gap:10px;align-items:center;}
+    .bottom-actions .btn{height: 44px;}
+
+    /* Hide desktop nav buttons (we use menu sheet) */
+    .nav-desktop{display:none;}
   </style>
 </head>
 <body>
   <div id="menuOverlay" class="menu-overlay"></div>
 
-  <header class="site-header">
-    <div class="site-header-left">
-      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
-      <div class="site-title-group">
-        <div class="site-title">FTK Classic</div>
-        <div class="site-subtitle">Bingo Bango Bongo</div>
+  <!-- App Bar -->
+  <header class="appbar">
+    <div class="brand">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="logo" />
+      <div class="brand-text">
+        <div class="title">FTK Classic</div>
+        <div class="subtitle">Bingo Bango Bongo</div>
       </div>
     </div>
 
-    <nav class="nav-links">
-      <div class="nav-desktop">
-        <a href="index.html" class="nav-btn secondary">Home</a>
-        <a href="spectator.html" class="nav-btn secondary">Scores</a>
-        <a href="games.html" class="nav-btn secondary">Games</a>
-        <a href="game_history.html" class="nav-btn secondary">Game History</a>
+    <div class="appbar-actions">
+      <div class="chip" id="sessionChip" title="Session">
+        <span style="opacity:.8">Session</span>
+        <strong id="sessionLabel">Not started</strong>
       </div>
 
-      <button id="hamburgerBtn" class="hamburger" aria-label="Menu" aria-expanded="false">☰</button>
+      <button id="hamburgerBtn" class="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
+    </div>
 
-      <div id="hamburgerMenu" class="hamburger-menu" aria-label="Navigation Menu">
-        <a href="index.html">Home</a>
-        <a href="spectator.html">Scores</a>
-        <a href="games.html">Games</a>
-        <a href="game_history.html">Game History</a>
-      </div>
-    </nav>
+    <!-- Menu Sheet -->
+    <div id="hamburgerMenu" class="menu-sheet" aria-label="Navigation Menu">
+      <a href="index.html"><span>Home</span><span class="hintline">FTK Classic</span></a>
+      <a href="spectator.html"><span>Scores</span><span class="hintline">Live totals</span></a>
+      <a href="games.html"><span>Games</span><span class="hintline">Choose a game</span></a>
+      <a href="game_history.html"><span>Game History</span><span class="hintline">Past games</span></a>
+    </div>
   </header>
 
   <main>
-    <!-- Sticky leaderboard at the very top -->
+    <!-- Sticky leaderboard at top -->
     <section id="stickyLb" class="card sticky-lb sticky-hidden">
-      <div class="section-title" style="margin-bottom:.45rem;">Leaderboard</div>
-      <div class="hint" style="margin-top:-.15rem;">Compact + sticky. Sorted by total points.</div>
+      <div class="section-title">
+        <span>Leaderboard</span>
+        <span style="font-size:.78rem;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:800;">
+          Total points
+        </span>
+      </div>
 
       <div class="sticky-meta">
         <span class="pill" id="holeMetaPill">—</span>
@@ -194,22 +426,23 @@
       <div id="stickyList" class="sticky-list"></div>
     </section>
 
+    <!-- Course & hole -->
     <section class="card">
       <div class="section-title">Course & hole</div>
       <div class="hint">
-        The game tracks a <strong>current hole</strong>. Once <strong>3 total points</strong> are awarded on a hole, it advances to the next hole.
+        Tracks a <strong>current hole</strong>. Once <strong>3 total points</strong> are awarded on a hole, it advances to the next hole.
       </div>
 
       <div class="controls">
-        <label class="hint" style="display:flex;flex-direction:column;gap:.25rem;">
-          Course
+        <label>
+          <span class="hint" style="font-size:.85rem;">Course</span>
           <select id="courseSelect">
             <option value="southern_oaks">Southern Oaks</option>
           </select>
         </label>
 
-        <label class="hint" style="display:flex;flex-direction:column;gap:.25rem;">
-          Current hole
+        <label>
+          <span class="hint" style="font-size:.85rem;">Current hole</span>
           <select id="holeSelect"></select>
         </label>
       </div>
@@ -227,31 +460,36 @@
       <div id="status" class="status"></div>
       <div id="error" class="err"></div>
 
-      <div id="pickWrap" style="margin-top:.65rem;">
-        <div class="section-title" style="margin-bottom:.45rem;">Select players</div>
+      <div id="pickWrap" style="margin-top:12px;">
+        <div class="section-title" style="margin-bottom:10px;">Select players</div>
         <div id="pickList" class="player-pick-list">
           <div class="hint">Loading players…</div>
         </div>
       </div>
     </section>
 
-    <!-- Scoreboard (main area) -->
+    <!-- Scoreboard -->
     <section class="card">
       <div class="section-title">Scoreboard</div>
       <div class="hint">Tap + / − to add points. Totals update automatically.</div>
-
-      <div id="scoreGrid" class="score-grid" style="margin-top:.6rem;">
+      <div id="scoreGrid" class="score-grid">
         <div class="hint">Start a session to begin scoring.</div>
       </div>
     </section>
+  </main>
 
-    <!-- End session button at the bottom -->
-    <section id="bottomBar" class="card bottom-bar" style="display:none;">
+  <!-- Bottom bar with End Session (only active during session) -->
+  <div id="bottomBar" class="bottom-bar" style="display:none;">
+    <div class="bottom-inner">
+      <div class="bottom-left">
+        <div class="bottom-title" id="bottomTitle">Session live</div>
+        <div class="bottom-sub" id="bottomSub">Use the scoreboard to track points</div>
+      </div>
       <div class="bottom-actions">
         <button id="endSessionBtn" class="btn btn-warn" type="button">End session</button>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -307,10 +545,16 @@
       holeMetaPill: document.getElementById("holeMetaPill"),
       holeAwardPill: document.getElementById("holeAwardPill"),
 
+      sessionLabel: document.getElementById("sessionLabel"),
+      sessionChip: document.getElementById("sessionChip"),
+
       startCard: document.getElementById("startCard"),
       newSessionBtn: document.getElementById("newSessionBtn"),
       bottomBar: document.getElementById("bottomBar"),
       endSessionBtn: document.getElementById("endSessionBtn"),
+      bottomTitle: document.getElementById("bottomTitle"),
+      bottomSub: document.getElementById("bottomSub"),
+
       pickWrap: document.getElementById("pickWrap"),
       pickList: document.getElementById("pickList"),
 
@@ -343,9 +587,9 @@
       return o;
     }
 
-    // Hamburger
+    // Menu sheet
     function openMenu(){
-      els.hamburgerMenu.style.display="flex";
+      els.hamburgerMenu.style.display="block";
       els.menuOverlay.style.display="block";
       els.hamburgerBtn.setAttribute("aria-expanded","true");
     }
@@ -356,7 +600,7 @@
     }
     els.hamburgerBtn?.addEventListener("click",(e)=>{
       e.stopPropagation();
-      (els.hamburgerMenu.style.display==="flex") ? closeMenu() : openMenu();
+      (els.hamburgerMenu.style.display==="block") ? closeMenu() : openMenu();
     });
     els.menuOverlay?.addEventListener("click", closeMenu);
     document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeMenu(); });
@@ -374,18 +618,34 @@
     function sessionRoot(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}`); }
     function sessionLogRef(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}/log`); }
 
+    // Game numbering map (sid -> Game #)
+    let gameNumMap = {};
+    function computeGameNumbers(allSessions){
+      const arr = Object.entries(allSessions || {}).map(([sid, sess]) => ({
+        sid,
+        createdAt: Number(sess?.createdAt || 0)
+      }));
+      arr.sort((a,b) => (a.createdAt - b.createdAt) || a.sid.localeCompare(b.sid));
+      const map = {};
+      arr.forEach((x,i)=> { map[x.sid] = i+1; });
+      return map;
+    }
+    function setSessionLabel(){
+      if (!sessionId){ els.sessionLabel.textContent = "Not started"; return; }
+      const n = gameNumMap[sessionId];
+      els.sessionLabel.textContent = n ? `Game ${n}` : "Game";
+    }
+
     function buildHoleSelect(){
       const course = COURSES[currentCourseKey];
       els.holeSelect.innerHTML = course.holes.map(h => `<option value="${h.n}">Hole ${h.n}</option>`).join("");
     }
-
     function setHoleMeta(holeNum){
       const course = COURSES[currentCourseKey];
       const h = course.holes.find(x => x.n === Number(holeNum));
       if (!h){ els.holeMetaPill.textContent = "—"; return; }
       els.holeMetaPill.textContent = `Hole ${h.n} · Par ${h.par} · ${h.yards} yds`;
     }
-
     function setHoleAwardCount(count){
       const c = Number(count||0);
       els.holeAwardPill.textContent = `Hole awards: ${c} / 3`;
@@ -406,7 +666,7 @@
         return `
           <label class="pick-row">
             <input type="checkbox" data-pick="${safeText(pid)}" ${checked} />
-            <div style="display:flex;flex-direction:column;gap:.05rem;min-width:0;">
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
               <div class="pick-name">${safeText(p.name||"Unknown")}</div>
               <div class="pick-sub">&nbsp;</div>
             </div>
@@ -454,11 +714,10 @@
 
       els.stickyLb.classList.remove("sticky-hidden");
 
-      // Keep it small: show everyone, but compact. (If you want only top 6, change to rows.slice(0,6))
       els.stickyList.innerHTML = rows.map((r, idx)=>`
         <div class="sticky-row">
           <div class="sticky-left">
-            <div class="sticky-rank">${idx+1}.</div>
+            <div class="rankBubble">${idx+1}</div>
             <div style="min-width:0;">
               <div class="sticky-name">${safeText(r.name)}</div>
               <div class="sticky-sub">B ${r.bingo} · Ba ${r.bango} · Bo ${r.bongo}</div>
@@ -556,16 +815,13 @@
 
       try{
         await ensureAnonAuth();
-        setStatus("Ending session…");
         await update(sessionRoot(sessionId), {
           status: "ended",
           endedAt: Date.now(),
           endedAtServer: serverTimestamp()
         });
-
         setStatus("Session ended. Returning to games…");
         setTimeout(()=>{ window.location.href = "games.html"; }, 400);
-
       }catch(e){
         console.error(e);
         setError("End failed: " + (e?.code || e?.message || "unknown"));
@@ -666,10 +922,16 @@
         return;
       }
 
-      // Init course/hole UI
       buildHoleSelect();
       setHoleMeta(1);
       setHoleAwardCount(0);
+
+      // Watch sessions list to compute Game # mapping
+      onValue(sessionsRootRef, (snap)=>{
+        const all = snap.val() || {};
+        gameNumMap = computeGameNumbers(all);
+        setSessionLabel();
+      });
 
       // Players
       onValue(playersRef, (snap)=>{
@@ -682,16 +944,21 @@
       });
 
       if (!sessionId){
-        // No active session: show start card, hide sticky leaderboard + end button
+        setSessionLabel();
         els.startCard.style.display = "block";
         els.bottomBar.style.display = "none";
         els.stickyLb.classList.add("sticky-hidden");
+        els.bottomTitle.textContent = "No session";
+        els.bottomSub.textContent = "Start a new session to score";
         return;
       }
 
-      // Active session: hide start card, show sticky leaderboard + end button
+      // Active session
       els.startCard.style.display = "none";
       els.bottomBar.style.display = "block";
+      els.bottomTitle.textContent = "Session live";
+      els.bottomSub.textContent = "Tap + / − to score points";
+      setSessionLabel();
 
       onValue(sessionRoot(sessionId), (snap)=>{
         const data = snap.val();
@@ -704,11 +971,7 @@
         }
         lastSnapshot = data;
 
-        if (data.status === "ended") setStatus("Session ended.");
-        else setStatus("");
-
         syncCourseHoleUIFromSession();
-
         renderStickyLeaderboard(data.players || {}, data.scores || {});
         renderScoreboard(data.players || {}, data.scores || {});
       }, (err)=>{
@@ -717,7 +980,7 @@
       });
     }
 
-    // Picker interactions
+    // Picker
     els.pickList.addEventListener("change", (e)=>{
       const cb = e.target.closest("input[type='checkbox'][data-pick]");
       if (!cb) return;
