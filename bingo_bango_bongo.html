@@ -9,7 +9,6 @@
     :root{
       --bg0:#0b1220;
       --bg1:#0f172a;
-      --glass:rgba(255,255,255,.06);
       --stroke:rgba(255,255,255,.12);
       --text:#e5e7eb;
       --muted:rgba(229,231,235,.72);
@@ -18,14 +17,11 @@
       --accent:#60a5fa;
       --accent2:#34d399;
       --warn:#fb923c;
-      --danger:#f87171;
 
       --shadow: 0 18px 60px rgba(0,0,0,.35);
       --shadow2: 0 8px 24px rgba(0,0,0,.28);
 
       --r-xl: 22px;
-      --r-lg: 18px;
-
       --tap: 46px;
 
       --safe-top: env(safe-area-inset-top, 0px);
@@ -44,18 +40,12 @@
       min-height:100%;
       padding: 12px;
 
-      /* keep fixed bottom bar from covering content */
-      padding-bottom: calc(140px + var(--safe-bottom));
-
+      /* fixed bottom bar space */
+      padding-bottom: calc(220px + var(--safe-bottom));
       touch-action: manipulation;
     }
-    body.session-live{
-      /* give more room so bottom bar never covers last player */
-      padding-bottom: calc(210px + var(--safe-bottom));
-    }
     @media (min-width: 900px){
-      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(150px + var(--safe-bottom));}
-      body.session-live{padding-bottom: calc(220px + var(--safe-bottom));}
+      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(240px + var(--safe-bottom));}
     }
 
     a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -92,20 +82,6 @@
     .subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
     .appbar-actions{display:flex;align-items:center;gap:8px;}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      font-size: .86rem;
-      color: var(--text);
-      max-width: 200px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .chip strong{font-weight:900;}
     .menuBtn{
       height: 40px; min-width: 40px;
       border-radius: 14px;
@@ -176,11 +152,7 @@
       -webkit-backdrop-filter: blur(12px);
       padding: 14px;
     }
-    /* smaller sections (Course & hole) */
-    .card.compact{
-      padding: 10px 12px;
-    }
-
+    .card.compact{padding: 10px 12px;}
     .section-title{
       font-size:.78rem;
       letter-spacing:.14em;
@@ -198,9 +170,7 @@
     .compact .hint{font-size:.86rem;line-height:1.2rem;}
 
     .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px;}
-    .compact .controls{margin-top:8px;gap:8px;}
-    label{display:flex;flex-direction:column;gap:6px;min-width: 210px;}
-    .compact label{min-width: 180px;}
+    .compact .controls{margin-top:0;gap:8px;}
     select, input{
       height: var(--tap);
       border-radius: 16px;
@@ -213,19 +183,6 @@
     }
     .compact select{height: 42px; border-radius: 14px; font-size: .98rem;}
     select option{background:#0b1220;color:var(--text);}
-
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size: .86rem;
-      color: var(--text);
-      height: 40px;
-      white-space:nowrap;
-    }
-    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: #bbf7d0;}
 
     .btn{
       height: var(--tap);
@@ -416,7 +373,6 @@
     .bbb-title{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);font-weight: 950;}
     .bbb-score{font-size: 1.05rem;font-weight: 1000;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 
-    /* One BIG + button per bucket; long-press decrements */
     .plusBtn{
       height: 44px;
       width: 100%;
@@ -447,7 +403,7 @@
     .pick-name{font-weight: 950;}
     .pick-sub{font-size:.85rem;color:var(--muted);}
 
-    /* Bottom bar */
+    /* Bottom bar (holds the session indicator now) */
     .bottom-bar{
       position: fixed;
       left: 0; right: 0;
@@ -473,16 +429,40 @@
       align-items:center;
       justify-content:space-between;
     }
-    .bottom-left{display:flex;flex-direction:column;gap:2px;min-width:0;padding-left: 10px;}
-    .bottom-title{font-weight: 950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .bottom-sub{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .bottom-actions{display:flex;gap:10px;align-items:center;}
+    .bottom-left{
+      display:flex;align-items:center;gap:10px;min-width:0;
+      padding-left: 10px;
+    }
+    .session-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-size: .86rem;
+      font-weight: 900;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    .bottom-sub{
+      font-size:.82rem;color:var(--muted);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      min-width:0;
+    }
+    .bottom-actions{display:flex;gap:10px;align-items:center;flex-shrink:0;}
     .bottom-actions .btn{height: 44px;}
+    .btn-ghost{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.16);
+    }
 
     /* Course select hidden once session is live */
     body.session-live #courseWrap{display:none;}
 
-    /* Hole log */
+    /* Log panel (hidden until button pressed) */
+    #logPanel{display:none;}
+    #logPanel.open{display:block;}
+
     .log-wrap{display:flex;flex-direction:column;gap:10px;margin-top: 8px;}
     details.log-hole{
       border-radius: 18px;
@@ -546,11 +526,6 @@
     </div>
 
     <div class="appbar-actions">
-      <div class="chip" id="sessionChip" title="Session">
-        <span style="opacity:.8">Session</span>
-        <strong id="sessionLabel">Not started</strong>
-      </div>
-
       <button id="hamburgerBtn" class="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
     </div>
   </header>
@@ -595,7 +570,7 @@
     <section class="card compact" id="courseHoleCard">
       <div class="section-title">Course & hole</div>
 
-      <div class="controls" style="margin-top:0;">
+      <div class="controls">
         <div id="courseWrap" style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
           <span class="hint" style="font-size:.82rem;">Course</span>
           <select id="courseSelect">
@@ -639,21 +614,26 @@
       </div>
     </section>
 
-    <!-- Hole log (collapsed by hole) -->
-    <section id="logCard" class="card" style="display:none;">
+    <!-- Log panel (hidden until user presses button) -->
+    <section id="logPanel" class="card">
       <div class="section-title">Log</div>
-      <div class="hint">Each hole is collapsed. Expand to see point awards.</div>
+      <div class="hint">Expand a hole to see records like “Hole 1 - Bingo - Jake Smith”.</div>
       <div id="logWrap" class="log-wrap"></div>
     </section>
   </main>
 
+  <!-- Bottom bar: session indicator moved here (NOT sticky at top anymore) -->
   <div id="bottomBar" class="bottom-bar" style="display:none;">
     <div class="bottom-inner">
       <div class="bottom-left">
-        <div class="bottom-title" id="bottomTitle">Session live</div>
+        <div class="session-pill" id="sessionPill">
+          <span style="opacity:.8">Session</span>
+          <strong id="sessionLabel">Game</strong>
+        </div>
         <div class="bottom-sub" id="bottomSub">Tap + to score · Long-press to undo</div>
       </div>
       <div class="bottom-actions">
+        <button id="toggleLogBtn" class="btn btn-ghost" type="button">Log</button>
         <button id="endSessionBtn" class="btn btn-warn" type="button">End session</button>
       </div>
     </div>
@@ -719,25 +699,22 @@
       newSessionBtn: document.getElementById("newSessionBtn"),
       bottomBar: document.getElementById("bottomBar"),
       endSessionBtn: document.getElementById("endSessionBtn"),
-      bottomTitle: document.getElementById("bottomTitle"),
       bottomSub: document.getElementById("bottomSub"),
+      toggleLogBtn: document.getElementById("toggleLogBtn"),
 
-      pickWrap: document.getElementById("pickWrap"),
       pickList: document.getElementById("pickList"),
-
       scoreGrid: document.getElementById("scoreGrid"),
       status: document.getElementById("status"),
       error: document.getElementById("error"),
 
       stickyLb: document.getElementById("stickyLb"),
       stickyList: document.getElementById("stickyList"),
-
       lbStrip: document.getElementById("lbStrip"),
       lbStripLeader: document.getElementById("lbStripLeader"),
       lbStripHole: document.getElementById("lbStripHole"),
       lbStripAwards: document.getElementById("lbStripAwards"),
 
-      logCard: document.getElementById("logCard"),
+      logPanel: document.getElementById("logPanel"),
       logWrap: document.getElementById("logWrap"),
 
       hamburgerBtn: document.getElementById("hamburgerBtn"),
@@ -848,7 +825,6 @@
         return;
       }
       ids.sort((a,b)=> (players[a]?.name||"").localeCompare(players[b]?.name||""));
-
       els.pickList.innerHTML = ids.map(pid=>{
         const p = players[pid] || {};
         const checked = selected.has(pid) ? "checked" : "";
@@ -872,7 +848,6 @@
       return { bingo, bango, bongo, total: bingo+bango+bongo };
     }
 
-    // MODE C: single + button; long-press subtracts
     function scoreBoxHtml(pid, bucket, title, val){
       return `
         <div class="bbb-box">
@@ -890,19 +865,17 @@
     }
 
     // ===== Leaderboard UX state =====
-    let lbExpanded = false;   // collapsed by default
+    let lbExpanded = false;
     let lbAutoHidden = false;
 
     function setLbExpanded(next){
       lbExpanded = !!next;
-      if (!els.stickyLb) return;
       els.stickyLb.classList.toggle("lb-collapsed", !lbExpanded);
       if (lbExpanded) setLbAutoHidden(false);
       if (lastSnapshot) renderStickyLeaderboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
     }
     function setLbAutoHidden(hidden){
       lbAutoHidden = !!hidden;
-      if (!els.stickyLb) return;
       els.stickyLb.classList.toggle("lb-autohide", lbAutoHidden);
     }
 
@@ -987,20 +960,42 @@
       }).join("");
     }
 
-    function renderLog(logObj){
-      // Show only if session is live
+    // ===== Log (hidden until button pressed) =====
+    let logOpen = false;
+    let lastLogObj = null;
+
+    function setLogOpen(next){
+      logOpen = !!next;
       if (!sessionId){
-        els.logCard.style.display = "none";
+        els.logPanel.classList.remove("open");
+        els.logPanel.style.display = "none";
+        return;
+      }
+      if (logOpen){
+        els.logPanel.classList.add("open");
+        els.logPanel.style.display = "block";
+        els.toggleLogBtn.textContent = "Hide log";
+        renderLog(lastLogObj || {});
+        // jump to log (optional but helpful)
+        setTimeout(()=> els.logPanel.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
+      }else{
+        els.logPanel.classList.remove("open");
+        els.logPanel.style.display = "none";
+        els.toggleLogBtn.textContent = "Log";
+      }
+    }
+
+    function renderLog(logObj){
+      // Never show anything until user opens the log
+      if (!logOpen){
         els.logWrap.innerHTML = "";
         return;
       }
-      els.logCard.style.display = "block";
 
       const entries = Object.entries(logObj || {}).map(([id, v])=> ({
         id,
         hole: Number(v?.hole || 0),
         bucket: String(v?.bucket || ""),
-        delta: Number(v?.delta || 0),
         pid: String(v?.pid || ""),
         playerName: String(v?.playerName || ""),
         createdAt: Number(v?.createdAt || 0)
@@ -1019,18 +1014,15 @@
       }
 
       const holes = Array.from(byHole.keys()).sort((a,b)=>a-b);
-      const html = holes.map(hole=>{
+      els.logWrap.innerHTML = holes.map(hole=>{
         const list = byHole.get(hole) || [];
         list.sort((a,b)=> (a.createdAt - b.createdAt) || a.id.localeCompare(b.id));
 
         const count = list.length;
         const items = list.map(e=>{
-          const label = `${bucketLabel(e.bucket)} - ${e.playerName || "Player"}`;
-          // Example requested: "Hole 1 - Bingo - Jake Smith"
-          const main = `Hole ${hole} - ${label}`;
+          const main = `Hole ${hole} - ${bucketLabel(e.bucket)} - ${e.playerName || "Player"}`;
           const t = fmtTime(e.createdAt);
-          const mut = t ? t : "";
-          return `<div class="log-item"><span>${safeText(main)}</span><span class="mut">${safeText(mut)}</span></div>`;
+          return `<div class="log-item"><span>${safeText(main)}</span><span class="mut">${safeText(t)}</span></div>`;
         }).join("");
 
         return `
@@ -1043,8 +1035,6 @@
           </details>
         `;
       }).join("");
-
-      els.logWrap.innerHTML = html;
     }
 
     async function startNewSession(){
@@ -1096,7 +1086,6 @@
 
     async function endSession(){
       if (!sessionId) return;
-
       const ok = window.confirm("Are you sure?");
       if (!ok) return;
 
@@ -1139,7 +1128,6 @@
         if (!lastSnapshot) { setError("Session not loaded yet."); return; }
 
         const curHole = Number(lastSnapshot.currentHole || 1);
-        const curCourseKey = lastSnapshot.courseKey || "southern_oaks";
         const holeNum = (Number.isFinite(curHole) && curHole >= 1 && curHole <= 18) ? curHole : 1;
 
         const cur = Number(lastSnapshot.scores?.[pid]?.[bucket] || 0);
@@ -1162,6 +1150,7 @@
 
         await update(ref(db), updates);
 
+        // log record
         const logPush = push(sessionLogRef(sessionId));
         await set(logPush, {
           createdAt: Date.now(),
@@ -1170,8 +1159,7 @@
           playerName: (players[pid]?.name || lastSnapshot.players?.[pid]?.name || "Player"),
           bucket,
           delta: (delta > 0 ? 1 : -1),
-          hole: holeNum,
-          courseKey: curCourseKey
+          hole: holeNum
         });
       }catch(e){
         console.error(e);
@@ -1198,7 +1186,7 @@
       setHoleAwardCount(count);
     }
 
-    // ===== Auto-hide leaderboard while scrolling down (show on scroll up) =====
+    // Auto-hide leaderboard while scrolling down
     let lastScrollY = window.scrollY || 0;
     let lastScrollTs = 0;
     function handleScroll(){
@@ -1233,7 +1221,7 @@
       });
     }
 
-    // ===== MODE C long-press handling =====
+    // MODE C long-press
     const LONG_PRESS_MS = 520;
     let lpTimer = null;
     let lpTriggered = false;
@@ -1291,20 +1279,19 @@
       });
 
       if (!sessionId){
-        document.body.classList.remove("session-live");
-        setSessionLabel();
         els.startCard.style.display = "block";
         els.bottomBar.style.display = "none";
         els.stickyLb.classList.add("sticky-hidden");
-        els.logCard.style.display = "none";
+        setLogOpen(false);
         return;
       }
 
+      // session live UI
       document.body.classList.add("session-live");
-
       els.startCard.style.display = "none";
       els.bottomBar.style.display = "block";
       setSessionLabel();
+      setLogOpen(false); // hidden until button pressed
 
       onValue(sessionRoot(sessionId), (snap)=>{
         const data = snap.val();
@@ -1313,8 +1300,7 @@
           els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
           els.stickyLb.classList.add("sticky-hidden");
           els.bottomBar.style.display = "none";
-          els.logCard.style.display = "none";
-          document.body.classList.remove("session-live");
+          setLogOpen(false);
           return;
         }
         lastSnapshot = data;
@@ -1327,10 +1313,10 @@
         setError("Read failed: " + (err?.code || err?.message || "unknown"));
       });
 
-      // Log feed grouped by hole
+      // Keep log snapshot updated, but DO NOT render unless user opened it
       onValue(sessionLogRef(sessionId), (snap)=>{
-        const log = snap.val() || {};
-        renderLog(log);
+        lastLogObj = snap.val() || {};
+        if (logOpen) renderLog(lastLogObj);
       });
     }
 
@@ -1346,7 +1332,12 @@
     document.getElementById("newSessionBtn").addEventListener("click", startNewSession);
     document.getElementById("endSessionBtn").addEventListener("click", endSession);
 
-    // Score actions: click +1 (unless long-press already fired)
+    // Log button
+    els.toggleLogBtn.addEventListener("click", ()=>{
+      setLogOpen(!logOpen);
+    });
+
+    // Score click +1
     document.getElementById("scoreGrid").addEventListener("click", (e)=>{
       const btn = e.target.closest("button.plusBtn[data-action='inc']");
       if (!btn) return;
