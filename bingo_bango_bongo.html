@@ -1,1390 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>FTK Classic – Bingo Bango Bongo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
-  <style>
-    :root{
-      --bg0:#0b1220;
-      --bg1:#0f172a;
-      --stroke:rgba(255,255,255,.12);
-      --text:#e5e7eb;
-      --muted:rgba(229,231,235,.72);
-      --muted2:rgba(229,231,235,.55);
+<meta charset="UTF-8" />
+<title>Bingo Bango Bongo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="icon" type="image/png" href="IMG_7296.jpg" />
 
-      --accent:#60a5fa;
-      --accent2:#34d399;
-      --warn:#fb923c;
-      --danger:#f87171;
+<style>
+:root{
+  --bg0:#0b1220;
+  --bg1:#0f172a;
+  --stroke:rgba(255,255,255,.12);
+  --text:#e5e7eb;
+  --muted:rgba(229,231,235,.65);
+  --accent:#60a5fa;
+  --good:#34d399;
+  --danger:#f87171;
+  --radius:20px;
+  --tap:44px;
+}
 
-      --shadow: 0 18px 60px rgba(0,0,0,.35);
-      --shadow2: 0 8px 24px rgba(0,0,0,.28);
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+body{
+  background:linear-gradient(180deg,var(--bg0),var(--bg1));
+  color:var(--text);
+  min-height:100vh;
+  padding:12px;
+  padding-bottom:24px;
+}
 
-      --r-xl: 22px;
-      --tap: 46px;
+button{border:0;background:none;color:inherit;}
+select{
+  height:44px;border-radius:14px;
+  background:#020617;border:1px solid var(--stroke);
+  color:var(--text);padding:0 12px;
+}
 
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
+/* ===== Top bar (menu only) ===== */
+.appbar{
+  position:sticky;
+  top:8px;
+  z-index:50;
+  display:flex;
+  justify-content:flex-end;
+}
+.menuBtn{
+  width:44px;height:44px;
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  font-size:20px;
+}
 
-    *{box-sizing:border-box;margin:0;padding:0;font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
-    html,body{height:100%;-webkit-text-size-adjust:100%;}
-    body{
-      color:var(--text);
-      background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(96,165,250,.35), transparent 55%),
-        radial-gradient(900px 520px at 90% 10%, rgba(52,211,153,.26), transparent 55%),
-        radial-gradient(800px 500px at 40% 110%, rgba(251,146,60,.18), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      min-height:100%;
-      padding: 12px;
+/* ===== Menu ===== */
+.menu-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;z-index:200;
+}
+.menu{
+  position:fixed;
+  top:60px;left:12px;right:12px;
+  background:rgba(15,23,42,.98);
+  border-radius:22px;
+  border:1px solid var(--stroke);
+  display:none;z-index:201;
+}
+.menu h3{
+  padding:14px;
+  font-size:.75rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--muted);
+}
+.menu button,.menu a{
+  width:100%;
+  padding:14px;
+  border-top:1px solid var(--stroke);
+  font-weight:800;
+  text-align:left;
+}
+.menu .danger{color:#fee2e2;background:rgba(248,113,113,.12);}
 
-      /* tight bottom space */
-      padding-bottom: calc(24px + var(--safe-bottom));
-      touch-action: manipulation;
-    }
-    @media (min-width: 900px){
-      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(28px + var(--safe-bottom));}
-    }
+/* ===== Cards ===== */
+.card{
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--stroke);
+  border-radius:22px;
+  padding:14px;
+  margin-top:12px;
+}
 
-    a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
-    button{border:0;background:none;color:inherit;-webkit-tap-highlight-color:transparent;}
-    :focus-visible{outline:2px solid rgba(96,165,250,.75);outline-offset:2px;border-radius:12px;}
+/* ===== Scoreboard (Mode C) ===== */
+.player{
+  background:rgba(2,6,23,.7);
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:10px;
+  margin-top:8px;
+}
+.player-head{
+  display:flex;
+  justify-content:space-between;
+  font-weight:900;
+}
+.buckets{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:8px;
+}
+.bucket{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--stroke);
+  border-radius:16px;
+  padding:8px;
+}
+.bucket small{
+  font-size:.65rem;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--muted);
+}
+.plus{
+  margin-top:6px;
+  width:100%;
+  height:44px;
+  border-radius:999px;
+  background:rgba(52,211,153,.12);
+  border:1px solid rgba(52,211,153,.4);
+  font-weight:900;
+  font-size:1.05rem;
+}
 
-    /* ====== Top App Bar ====== */
-    .appbar{
-      position: sticky;
-      top: calc(10px + var(--safe-top));
-      z-index: 60;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: var(--r-xl);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-      border: 1px solid var(--stroke);
-      box-shadow: var(--shadow2);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-    .brand{display:flex;align-items:center;gap:10px;min-width:0;}
-    .logo{
-      width:36px;height:36px;border-radius:12px;object-fit:cover;
-      box-shadow: 0 10px 22px rgba(0,0,0,.25);
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
-      flex-shrink:0;
-    }
-    .brand-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
-    .title{font-weight:900;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* ===== Leaderboard (menu only) ===== */
+.lb-row{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-top:1px solid var(--stroke);
+  font-weight:800;
+}
+.lb-row:first-child{border-top:none;}
+.lb-total{
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  padding:4px 10px;
+}
 
-    .appbar-actions{display:flex;align-items:center;gap:8px;}
-    .menuBtn{
-      height: 40px; min-width: 40px;
-      border-radius: 14px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      display:inline-flex;align-items:center;justify-content:center;
-      box-shadow: 0 10px 22px rgba(0,0,0,.18);
-      cursor:pointer;
-      font-size: 18px;
-    }
-
-    /* Menu overlay + sheet */
-    .menu-overlay{
-      position:fixed;inset:0;display:none;z-index:999;
-      background: rgba(0,0,0,.40);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    .menu-sheet{
-      position: fixed;
-      left: 12px; right: 12px;
-      top: calc(64px + var(--safe-top));
-      z-index: 1000;
-      display:none;
-      border-radius: var(--r-xl);
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
-      border:1px solid rgba(255,255,255,.16);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      color: var(--text);
-    }
-    .menu-head{
-      padding: 12px 14px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.10);
-    }
-    .menu-title{font-weight:950;letter-spacing:.2px;}
-    .menu-close{
-      height: 34px; min-width: 34px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;
-      font-size: 18px;
-    }
-    .menu-items{display:flex;flex-direction:column;}
-    .menu-link,
-    .menu-action{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding: 14px 14px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      font-weight: 800;
-      color: var(--text);
-      width:100%;
-      text-align:left;
-      cursor:pointer;
-    }
-    .menu-items > :first-child{border-top:none;}
-    .menu-link:hover,.menu-action:hover{background: rgba(255,255,255,.06);}
-    .menu-sheet .hintline{font-size:.82rem;color:var(--muted);font-weight:650;}
-    .menu-danger{
-      color: #fee2e2;
-      background: rgba(248,113,113,.10);
-    }
-    .menu-danger:hover{background: rgba(248,113,113,.16);}
-
-    .menu-subpanel{
-      padding: 10px 14px 14px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.10);
-      display:none;
-    }
-    .menu-subpanel.open{display:block;}
-    .menu-subtitle{
-      font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;
-      color: var(--muted2); font-weight: 950;
-      margin-bottom: 10px;
-      display:flex;justify-content:space-between;align-items:center;gap:10px;
-    }
-    .menu-subpanel select{
-      width:100%;
-      height: 44px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(2,6,23,.35);
-      color: var(--text);
-      padding: 0 12px;
-      font-size: 1rem;
-    }
-
-    /* ====== Layout blocks ====== */
-    main{margin-top: 12px;display:flex;flex-direction:column;gap:12px;}
-    .card{
-      border-radius: var(--r-xl);
-      background: linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.06));
-      border: 1px solid var(--stroke);
-      box-shadow: var(--shadow2);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 14px;
-    }
-    .card.compact{padding: 10px 12px;}
-    .section-title{
-      font-size:.78rem;
-      letter-spacing:.14em;
-      text-transform: uppercase;
-      color: var(--muted2);
-      font-weight: 900;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .compact .section-title{margin-bottom: 8px;}
-    .hint{font-size:.92rem;color:var(--muted);line-height:1.35rem;}
-    .compact .hint{font-size:.86rem;line-height:1.2rem;}
-
-    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px;}
-    select, input{
-      height: var(--tap);
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(2,6,23,.35);
-      color: var(--text);
-      padding: 0 12px;
-      font-size: 1rem;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    }
-    select option{background:#0b1220;color:var(--text);}
-
-    .btn{
-      height: var(--tap);
-      border-radius: 999px;
-      padding: 0 16px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      font-weight: 900;
-      cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;
-      box-shadow: 0 12px 28px rgba(0,0,0,.20);
-    }
-    .btn:active{transform: translateY(1px);}
-    .btn-primary{
-      background: linear-gradient(180deg, rgba(96,165,250,.95), rgba(59,130,246,.75));
-      border-color: rgba(96,165,250,.6);
-      color: #071123;
-    }
-
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size: .86rem;
-      color: var(--text);
-      height: 40px;
-      white-space:nowrap;
-    }
-    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: #bbf7d0;}
-
-    .err{
-      margin-top:10px;
-      font-size:.92rem;
-      color:#fecaca;
-      background: rgba(248,113,113,.10);
-      border: 1px solid rgba(248,113,113,.28);
-      padding: 10px 12px;
-      border-radius: 16px;
-      display:none;
-    }
-    .status{margin-top:8px;font-size:.9rem;color:var(--muted);min-height:1.1em;}
-
-    /* ===== Leaderboard: tight strip + optional expand + autohide ===== */
-    .sticky-lb{
-      position: sticky;
-      top: calc(78px + var(--safe-top));
-      z-index: 55;
-      padding: 10px 12px;
-      transition: transform .18s ease, opacity .18s ease;
-      will-change: transform, opacity;
-    }
-    .sticky-lb.sticky-hidden{display:none;}
-    .sticky-lb.lb-autohide{
-      transform: translateY(-130%);
-      opacity: 0;
-      pointer-events: none;
-    }
-    .sticky-lb.lb-collapsed .sticky-meta,
-    .sticky-lb.lb-collapsed .sticky-list{display:none;}
-
-    .lb-strip{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding: 8px 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(2,6,23,.28);
-      cursor:pointer;
-    }
-    .lb-strip-left{display:flex;align-items:center;gap:10px;min-width:0;}
-    .lb-dot{
-      width:10px;height:10px;border-radius:999px;
-      background: rgba(96,165,250,.75);
-      box-shadow: 0 0 0 4px rgba(96,165,250,.14);
-      flex-shrink:0;
-    }
-    .lb-strip-leader{
-      font-weight: 950;
-      font-size: .92rem;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      min-width:0;
-    }
-    .lb-strip-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-    .lb-strip-hole{
-      font-size:.82rem;
-      color: var(--muted);
-      font-weight: 900;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      padding: 5px 8px;
-      border-radius: 999px;
-    }
-    .lb-strip-awards{
-      font-size:.82rem;
-      font-weight: 950;
-      border:1px solid rgba(52,211,153,.25);
-      background: rgba(52,211,153,.10);
-      padding: 5px 8px;
-      border-radius: 999px;
-      color: #bbf7d0;
-    }
-    .sticky-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;}
-    .sticky-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
-    .sticky-row{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding: 8px 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(2,6,23,.25);
-    }
-    .sticky-left{display:flex;gap:10px;align-items:center;min-width:0;}
-    .rankBubble{
-      width: 26px;height:26px;border-radius: 999px;
-      display:flex;align-items:center;justify-content:center;
-      background: rgba(96,165,250,.18);
-      border: 1px solid rgba(96,165,250,.25);
-      font-weight: 950;
-      font-size: .8rem;
-      flex-shrink:0;
-    }
-    .sticky-name{
-      font-weight: 950;
-      font-size: .92rem;
-      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-      max-width: 180px;
-    }
-    .sticky-sub{font-size:.78rem;color:var(--muted);white-space:nowrap;}
-    .sticky-total{
-      font-weight: 950;
-      font-size: .82rem;
-      padding: 6px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      white-space:nowrap;
-      flex-shrink:0;
-    }
-
-    /* ===== Scoreboard: compact rows (Mode C) ===== */
-    .score-grid{
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .player-card{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(2,6,23,.22);
-      padding: 10px 10px;
-      box-shadow: 0 8px 18px rgba(0,0,0,.18);
-    }
-    .player-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 8px;
-    }
-    .player-name{
-      font-size: .98rem;
-      font-weight: 950;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      min-width:0;
-    }
-    .total-pill{
-      font-size:.82rem;
-      padding: 6px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      white-space:nowrap;
-    }
-
-    .bbb-row{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    .bbb-box{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-      padding: 8px 8px;
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .bbb-title{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);font-weight: 950;}
-    .bbb-score{font-size: 1.05rem;font-weight: 1000;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-
-    .plusBtn{
-      height: 44px;
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid rgba(52,211,153,.25);
-      background: rgba(52,211,153,.10);
-      color: #bbf7d0;
-      font-weight: 1000;
-      font-size: 1.05rem;
-      cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;
-      user-select:none;
-      -webkit-user-select:none;
-      touch-action: manipulation;
-    }
-    .plusBtn:active{transform: translateY(1px);}
-
-    /* Player picker */
-    .player-pick-list{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
-    .pick-row{
-      display:flex;align-items:center;gap:12px;
-      padding: 12px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(2,6,23,.22);
-    }
-    .pick-row input{width:20px;height:20px;accent-color: var(--accent);}
-    .pick-name{font-weight: 950;}
-    .pick-sub{font-size:.85rem;color:var(--muted);}
-
-    /* Log panel (hidden until menu pressed) */
-    #logPanel{display:none;}
-    #logPanel.open{display:block;}
-
-    .log-wrap{display:flex;flex-direction:column;gap:10px;margin-top: 8px;}
-    details.log-hole{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(2,6,23,.22);
-      box-shadow: 0 8px 18px rgba(0,0,0,.16);
-      overflow:hidden;
-    }
-    details.log-hole > summary{
-      list-style:none;
-      cursor:pointer;
-      padding: 12px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      font-weight: 950;
-    }
-    details.log-hole > summary::-webkit-details-marker{display:none;}
-    .log-pill{
-      font-size:.82rem;
-      padding: 6px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: var(--muted);
-      font-weight: 900;
-      white-space:nowrap;
-      flex-shrink:0;
-    }
-    .log-items{
-      padding: 0 12px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .log-item{
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 10px 10px;
-      font-size: .92rem;
-      color: var(--text);
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .log-item .mut{color: var(--muted);font-size:.82rem;white-space:nowrap;}
-
-    /* Hide the "Course & hole" card once session starts (hole control moves to menu) */
-    body.session-live #courseHoleCard{display:none;}
-  </style>
+/* ===== Log ===== */
+.log{display:none;}
+details{
+  border:1px solid var(--stroke);
+  border-radius:16px;
+  margin-top:8px;
+  background:rgba(255,255,255,.04);
+}
+summary{
+  padding:12px;
+  cursor:pointer;
+  font-weight:900;
+}
+.log-item{
+  padding:10px 12px;
+  border-top:1px solid var(--stroke);
+  font-size:.9rem;
+}
+</style>
 </head>
+
 <body>
-  <div id="menuOverlay" class="menu-overlay"></div>
 
-  <header class="appbar">
-    <div class="brand">
-      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="logo" />
-      <div class="brand-text">
-        <div class="title">FTK Classic</div>
-        <div class="subtitle">Bingo Bango Bongo</div>
+<!-- MENU -->
+<div id="menuOverlay" class="menu-overlay"></div>
+<div id="menu" class="menu">
+  <h3>Leaderboard</h3>
+  <div id="leaderboard"></div>
+
+  <h3>Hole</h3>
+  <select id="holeSelect"></select>
+
+  <h3>Log</h3>
+  <button id="toggleLogBtn">Show / Hide Log</button>
+
+  <button id="endSessionBtn" class="danger">End Session</button>
+</div>
+
+<!-- TOP BAR -->
+<div class="appbar">
+  <button id="menuBtn" class="menuBtn">☰</button>
+</div>
+
+<!-- SCOREBOARD -->
+<div id="scoreboard"></div>
+
+<!-- LOG -->
+<div id="log" class="card log"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, ref, onValue, update, push, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
+  databaseURL:"https://ftkclassicdb-default-rtdb.firebaseio.com"
+});
+const db = getDatabase(app);
+
+const params=new URLSearchParams(location.search);
+const sessionId=params.get("session");
+
+const els={
+  menu:menu,overlay:menuOverlay,
+  leaderboard,scoreboard,log,
+  holeSelect,toggleLogBtn,endSessionBtn
+};
+
+menuBtn.onclick=()=>{menu.style.display="block";overlay.style.display="block";}
+overlay.onclick=()=>{menu.style.display="none";overlay.style.display="none";}
+
+toggleLogBtn.onclick=()=>els.log.classList.toggle("log");
+
+endSessionBtn.onclick=()=>{
+  if(confirm("End session?")){
+    update(ref(db,`games/bingoBangoBongo/sessions/${sessionId}`),{status:"ended"});
+    location.href="games.html";
+  }
+};
+
+onValue(ref(db,`games/bingoBangoBongo/sessions/${sessionId}`),snap=>{
+  const d=snap.val(); if(!d)return;
+  const scores=d.scores||{};
+  const players=d.players||{};
+
+  // Hole select
+  holeSelect.innerHTML=[...Array(18)].map((_,i)=>`<option ${d.currentHole==i+1?"selected":""}>Hole ${i+1}</option>`).join("");
+  holeSelect.onchange=()=>update(ref(db,`games/bingoBangoBongo/sessions/${sessionId}`),{currentHole:holeSelect.selectedIndex+1});
+
+  // Leaderboard
+  const rows=Object.keys(players).map(pid=>{
+    const s=scores[pid]||{};
+    return {name:players[pid].name,total:(s.bingo||0)+(s.bango||0)+(s.bongo||0)};
+  }).sort((a,b)=>b.total-a.total);
+
+  leaderboard.innerHTML=rows.map(r=>`
+    <div class="lb-row">
+      <span>${r.name}</span>
+      <span class="lb-total">${r.total}</span>
+    </div>`).join("");
+
+  // Scoreboard
+  scoreboard.innerHTML=Object.keys(players).map(pid=>{
+    const s=scores[pid]||{};
+    return `
+    <div class="player">
+      <div class="player-head">
+        <span>${players[pid].name}</span>
+        <span>${(s.bingo||0)+(s.bango||0)+(s.bongo||0)}</span>
       </div>
-    </div>
-
-    <div class="appbar-actions">
-      <button id="hamburgerBtn" class="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
-    </div>
-  </header>
-
-  <!-- Menu Sheet -->
-  <div id="hamburgerMenu" class="menu-sheet" aria-label="Navigation Menu">
-    <div class="menu-head">
-      <div class="menu-title">Menu</div>
-      <button id="menuCloseBtn" class="menu-close" type="button" aria-label="Close menu">✕</button>
-    </div>
-    <div class="menu-items">
-      <a class="menu-link" href="index.html"><span>Home</span><span class="hintline">FTK Classic</span></a>
-      <a class="menu-link" href="spectator.html"><span>Scores</span><span class="hintline">Live totals</span></a>
-      <a class="menu-link" href="games.html"><span>Games</span><span class="hintline">Choose a game</span></a>
-      <a class="menu-link" href="game_history.html"><span>Game History</span><span class="hintline">Past games</span></a>
-
-      <!-- In-session controls -->
-      <button id="toggleLogMenuBtn" class="menu-action" type="button" style="display:none;">
-        <span>Log</span>
-        <span class="hintline">Show / hide</span>
-      </button>
-
-      <button id="toggleHoleMenuBtn" class="menu-action" type="button" style="display:none;">
-        <span>Hole</span>
-        <span class="hintline" id="holeMenuHint">Select</span>
-      </button>
-      <div id="holeMenuPanel" class="menu-subpanel" aria-label="Hole selection panel">
-        <div class="menu-subtitle">
-          <span>Hole selection</span>
-          <button id="closeHolePanelBtn" class="menu-close" type="button" aria-label="Close hole panel">✕</button>
-        </div>
-        <select id="menuHoleSelect"></select>
+      <div class="buckets">
+        ${["bingo","bango","bongo"].map(b=>`
+          <div class="bucket">
+            <small>${b}</small>
+            <button class="plus" onclick="add('${pid}','${b}')">+1</button>
+          </div>`).join("")}
       </div>
+    </div>`;
+  }).join("");
+});
+
+window.add=(pid,b)=>{
+  const r=ref(db,`games/bingoBangoBongo/sessions/${sessionId}/scores/${pid}/${b}`);
+  onValue(r,s=>update(r,(s.val()||0)+1),{onlyOnce:true});
+};
+</script>
 
-      <button id="endSessionMenuBtn" class="menu-action menu-danger" type="button" style="display:none;">
-        <span>End session</span>
-        <span class="hintline" style="color: rgba(254,226,226,.85);">Close this game</span>
-      </button>
-    </div>
-  </div>
-
-  <main>
-    <!-- Leaderboard -->
-    <section id="stickyLb" class="card sticky-lb sticky-hidden lb-collapsed">
-      <div id="lbStrip" class="lb-strip" role="button" tabindex="0" aria-label="Toggle leaderboard">
-        <div class="lb-strip-left">
-          <span class="lb-dot"></span>
-          <span id="lbStripLeader" class="lb-strip-leader">Leader: —</span>
-        </div>
-        <div class="lb-strip-right">
-          <span id="lbStripHole" class="lb-strip-hole">—</span>
-          <span id="lbStripAwards" class="lb-strip-awards">0/3</span>
-        </div>
-      </div>
-
-      <!-- Expanded -->
-      <div class="sticky-meta">
-        <span class="pill" id="holeMetaPill">—</span>
-        <span class="pill" id="holeAwardPill">Hole awards: 0 / 3</span>
-      </div>
-      <div id="stickyList" class="sticky-list"></div>
-    </section>
-
-    <!-- Course & hole (ONLY pre-session; course hidden once session live) -->
-    <section class="card compact" id="courseHoleCard">
-      <div class="section-title">Course & hole</div>
-
-      <div class="controls">
-        <div id="courseWrap" style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
-          <span class="hint" style="font-size:.82rem;">Course</span>
-          <select id="courseSelect">
-            <option value="southern_oaks">Southern Oaks</option>
-          </select>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
-          <span class="hint" style="font-size:.82rem;">Starting hole</span>
-          <select id="holeSelect"></select>
-        </div>
-      </div>
-      <div class="hint" style="margin-top:8px;">Course is only chosen here before starting the session.</div>
-    </section>
-
-    <section id="startCard" class="card">
-      <div class="section-title">Start</div>
-      <div class="hint">Select players, then start a new session.</div>
-
-      <div class="controls">
-        <button id="newSessionBtn" class="btn btn-primary" type="button">Start new session</button>
-      </div>
-
-      <div id="status" class="status"></div>
-      <div id="error" class="err"></div>
-
-      <div id="pickWrap" style="margin-top:12px;">
-        <div class="section-title" style="margin-bottom:10px;">Select players</div>
-        <div id="pickList" class="player-pick-list">
-          <div class="hint">Loading players…</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-title">Scoreboard</div>
-      <div class="hint">
-        Tap <strong>+1</strong> to add a point. <strong>Long-press</strong> the same button to subtract a point.
-      </div>
-      <div id="scoreGrid" class="score-grid">
-        <div class="hint">Start a session to begin scoring.</div>
-      </div>
-    </section>
-
-    <!-- Log panel (hidden until menu pressed) -->
-    <section id="logPanel" class="card">
-      <div class="section-title">Log</div>
-      <div class="hint">Expand a hole to see records like “Hole 1 - Bingo - Jake Smith”.</div>
-      <div id="logWrap" class="log-wrap"></div>
-    </section>
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
-      authDomain: "ftkclassicdb.firebaseapp.com",
-      databaseURL: "https://ftkclassicdb-default-rtdb.firebaseio.com",
-      projectId: "ftkclassicdb",
-      storageBucket: "ftkclassicdb.firebasestorage.app",
-      messagingSenderId: "963469808092",
-      appId: "1:963469808092:web:e6e789ce20ef46404b3f19"
-    };
-
-    const COURSES = {
-      southern_oaks: {
-        name: "Southern Oaks",
-        holes: [
-          { n:1,  par:4, yards:343 }, { n:2,  par:4, yards:316 }, { n:3,  par:4, yards:364 },
-          { n:4,  par:3, yards:142 }, { n:5,  par:5, yards:484 }, { n:6,  par:3, yards:202 },
-          { n:7,  par:5, yards:578 }, { n:8,  par:4, yards:305 }, { n:9,  par:4, yards:363 },
-          { n:10, par:4, yards:405 }, { n:11, par:3, yards:171 }, { n:12, par:4, yards:344 },
-          { n:13, par:3, yards:138 }, { n:14, par:4, yards:279 }, { n:15, par:5, yards:516 },
-          { n:16, par:4, yards:346 }, { n:17, par:4, yards:333 }, { n:18, par:5, yards:471 }
-        ]
-      }
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    async function ensureAnonAuth(){
-      return new Promise((resolve,reject)=>{
-        const unsub = onAuthStateChanged(auth, async (user)=>{
-          try{
-            if(user){ unsub(); return resolve(user); }
-            const cred = await signInAnonymously(auth);
-            unsub();
-            resolve(cred.user);
-          }catch(e){
-            unsub(); reject(e);
-          }
-        });
-      });
-    }
-
-    const els = {
-      courseSelect: document.getElementById("courseSelect"),
-      holeSelect: document.getElementById("holeSelect"),
-
-      menuHoleSelect: document.getElementById("menuHoleSelect"),
-      holeMenuHint: document.getElementById("holeMenuHint"),
-      holeMenuPanel: document.getElementById("holeMenuPanel"),
-      toggleHoleMenuBtn: document.getElementById("toggleHoleMenuBtn"),
-      closeHolePanelBtn: document.getElementById("closeHolePanelBtn"),
-
-      holeMetaPill: document.getElementById("holeMetaPill"),
-      holeAwardPill: document.getElementById("holeAwardPill"),
-
-      startCard: document.getElementById("startCard"),
-      newSessionBtn: document.getElementById("newSessionBtn"),
-
-      pickList: document.getElementById("pickList"),
-      scoreGrid: document.getElementById("scoreGrid"),
-      status: document.getElementById("status"),
-      error: document.getElementById("error"),
-
-      stickyLb: document.getElementById("stickyLb"),
-      stickyList: document.getElementById("stickyList"),
-      lbStrip: document.getElementById("lbStrip"),
-      lbStripLeader: document.getElementById("lbStripLeader"),
-      lbStripHole: document.getElementById("lbStripHole"),
-      lbStripAwards: document.getElementById("lbStripAwards"),
-
-      logPanel: document.getElementById("logPanel"),
-      logWrap: document.getElementById("logWrap"),
-
-      hamburgerBtn: document.getElementById("hamburgerBtn"),
-      hamburgerMenu: document.getElementById("hamburgerMenu"),
-      menuOverlay: document.getElementById("menuOverlay"),
-      menuCloseBtn: document.getElementById("menuCloseBtn"),
-
-      toggleLogMenuBtn: document.getElementById("toggleLogMenuBtn"),
-      endSessionMenuBtn: document.getElementById("endSessionMenuBtn")
-    };
-
-    function setError(msg){
-      els.error.textContent = msg || "";
-      els.error.style.display = msg ? "block" : "none";
-    }
-    function setStatus(msg){ els.status.textContent = msg || ""; }
-    function safeText(s){
-      return String(s||"").replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[m]));
-    }
-    function qp(){
-      const p = new URLSearchParams(location.search || "");
-      const o = {};
-      for (const [k,v] of p.entries()) o[k]=v;
-      return o;
-    }
-    function bucketLabel(b){
-      if (b === "bingo") return "Bingo";
-      if (b === "bango") return "Bango";
-      if (b === "bongo") return "Bongo";
-      return b || "—";
-    }
-    function fmtTime(ts){
-      const n = Number(ts || 0);
-      if (!n) return "";
-      try{
-        const d = new Date(n);
-        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-      }catch(_){ return ""; }
-    }
-
-    // Menu sheet
-    function openMenu(){
-      els.hamburgerMenu.style.display="block";
-      els.menuOverlay.style.display="block";
-      els.hamburgerBtn.setAttribute("aria-expanded","true");
-    }
-    function closeMenu(){
-      els.hamburgerMenu.style.display="none";
-      els.menuOverlay.style.display="none";
-      els.hamburgerBtn.setAttribute("aria-expanded","false");
-      // also collapse hole panel when menu closes
-      els.holeMenuPanel.classList.remove("open");
-    }
-    els.hamburgerBtn?.addEventListener("click",(e)=>{
-      e.stopPropagation();
-      (els.hamburgerMenu.style.display==="block") ? closeMenu() : openMenu();
-    });
-    els.menuOverlay?.addEventListener("click", closeMenu);
-    els.menuCloseBtn?.addEventListener("click", closeMenu);
-    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeMenu(); });
-
-    // State
-    let players = {};
-    let selected = new Set();
-    let sessionId = qp().session || null;
-    let lastSnapshot = null;
-    let currentCourseKey = els.courseSelect.value || "southern_oaks";
-
-    const sessionsRootRef = ref(db, "games/bingoBangoBongo/sessions");
-    function sessionRoot(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}`); }
-    function sessionLogRef(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}/log`); }
-
-    function buildHoleSelect(selectEl){
-      const course = COURSES[currentCourseKey];
-      selectEl.innerHTML = course.holes.map(h => `<option value="${h.n}">Hole ${h.n}</option>`).join("");
-    }
-    function setHoleMeta(holeNum){
-      const course = COURSES[currentCourseKey];
-      const h = course.holes.find(x => x.n === Number(holeNum));
-      if (!h){ els.holeMetaPill.textContent = "—"; return; }
-      els.holeMetaPill.textContent = `Hole ${h.n} · Par ${h.par} · ${h.yards} yds`;
-    }
-    function setHoleAwardCount(count){
-      const c = Number(count||0);
-      els.holeAwardPill.textContent = `Hole awards: ${c} / 3`;
-      els.holeAwardPill.className = "pill" + (c >= 3 ? " good" : "");
-    }
-
-    function renderPlayerPicker(){
-      const ids = Object.keys(players || {});
-      if (!ids.length){
-        els.pickList.innerHTML = `<div class="hint">No players found.</div>`;
-        return;
-      }
-      ids.sort((a,b)=> (players[a]?.name||"").localeCompare(players[b]?.name||""));
-      els.pickList.innerHTML = ids.map(pid=>{
-        const p = players[pid] || {};
-        const checked = selected.has(pid) ? "checked" : "";
-        return `
-          <label class="pick-row">
-            <input type="checkbox" data-pick="${safeText(pid)}" ${checked} />
-            <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
-              <div class="pick-name">${safeText(p.name||"Unknown")}</div>
-              <div class="pick-sub">&nbsp;</div>
-            </div>
-          </label>
-        `;
-      }).join("");
-    }
-
-    function getScore(scoresObj, pid){
-      const s = scoresObj?.[pid] || {};
-      const bingo = Number(s.bingo||0);
-      const bango = Number(s.bango||0);
-      const bongo = Number(s.bongo||0);
-      return { bingo, bango, bongo, total: bingo+bango+bongo };
-    }
-
-    function scoreBoxHtml(pid, bucket, title, val){
-      return `
-        <div class="bbb-box">
-          <div class="bbb-title">${safeText(title)}</div>
-          <div class="bbb-score"><span>${val}</span></div>
-          <button class="plusBtn"
-            data-action="inc"
-            data-bucket="${safeText(bucket)}"
-            data-pid="${safeText(pid)}"
-            aria-label="${safeText(title)} plus (long-press to minus)"
-            title="Tap +1. Long-press to -1."
-            type="button">+1</button>
-        </div>
-      `;
-    }
-
-    // ===== Leaderboard UX state =====
-    let lbExpanded = false;
-    let lbAutoHidden = false;
-
-    function setLbExpanded(next){
-      lbExpanded = !!next;
-      els.stickyLb.classList.toggle("lb-collapsed", !lbExpanded);
-      if (lbExpanded) setLbAutoHidden(false);
-      if (lastSnapshot) renderStickyLeaderboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
-    }
-    function setLbAutoHidden(hidden){
-      lbAutoHidden = !!hidden;
-      els.stickyLb.classList.toggle("lb-autohide", lbAutoHidden);
-    }
-
-    function renderStickyLeaderboard(sessionPlayersObj, scoresObj){
-      const pids = Object.keys(sessionPlayersObj || {});
-      if (!pids.length){
-        els.stickyLb.classList.add("sticky-hidden");
-        els.stickyList.innerHTML = "";
-        els.lbStripLeader.textContent = "Leader: —";
-        els.lbStripHole.textContent = "—";
-        els.lbStripAwards.textContent = "0/3";
-        return;
-      }
-
-      const rows = pids.map(pid=>{
-        const name = players[pid]?.name || sessionPlayersObj[pid]?.name || "Player";
-        const s = getScore(scoresObj, pid);
-        return { pid, name, ...s };
-      });
-      rows.sort((a,b)=> b.total - a.total || b.bingo - a.bingo || b.bango - a.bango || b.bongo - a.bongo || a.name.localeCompare(b.name));
-
-      els.stickyLb.classList.remove("sticky-hidden");
-
-      const leader = rows[0];
-      els.lbStripLeader.textContent = leader ? `Leader: ${leader.name} ${leader.total}` : "Leader: —";
-
-      const holeNum = Number(lastSnapshot?.currentHole || 1);
-      els.lbStripHole.textContent = `H${holeNum}`;
-
-      const cnt = Number(lastSnapshot?.holeAwards?.[holeNum]?.count || 0);
-      els.lbStripAwards.textContent = `${cnt}/3`;
-
-      els.holeMenuHint.textContent = `Current: Hole ${holeNum}`;
-
-      if (!lbExpanded){
-        els.stickyList.innerHTML = "";
-        return;
-      }
-
-      const top = rows.slice(0, 6);
-      els.stickyList.innerHTML = top.map((r, idx)=>`
-        <div class="sticky-row">
-          <div class="sticky-left">
-            <div class="rankBubble">${idx+1}</div>
-            <div style="min-width:0;">
-              <div class="sticky-name">${safeText(r.name)}</div>
-              <div class="sticky-sub">B ${r.bingo} · Ba ${r.bango} · Bo ${r.bongo}</div>
-            </div>
-          </div>
-          <div class="sticky-total">Total ${r.total}</div>
-        </div>
-      `).join("");
-    }
-
-    function renderScoreboard(sessionPlayersObj, scoresObj){
-      const pids = Object.keys(sessionPlayersObj || {});
-      if (!pids.length){
-        els.scoreGrid.innerHTML = `<div class="hint">No players in this session.</div>`;
-        return;
-      }
-
-      pids.sort((a,b)=>{
-        const na = players[a]?.name || sessionPlayersObj[a]?.name || "";
-        const nb = players[b]?.name || sessionPlayersObj[b]?.name || "";
-        return na.localeCompare(nb);
-      });
-
-      els.scoreGrid.innerHTML = pids.map(pid=>{
-        const name = players[pid]?.name || sessionPlayersObj[pid]?.name || "Player";
-        const s = getScore(scoresObj, pid);
-        return `
-          <div class="player-card" data-pid="${safeText(pid)}">
-            <div class="player-head">
-              <div class="player-name">${safeText(name)}</div>
-              <div class="total-pill"><strong>Total: ${s.total}</strong></div>
-            </div>
-            <div class="bbb-row">
-              ${scoreBoxHtml(pid, "bingo", "Bingo", s.bingo)}
-              ${scoreBoxHtml(pid, "bango", "Bango", s.bango)}
-              ${scoreBoxHtml(pid, "bongo", "Bongo", s.bongo)}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    // ===== Log (hidden until menu pressed) =====
-    let logOpen = false;
-    let lastLogObj = null;
-
-    function setLogOpen(next){
-      logOpen = !!next;
-      if (!sessionId){
-        els.logPanel.classList.remove("open");
-        els.logPanel.style.display = "none";
-        return;
-      }
-      if (logOpen){
-        els.logPanel.classList.add("open");
-        els.logPanel.style.display = "block";
-        els.toggleLogMenuBtn.querySelector(".hintline").textContent = "Hide";
-        renderLog(lastLogObj || {});
-        setTimeout(()=> els.logPanel.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
-      }else{
-        els.logPanel.classList.remove("open");
-        els.logPanel.style.display = "none";
-        els.toggleLogMenuBtn.querySelector(".hintline").textContent = "Show";
-        els.logWrap.innerHTML = "";
-      }
-    }
-
-    function renderLog(logObj){
-      if (!logOpen){
-        els.logWrap.innerHTML = "";
-        return;
-      }
-
-      const entries = Object.entries(logObj || {}).map(([id, v])=> ({
-        id,
-        hole: Number(v?.hole || 0),
-        bucket: String(v?.bucket || ""),
-        playerName: String(v?.playerName || ""),
-        createdAt: Number(v?.createdAt || 0)
-      })).filter(x => x.hole >= 1 && x.hole <= 18);
-
-      if (!entries.length){
-        els.logWrap.innerHTML = `<div class="hint">No log entries yet.</div>`;
-        return;
-      }
-
-      const byHole = new Map();
-      for (const e of entries){
-        if (!byHole.has(e.hole)) byHole.set(e.hole, []);
-        byHole.get(e.hole).push(e);
-      }
-
-      const holes = Array.from(byHole.keys()).sort((a,b)=>a-b);
-      els.logWrap.innerHTML = holes.map(hole=>{
-        const list = byHole.get(hole) || [];
-        list.sort((a,b)=> (a.createdAt - b.createdAt) || a.id.localeCompare(b.id));
-
-        const count = list.length;
-        const items = list.map(e=>{
-          const main = `Hole ${hole} - ${bucketLabel(e.bucket)} - ${e.playerName || "Player"}`;
-          const t = fmtTime(e.createdAt);
-          return `<div class="log-item"><span>${safeText(main)}</span><span class="mut">${safeText(t)}</span></div>`;
-        }).join("");
-
-        return `
-          <details class="log-hole">
-            <summary>
-              <span>Hole ${hole}</span>
-              <span class="log-pill">${count} record${count===1?"":"s"}</span>
-            </summary>
-            <div class="log-items">${items}</div>
-          </details>
-        `;
-      }).join("");
-    }
-
-    async function startNewSession(){
-      setError(""); setStatus("");
-
-      const chosen = Array.from(selected);
-      if (chosen.length < 1){
-        setError("Select at least 1 player.");
-        return;
-      }
-
-      try{
-        await ensureAnonAuth();
-        setStatus("Creating session…");
-
-        const newRef = push(sessionsRootRef);
-
-        const playersObj = {};
-        const scoresObj = {};
-        chosen.forEach(pid=>{
-          playersObj[pid] = { name: players[pid]?.name || "Player" };
-          scoresObj[pid] = { bingo: 0, bango: 0, bongo: 0 };
-        });
-
-        const courseKey = els.courseSelect.value || "southern_oaks";
-        const startHole = Number(els.holeSelect.value || 1);
-
-        // NOTE: Course is stored, but NOT displayed in-session (per your request)
-        await set(newRef, {
-          createdAt: Date.now(),
-          createdAtServer: serverTimestamp(),
-          status: "live",
-          game: "bingoBangoBongo",
-          courseKey,
-          courseName: COURSES[courseKey]?.name || "Course",
-          currentHole: startHole,
-          players: playersObj,
-          scores: scoresObj
-        });
-
-        sessionId = newRef.key;
-        const url = new URL(location.href);
-        url.searchParams.set("session", sessionId);
-        location.href = url.toString();
-      }catch(e){
-        console.error(e);
-        setError("Create failed: " + (e?.code || e?.message || "unknown"));
-        setStatus("");
-      }
-    }
-
-    async function endSession(){
-      if (!sessionId) return;
-      const ok = window.confirm("Are you sure?");
-      if (!ok) return;
-
-      try{
-        await ensureAnonAuth();
-        await update(sessionRoot(sessionId), {
-          status: "ended",
-          endedAt: Date.now(),
-          endedAtServer: serverTimestamp()
-        });
-        setStatus("Session ended. Returning to games…");
-        setTimeout(()=>{ window.location.href = "games.html"; }, 400);
-      }catch(e){
-        console.error(e);
-        setError("End failed: " + (e?.code || e?.message || "unknown"));
-      }
-    }
-
-    async function setSessionHole(holeNum){
-      if (!sessionId) return;
-      try{
-        await ensureAnonAuth();
-        await update(sessionRoot(sessionId), {
-          currentHole: holeNum
-        });
-      }catch(e){
-        console.error(e);
-        setError("Update failed: " + (e?.code || e?.message || "unknown"));
-      }
-    }
-
-    async function applyDelta(pid, bucket, delta){
-      if (!sessionId) return;
-      setError("");
-
-      try{
-        await ensureAnonAuth();
-        if (!lastSnapshot) { setError("Session not loaded yet."); return; }
-
-        const curHole = Number(lastSnapshot.currentHole || 1);
-        const holeNum = (Number.isFinite(curHole) && curHole >= 1 && curHole <= 18) ? curHole : 1;
-
-        const cur = Number(lastSnapshot.scores?.[pid]?.[bucket] || 0);
-        const next = Math.max(0, cur + delta);
-
-        const updates = {};
-        updates[`games/bingoBangoBongo/sessions/${sessionId}/scores/${pid}/${bucket}`] = next;
-
-        if (delta > 0) {
-          const prevCount = Number(lastSnapshot.holeAwards?.[holeNum]?.count || 0);
-          const newCount = prevCount + 1;
-          updates[`games/bingoBangoBongo/sessions/${sessionId}/holeAwards/${holeNum}/count`] = newCount;
-          updates[`games/bingoBangoBongo/sessions/${sessionId}/holeAwards/${holeNum}/lastUpdatedAt`] = Date.now();
-
-          if (newCount >= 3) {
-            const nextHole = Math.min(18, holeNum + 1);
-            updates[`games/bingoBangoBongo/sessions/${sessionId}/currentHole`] = nextHole;
-          }
-        }
-
-        await update(ref(db), updates);
-
-        const logPush = push(sessionLogRef(sessionId));
-        await set(logPush, {
-          createdAt: Date.now(),
-          createdAtServer: serverTimestamp(),
-          pid,
-          playerName: (players[pid]?.name || lastSnapshot.players?.[pid]?.name || "Player"),
-          bucket,
-          delta: (delta > 0 ? 1 : -1),
-          hole: holeNum
-        });
-      }catch(e){
-        console.error(e);
-        setError("Update failed: " + (e?.code || e?.message || "unknown"));
-      }
-    }
-
-    function syncHoleUIFromSession(){
-      if (!lastSnapshot) return;
-
-      const holeNum = Number(lastSnapshot.currentHole || 1);
-
-      // leaderboard pills
-      setHoleMeta(holeNum);
-      const count = Number(lastSnapshot.holeAwards?.[holeNum]?.count || 0);
-      setHoleAwardCount(count);
-
-      // menu hole select
-      if (els.menuHoleSelect.value !== String(holeNum)) els.menuHoleSelect.value = String(holeNum);
-      els.holeMenuHint.textContent = `Current: Hole ${holeNum}`;
-
-      // LB strip
-      els.lbStripHole.textContent = `H${holeNum}`;
-      els.lbStripAwards.textContent = `${count}/3`;
-    }
-
-    // Auto-hide leaderboard while scrolling down
-    let lastScrollY = window.scrollY || 0;
-    let lastScrollTs = 0;
-    function handleScroll(){
-      if (!sessionId) return;
-      if (!els.stickyLb || els.stickyLb.classList.contains("sticky-hidden")) return;
-
-      const y = window.scrollY || 0;
-      const now = Date.now();
-      const dy = y - lastScrollY;
-
-      if (now - lastScrollTs < 60) { lastScrollY = y; return; }
-      lastScrollTs = now;
-
-      if (y < 40){
-        setLbAutoHidden(false);
-        lastScrollY = y;
-        return;
-      }
-
-      if (dy > 10) setLbAutoHidden(true);
-      else if (dy < -8) setLbAutoHidden(false);
-
-      lastScrollY = y;
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    function wireLbStrip(){
-      function toggle(){ setLbExpanded(!lbExpanded); }
-      els.lbStrip.addEventListener("click", toggle);
-      els.lbStrip.addEventListener("keydown", (e)=>{
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
-      });
-    }
-
-    // MODE C long-press
-    const LONG_PRESS_MS = 520;
-    let lpTimer = null;
-    let lpTriggered = false;
-
-    function clearLongPress(){
-      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
-    }
-    function armLongPress(btn){
-      clearLongPress();
-      lpTriggered = false;
-
-      const pid = btn.getAttribute("data-pid");
-      const bucket = btn.getAttribute("data-bucket");
-      if (!pid || !bucket) return;
-
-      lpTimer = setTimeout(()=>{
-        lpTriggered = true;
-        applyDelta(pid, bucket, -1);
-        setLbAutoHidden(false);
-      }, LONG_PRESS_MS);
-    }
-    function cancelLongPress(){ clearLongPress(); }
-
-    async function init(){
-      wireLbStrip();
-      setLbExpanded(false);
-
-      try{
-        setStatus("Signing in…");
-        await ensureAnonAuth();
-        setStatus("");
-      }catch(e){
-        console.error(e);
-        setError("Auth failed. Make sure Anonymous sign-in is enabled in Firebase Auth.");
-        return;
-      }
-
-      // pre-session (course + starting hole)
-      buildHoleSelect(els.holeSelect);
-      els.holeSelect.value = "1";
-
-      onValue(ref(db, "players"), (snap)=>{
-        players = snap.val() || {};
-        if (!sessionId) renderPlayerPicker();
-        if (lastSnapshot) {
-          renderStickyLeaderboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
-          renderScoreboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
-        }
-      });
-
-      if (!sessionId){
-        els.startCard.style.display = "block";
-        els.stickyLb.classList.add("sticky-hidden");
-        els.toggleLogMenuBtn.style.display = "none";
-        els.toggleHoleMenuBtn.style.display = "none";
-        els.endSessionMenuBtn.style.display = "none";
-        setLogOpen(false);
-        return;
-      }
-
-      // in-session UI
-      document.body.classList.add("session-live");
-      els.startCard.style.display = "none";
-      els.toggleLogMenuBtn.style.display = "flex";
-      els.toggleHoleMenuBtn.style.display = "flex";
-      els.endSessionMenuBtn.style.display = "flex";
-
-      // menu hole select (always 1-18)
-      buildHoleSelect(els.menuHoleSelect);
-
-      onValue(sessionRoot(sessionId), (snap)=>{
-        const data = snap.val();
-        if (!data){
-          setError("Session not found. Start a new one.");
-          els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
-          els.stickyLb.classList.add("sticky-hidden");
-          els.toggleLogMenuBtn.style.display = "none";
-          els.toggleHoleMenuBtn.style.display = "none";
-          els.endSessionMenuBtn.style.display = "none";
-          setLogOpen(false);
-          return;
-        }
-        lastSnapshot = data;
-
-        // force course key for hole meta; but do NOT show course in-session
-        currentCourseKey = data.courseKey || currentCourseKey || "southern_oaks";
-
-        // Ensure menu hole select has correct options if course changes
-        buildHoleSelect(els.menuHoleSelect);
-
-        syncHoleUIFromSession();
-        renderStickyLeaderboard(data.players || {}, data.scores || {});
-        renderScoreboard(data.players || {}, data.scores || {});
-      }, (err)=>{
-        console.error(err);
-        setError("Read failed: " + (err?.code || err?.message || "unknown"));
-      });
-
-      // Keep log snapshot updated, but do not render unless open
-      onValue(sessionLogRef(sessionId), (snap)=>{
-        lastLogObj = snap.val() || {};
-        if (logOpen) renderLog(lastLogObj);
-      });
-    }
-
-    // Picker
-    els.pickList.addEventListener("change", (e)=>{
-      const cb = e.target.closest("input[type='checkbox'][data-pick]");
-      if (!cb) return;
-      const pid = cb.getAttribute("data-pick");
-      if (!pid) return;
-      cb.checked ? selected.add(pid) : selected.delete(pid);
-    });
-
-    // Pre-session course changes update hole list (still only Southern Oaks right now)
-    els.courseSelect.addEventListener("change", ()=>{
-      currentCourseKey = els.courseSelect.value || "southern_oaks";
-      buildHoleSelect(els.holeSelect);
-      els.holeSelect.value = "1";
-    });
-
-    els.newSessionBtn.addEventListener("click", startNewSession);
-
-    // Log from menu
-    els.toggleLogMenuBtn.addEventListener("click", ()=>{
-      setLogOpen(!logOpen);
-      // keep menu open; just update panel below page
-    });
-
-    // Hole panel toggle
-    els.toggleHoleMenuBtn.addEventListener("click", ()=>{
-      const open = els.holeMenuPanel.classList.toggle("open");
-      if (open){
-        // sync selection when opening
-        const holeNum = Number(lastSnapshot?.currentHole || 1);
-        els.menuHoleSelect.value = String(holeNum);
-      }
-    });
-    els.closeHolePanelBtn.addEventListener("click", ()=>{
-      els.holeMenuPanel.classList.remove("open");
-    });
-
-    // Change hole from menu
-    els.menuHoleSelect.addEventListener("change", ()=>{
-      const holeNum = Number(els.menuHoleSelect.value || 1);
-      setSessionHole(holeNum);
-      els.holeMenuPanel.classList.remove("open");
-    });
-
-    // End session from menu
-    els.endSessionMenuBtn.addEventListener("click", ()=>{
-      closeMenu();
-      endSession();
-    });
-
-    // Score click +1
-    els.scoreGrid.addEventListener("click", (e)=>{
-      const btn = e.target.closest("button.plusBtn[data-action='inc']");
-      if (!btn) return;
-
-      if (lpTriggered) { lpTriggered = false; return; }
-
-      const pid = btn.getAttribute("data-pid");
-      const bucket = btn.getAttribute("data-bucket");
-      if (!pid || !bucket) return;
-
-      setLbAutoHidden(false);
-      applyDelta(pid, bucket, +1);
-    });
-
-    // Long-press events
-    els.scoreGrid.addEventListener("pointerdown", (e)=>{
-      const btn = e.target.closest("button.plusBtn[data-action='inc']");
-      if (!btn) return;
-      btn.addEventListener("contextmenu", (ev)=> ev.preventDefault(), { once:true });
-      armLongPress(btn);
-    }, { passive:true });
-
-    els.scoreGrid.addEventListener("pointerup", cancelLongPress, { passive:true });
-    els.scoreGrid.addEventListener("pointercancel", cancelLongPress, { passive:true });
-    els.scoreGrid.addEventListener("pointerleave", cancelLongPress, { passive:true });
-
-    init();
-  </script>
 </body>
 </html>
