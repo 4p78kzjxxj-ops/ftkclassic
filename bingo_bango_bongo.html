@@ -43,11 +43,19 @@
         linear-gradient(180deg, var(--bg0), var(--bg1));
       min-height:100%;
       padding: 12px;
-      padding-bottom: calc(88px + var(--safe-bottom));
+
+      /* Mobile overlap fix: ensure fixed bottom bar never covers player cards */
+      padding-bottom: calc(120px + var(--safe-bottom));
+
       touch-action: manipulation;
     }
+    body.session-live{
+      padding-bottom: calc(140px + var(--safe-bottom));
+    }
+
     @media (min-width: 900px){
-      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(92px + var(--safe-bottom));}
+      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(130px + var(--safe-bottom));}
+      body.session-live{padding-bottom: calc(150px + var(--safe-bottom));}
     }
 
     a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -246,20 +254,93 @@
     }
     .status{margin-top:8px;font-size:.9rem;color:var(--muted);min-height:1.1em;}
 
-    /* ===== Smaller sticky leaderboard ===== */
+    /* ===== Leaderboard: single-row collapsed + expandable ===== */
     .sticky-lb{
       position: sticky;
       top: calc(78px + var(--safe-top));
       z-index: 55;
-      padding: 10px 12px;   /* smaller */
+      padding: 10px 12px;   /* compact */
+      transition: transform .18s ease, opacity .18s ease;
+      will-change: transform, opacity;
     }
     .sticky-lb.sticky-hidden{display:none;}
-    .sticky-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;}
+
+    /* auto-hide on scroll down */
+    .sticky-lb.lb-autohide{
+      transform: translateY(-130%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lb-actions{display:flex;gap:8px;align-items:center;}
+    .lb-toggle{
+      cursor:pointer;
+      font-weight: 900;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size: .86rem;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text);
+    }
+    .lb-summary{
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.25);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+    }
+    .lb-summary-left{
+      display:flex;gap:10px;align-items:center;min-width:0;
+      font-weight: 950;
+    }
+    .lb-summary-left .tag{
+      width: 28px;height:28px;border-radius: 999px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(96,165,250,.18);
+      border: 1px solid rgba(96,165,250,.25);
+      font-weight: 950;
+      font-size: .8rem;
+      flex-shrink:0;
+    }
+    .lb-summary-text{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size: .92rem;
+    }
+    .lb-summary-right{
+      flex-shrink:0;
+      font-size:.82rem;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    /* expanded bits */
+    .sticky-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;}
     .sticky-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+
+    /* collapsed state: hide expanded sections, keep summary only */
+    .sticky-lb.lb-collapsed .sticky-meta,
+    .sticky-lb.lb-collapsed .sticky-list{display:none;}
 
     .sticky-row{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding: 8px 10px; /* smaller */
+      padding: 8px 10px; /* compact */
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(2,6,23,.25);
@@ -408,7 +489,7 @@
     </div>
   </header>
 
-  <!-- Menu Sheet (outside header to avoid any sticky/stacking weirdness) -->
+  <!-- Menu Sheet -->
   <div id="hamburgerMenu" class="menu-sheet" aria-label="Navigation Menu">
     <div class="menu-head">
       <div class="menu-title">Menu</div>
@@ -423,14 +504,25 @@
   </div>
 
   <main>
-    <section id="stickyLb" class="card sticky-lb sticky-hidden">
-      <div class="section-title">
+    <!-- Leaderboard: single-row summary bar + expand -->
+    <section id="stickyLb" class="card sticky-lb sticky-hidden lb-collapsed">
+      <div class="section-title" style="margin-bottom:8px;">
         <span>Leaderboard</span>
-        <span style="font-size:.78rem;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:800;">
-          Total points
-        </span>
+        <div class="lb-actions">
+          <button id="lbToggleBtn" class="lb-toggle" type="button" aria-expanded="false">Expand</button>
+        </div>
       </div>
 
+      <!-- Always-visible single row summary -->
+      <div id="lbSummary" class="lb-summary" role="button" tabindex="0" aria-label="Toggle leaderboard">
+        <div class="lb-summary-left">
+          <div class="tag">#</div>
+          <div id="lbSummaryText" class="lb-summary-text">—</div>
+        </div>
+        <div id="lbSummaryRight" class="lb-summary-right">Top 3</div>
+      </div>
+
+      <!-- Expanded -->
       <div class="sticky-meta">
         <span class="pill" id="holeMetaPill">—</span>
         <span class="pill" id="holeAwardPill">Hole awards: 0 / 3</span>
@@ -573,6 +665,11 @@
       stickyLb: document.getElementById("stickyLb"),
       stickyList: document.getElementById("stickyList"),
 
+      lbToggleBtn: document.getElementById("lbToggleBtn"),
+      lbSummary: document.getElementById("lbSummary"),
+      lbSummaryText: document.getElementById("lbSummaryText"),
+      lbSummaryRight: document.getElementById("lbSummaryRight"),
+
       hamburgerBtn: document.getElementById("hamburgerBtn"),
       hamburgerMenu: document.getElementById("hamburgerMenu"),
       menuOverlay: document.getElementById("menuOverlay"),
@@ -706,11 +803,37 @@
       `;
     }
 
+    // ===== Leaderboard UX state =====
+    let lbExpanded = false;   // collapsed single-row by default
+    let lbAutoHidden = false;
+
+    function setLbExpanded(next){
+      lbExpanded = !!next;
+      if (!els.stickyLb) return;
+      els.stickyLb.classList.toggle("lb-collapsed", !lbExpanded);
+      els.lbToggleBtn.setAttribute("aria-expanded", String(lbExpanded));
+      els.lbToggleBtn.textContent = lbExpanded ? "Collapse" : "Expand";
+    }
+
+    function setLbAutoHidden(hidden){
+      lbAutoHidden = !!hidden;
+      if (!els.stickyLb) return;
+      els.stickyLb.classList.toggle("lb-autohide", lbAutoHidden);
+    }
+
+    function formatTopSummary(rows){
+      const top3 = rows.slice(0,3);
+      if (!top3.length) return "—";
+      // "1) Name 6 • 2) Name 4 • 3) Name 2"
+      return top3.map((r, i)=> `${i+1}) ${r.name} ${r.total}`).join(" • ");
+    }
+
     function renderStickyLeaderboard(sessionPlayersObj, scoresObj){
       const pids = Object.keys(sessionPlayersObj || {});
       if (!pids.length){
         els.stickyLb.classList.add("sticky-hidden");
         els.stickyList.innerHTML = "";
+        els.lbSummaryText.textContent = "—";
         return;
       }
 
@@ -722,10 +845,18 @@
 
       rows.sort((a,b)=> b.total - a.total || b.bingo - a.bingo || b.bango - a.bango || b.bongo - a.bongo || a.name.localeCompare(b.name));
 
-      // smaller leaderboard: show top 6 only
-      const top = rows.slice(0, 6);
-
       els.stickyLb.classList.remove("sticky-hidden");
+
+      // Always update collapsed single-row summary
+      els.lbSummaryText.textContent = formatTopSummary(rows);
+
+      // Only render expanded list when expanded
+      if (!lbExpanded){
+        els.stickyList.innerHTML = "";
+        return;
+      }
+
+      const top = rows.slice(0, 6);
       els.stickyList.innerHTML = top.map((r, idx)=>`
         <div class="sticky-row">
           <div class="sticky-left">
@@ -923,7 +1054,67 @@
       setHoleAwardCount(count);
     }
 
+    // ===== Auto-hide LB while scrolling (down hides, up shows) =====
+    let lastScrollY = window.scrollY || 0;
+    let lastScrollTs = 0;
+
+    function handleScroll(){
+      if (!sessionId) return;
+      if (!els.stickyLb || els.stickyLb.classList.contains("sticky-hidden")) return;
+
+      const y = window.scrollY || 0;
+      const now = Date.now();
+      const dy = y - lastScrollY;
+
+      // Throttle-ish: only react every ~60ms
+      if (now - lastScrollTs < 60) { lastScrollY = y; return; }
+      lastScrollTs = now;
+
+      // Near top: always show
+      if (y < 40){
+        setLbAutoHidden(false);
+        lastScrollY = y;
+        return;
+      }
+
+      // If user scrolls down a bit, hide. Scroll up, show.
+      if (dy > 10){
+        setLbAutoHidden(true);
+      } else if (dy < -8){
+        setLbAutoHidden(false);
+      }
+
+      lastScrollY = y;
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    function initLeaderboardControls(){
+      // default collapsed, button reflects state
+      setLbExpanded(false);
+
+      // Toggle expand/collapse
+      els.lbToggleBtn.addEventListener("click", ()=>{
+        setLbExpanded(!lbExpanded);
+        // if expanding, make sure it's visible
+        if (lbExpanded) setLbAutoHidden(false);
+        if (lastSnapshot) renderStickyLeaderboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
+      });
+
+      // Summary row is also a toggle (tap anywhere)
+      function summaryToggle(){
+        setLbExpanded(!lbExpanded);
+        if (lbExpanded) setLbAutoHidden(false);
+        if (lastSnapshot) renderStickyLeaderboard(lastSnapshot.players || {}, lastSnapshot.scores || {});
+      }
+      els.lbSummary.addEventListener("click", summaryToggle);
+      els.lbSummary.addEventListener("keydown", (e)=>{
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); summaryToggle(); }
+      });
+    }
+
     async function init(){
+      initLeaderboardControls();
+
       try{
         setStatus("Signing in…");
         await ensureAnonAuth();
@@ -954,12 +1145,15 @@
       });
 
       if (!sessionId){
+        document.body.classList.remove("session-live");
         setSessionLabel();
         els.startCard.style.display = "block";
         els.bottomBar.style.display = "none";
         els.stickyLb.classList.add("sticky-hidden");
         return;
       }
+
+      document.body.classList.add("session-live");
 
       els.startCard.style.display = "none";
       els.bottomBar.style.display = "block";
@@ -972,6 +1166,7 @@
           els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
           els.stickyLb.classList.add("sticky-hidden");
           els.bottomBar.style.display = "none";
+          document.body.classList.remove("session-live");
           return;
         }
         lastSnapshot = data;
@@ -979,6 +1174,7 @@
         syncCourseHoleUIFromSession();
         renderStickyLeaderboard(data.players || {}, data.scores || {});
         renderScoreboard(data.players || {}, data.scores || {});
+
       }, (err)=>{
         console.error(err);
         setError("Read failed: " + (err?.code || err?.message || "unknown"));
