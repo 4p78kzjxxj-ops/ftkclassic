@@ -17,6 +17,7 @@
       --accent:#60a5fa;
       --accent2:#34d399;
       --warn:#fb923c;
+      --danger:#f87171;
 
       --shadow: 0 18px 60px rgba(0,0,0,.35);
       --shadow2: 0 8px 24px rgba(0,0,0,.28);
@@ -40,12 +41,12 @@
       min-height:100%;
       padding: 12px;
 
-      /* fixed bottom bar space */
-      padding-bottom: calc(220px + var(--safe-bottom));
+      /* fixed bottom bar space (tight) */
+      padding-bottom: calc(130px + var(--safe-bottom));
       touch-action: manipulation;
     }
     @media (min-width: 900px){
-      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(240px + var(--safe-bottom));}
+      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(140px + var(--safe-bottom));}
     }
 
     a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -130,16 +131,28 @@
       font-size: 18px;
     }
     .menu-items{display:flex;flex-direction:column;}
-    .menu-sheet a{
+    .menu-link,
+    .menu-action{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       padding: 14px 14px;
       border-top: 1px solid rgba(255,255,255,.10);
       font-weight: 800;
       color: var(--text);
+      width:100%;
+      text-align:left;
+      cursor:pointer;
     }
-    .menu-sheet a:first-child{border-top:none;}
-    .menu-sheet a:hover{background: rgba(255,255,255,.06);}
+    .menu-items > :first-child{border-top:none;}
+    .menu-link:hover,.menu-action:hover{background: rgba(255,255,255,.06);}
     .menu-sheet .hintline{font-size:.82rem;color:var(--muted);font-weight:650;}
+
+    .menu-danger{
+      color: #fee2e2;
+      background: rgba(248,113,113,.10);
+    }
+    .menu-danger:hover{
+      background: rgba(248,113,113,.16);
+    }
 
     /* ====== Layout blocks ====== */
     main{margin-top: 12px;display:flex;flex-direction:column;gap:12px;}
@@ -184,6 +197,19 @@
     .compact select{height: 42px; border-radius: 14px; font-size: .98rem;}
     select option{background:#0b1220;color:var(--text);}
 
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-size: .86rem;
+      color: var(--text);
+      height: 40px;
+      white-space:nowrap;
+    }
+    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: #bbf7d0;}
+
     .btn{
       height: var(--tap);
       border-radius: 999px;
@@ -202,10 +228,9 @@
       border-color: rgba(96,165,250,.6);
       color: #071123;
     }
-    .btn-warn{
-      background: linear-gradient(180deg, rgba(251,146,60,.35), rgba(251,146,60,.18));
-      border-color: rgba(251,146,60,.35);
-      color: #ffe6d0;
+    .btn-ghost{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.16);
     }
 
     .err{
@@ -220,7 +245,7 @@
     }
     .status{margin-top:8px;font-size:.9rem;color:var(--muted);min-height:1.1em;}
 
-    /* ===== Leaderboard: ultra-tight strip + optional expand + autohide ===== */
+    /* ===== Leaderboard: tight strip + optional expand + autohide ===== */
     .sticky-lb{
       position: sticky;
       top: calc(78px + var(--safe-top));
@@ -403,7 +428,7 @@
     .pick-name{font-weight: 950;}
     .pick-sub{font-size:.85rem;color:var(--muted);}
 
-    /* Bottom bar (holds the session indicator now) */
+    /* Bottom bar (NO session bubble) */
     .bottom-bar{
       position: fixed;
       left: 0; right: 0;
@@ -433,17 +458,6 @@
       display:flex;align-items:center;gap:10px;min-width:0;
       padding-left: 10px;
     }
-    .session-pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size: .86rem;
-      font-weight: 900;
-      white-space:nowrap;
-      flex-shrink:0;
-    }
     .bottom-sub{
       font-size:.82rem;color:var(--muted);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -451,10 +465,6 @@
     }
     .bottom-actions{display:flex;gap:10px;align-items:center;flex-shrink:0;}
     .bottom-actions .btn{height: 44px;}
-    .btn-ghost{
-      background: rgba(255,255,255,.06);
-      border-color: rgba(255,255,255,.16);
-    }
 
     /* Course select hidden once session is live */
     body.session-live #courseWrap{display:none;}
@@ -537,10 +547,16 @@
       <button id="menuCloseBtn" class="menu-close" type="button" aria-label="Close menu">✕</button>
     </div>
     <div class="menu-items">
-      <a href="index.html"><span>Home</span><span class="hintline">FTK Classic</span></a>
-      <a href="spectator.html"><span>Scores</span><span class="hintline">Live totals</span></a>
-      <a href="games.html"><span>Games</span><span class="hintline">Choose a game</span></a>
-      <a href="game_history.html"><span>Game History</span><span class="hintline">Past games</span></a>
+      <a class="menu-link" href="index.html"><span>Home</span><span class="hintline">FTK Classic</span></a>
+      <a class="menu-link" href="spectator.html"><span>Scores</span><span class="hintline">Live totals</span></a>
+      <a class="menu-link" href="games.html"><span>Games</span><span class="hintline">Choose a game</span></a>
+      <a class="menu-link" href="game_history.html"><span>Game History</span><span class="hintline">Past games</span></a>
+
+      <!-- End Session moved here; hidden unless session live -->
+      <button id="endSessionMenuBtn" class="menu-action menu-danger" type="button" style="display:none;">
+        <span>End session</span>
+        <span class="hintline" style="color: rgba(254,226,226,.85);">Close this game</span>
+      </button>
     </div>
   </div>
 
@@ -622,19 +638,14 @@
     </section>
   </main>
 
-  <!-- Bottom bar: session indicator moved here (NOT sticky at top anymore) -->
+  <!-- Bottom bar: ONLY Log button + small hint -->
   <div id="bottomBar" class="bottom-bar" style="display:none;">
     <div class="bottom-inner">
       <div class="bottom-left">
-        <div class="session-pill" id="sessionPill">
-          <span style="opacity:.8">Session</span>
-          <strong id="sessionLabel">Game</strong>
-        </div>
         <div class="bottom-sub" id="bottomSub">Tap + to score · Long-press to undo</div>
       </div>
       <div class="bottom-actions">
         <button id="toggleLogBtn" class="btn btn-ghost" type="button">Log</button>
-        <button id="endSessionBtn" class="btn btn-warn" type="button">End session</button>
       </div>
     </div>
   </div>
@@ -693,12 +704,10 @@
       holeMetaPill: document.getElementById("holeMetaPill"),
       holeAwardPill: document.getElementById("holeAwardPill"),
 
-      sessionLabel: document.getElementById("sessionLabel"),
-
       startCard: document.getElementById("startCard"),
       newSessionBtn: document.getElementById("newSessionBtn"),
+
       bottomBar: document.getElementById("bottomBar"),
-      endSessionBtn: document.getElementById("endSessionBtn"),
       bottomSub: document.getElementById("bottomSub"),
       toggleLogBtn: document.getElementById("toggleLogBtn"),
 
@@ -720,7 +729,9 @@
       hamburgerBtn: document.getElementById("hamburgerBtn"),
       hamburgerMenu: document.getElementById("hamburgerMenu"),
       menuOverlay: document.getElementById("menuOverlay"),
-      menuCloseBtn: document.getElementById("menuCloseBtn")
+      menuCloseBtn: document.getElementById("menuCloseBtn"),
+
+      endSessionMenuBtn: document.getElementById("endSessionMenuBtn")
     };
 
     function setError(msg){
@@ -783,24 +794,6 @@
     const sessionsRootRef = ref(db, "games/bingoBangoBongo/sessions");
     function sessionRoot(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}`); }
     function sessionLogRef(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}/log`); }
-
-    // Game numbering map (sid -> Game #)
-    let gameNumMap = {};
-    function computeGameNumbers(allSessions){
-      const arr = Object.entries(allSessions || {}).map(([sid, sess]) => ({
-        sid,
-        createdAt: Number(sess?.createdAt || 0)
-      }));
-      arr.sort((a,b) => (a.createdAt - b.createdAt) || a.sid.localeCompare(b.sid));
-      const map = {};
-      arr.forEach((x,i)=> { map[x.sid] = i+1; });
-      return map;
-    }
-    function setSessionLabel(){
-      if (!sessionId){ els.sessionLabel.textContent = "Not started"; return; }
-      const n = gameNumMap[sessionId];
-      els.sessionLabel.textContent = n ? `Game ${n}` : "Game";
-    }
 
     function buildHoleSelect(){
       const course = COURSES[currentCourseKey];
@@ -976,17 +969,16 @@
         els.logPanel.style.display = "block";
         els.toggleLogBtn.textContent = "Hide log";
         renderLog(lastLogObj || {});
-        // jump to log (optional but helpful)
         setTimeout(()=> els.logPanel.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
       }else{
         els.logPanel.classList.remove("open");
         els.logPanel.style.display = "none";
         els.toggleLogBtn.textContent = "Log";
+        els.logWrap.innerHTML = "";
       }
     }
 
     function renderLog(logObj){
-      // Never show anything until user opens the log
       if (!logOpen){
         els.logWrap.innerHTML = "";
         return;
@@ -996,7 +988,6 @@
         id,
         hole: Number(v?.hole || 0),
         bucket: String(v?.bucket || ""),
-        pid: String(v?.pid || ""),
         playerName: String(v?.playerName || ""),
         createdAt: Number(v?.createdAt || 0)
       })).filter(x => x.hole >= 1 && x.hole <= 18);
@@ -1006,7 +997,6 @@
         return;
       }
 
-      // group by hole
       const byHole = new Map();
       for (const e of entries){
         if (!byHole.has(e.hole)) byHole.set(e.hole, []);
@@ -1150,7 +1140,6 @@
 
         await update(ref(db), updates);
 
-        // log record
         const logPush = push(sessionLogRef(sessionId));
         await set(logPush, {
           createdAt: Date.now(),
@@ -1263,12 +1252,6 @@
       setHoleMeta(1);
       setHoleAwardCount(0);
 
-      onValue(sessionsRootRef, (snap)=>{
-        const all = snap.val() || {};
-        gameNumMap = computeGameNumbers(all);
-        setSessionLabel();
-      });
-
       onValue(ref(db, "players"), (snap)=>{
         players = snap.val() || {};
         if (!sessionId) renderPlayerPicker();
@@ -1282,6 +1265,7 @@
         els.startCard.style.display = "block";
         els.bottomBar.style.display = "none";
         els.stickyLb.classList.add("sticky-hidden");
+        els.endSessionMenuBtn.style.display = "none";
         setLogOpen(false);
         return;
       }
@@ -1290,8 +1274,8 @@
       document.body.classList.add("session-live");
       els.startCard.style.display = "none";
       els.bottomBar.style.display = "block";
-      setSessionLabel();
-      setLogOpen(false); // hidden until button pressed
+      els.endSessionMenuBtn.style.display = "flex";
+      setLogOpen(false);
 
       onValue(sessionRoot(sessionId), (snap)=>{
         const data = snap.val();
@@ -1300,6 +1284,7 @@
           els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
           els.stickyLb.classList.add("sticky-hidden");
           els.bottomBar.style.display = "none";
+          els.endSessionMenuBtn.style.display = "none";
           setLogOpen(false);
           return;
         }
@@ -1313,7 +1298,7 @@
         setError("Read failed: " + (err?.code || err?.message || "unknown"));
       });
 
-      // Keep log snapshot updated, but DO NOT render unless user opened it
+      // Keep log snapshot updated, but do not render unless open
       onValue(sessionLogRef(sessionId), (snap)=>{
         lastLogObj = snap.val() || {};
         if (logOpen) renderLog(lastLogObj);
@@ -1321,7 +1306,7 @@
     }
 
     // Picker
-    document.getElementById("pickList").addEventListener("change", (e)=>{
+    els.pickList.addEventListener("change", (e)=>{
       const cb = e.target.closest("input[type='checkbox'][data-pick]");
       if (!cb) return;
       const pid = cb.getAttribute("data-pick");
@@ -1329,16 +1314,21 @@
       cb.checked ? selected.add(pid) : selected.delete(pid);
     });
 
-    document.getElementById("newSessionBtn").addEventListener("click", startNewSession);
-    document.getElementById("endSessionBtn").addEventListener("click", endSession);
+    els.newSessionBtn.addEventListener("click", startNewSession);
 
     // Log button
     els.toggleLogBtn.addEventListener("click", ()=>{
       setLogOpen(!logOpen);
     });
 
+    // End session from menu
+    els.endSessionMenuBtn.addEventListener("click", ()=>{
+      closeMenu();
+      endSession();
+    });
+
     // Score click +1
-    document.getElementById("scoreGrid").addEventListener("click", (e)=>{
+    els.scoreGrid.addEventListener("click", (e)=>{
       const btn = e.target.closest("button.plusBtn[data-action='inc']");
       if (!btn) return;
 
@@ -1353,18 +1343,18 @@
     });
 
     // Long-press events
-    document.getElementById("scoreGrid").addEventListener("pointerdown", (e)=>{
+    els.scoreGrid.addEventListener("pointerdown", (e)=>{
       const btn = e.target.closest("button.plusBtn[data-action='inc']");
       if (!btn) return;
       btn.addEventListener("contextmenu", (ev)=> ev.preventDefault(), { once:true });
       armLongPress(btn);
     }, { passive:true });
 
-    document.getElementById("scoreGrid").addEventListener("pointerup", cancelLongPress, { passive:true });
-    document.getElementById("scoreGrid").addEventListener("pointercancel", cancelLongPress, { passive:true });
-    document.getElementById("scoreGrid").addEventListener("pointerleave", cancelLongPress, { passive:true });
+    els.scoreGrid.addEventListener("pointerup", cancelLongPress, { passive:true });
+    els.scoreGrid.addEventListener("pointercancel", cancelLongPress, { passive:true });
+    els.scoreGrid.addEventListener("pointerleave", cancelLongPress, { passive:true });
 
-    document.getElementById("courseSelect").addEventListener("change", async ()=>{
+    els.courseSelect.addEventListener("change", async ()=>{
       currentCourseKey = els.courseSelect.value || "southern_oaks";
       buildHoleSelect();
       setHoleMeta(1);
@@ -1377,7 +1367,7 @@
       }
     });
 
-    document.getElementById("holeSelect").addEventListener("change", async ()=>{
+    els.holeSelect.addEventListener("change", async ()=>{
       const holeNum = Number(els.holeSelect.value || 1);
       setHoleMeta(holeNum);
 
