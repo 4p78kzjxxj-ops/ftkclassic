@@ -41,12 +41,12 @@
       min-height:100%;
       padding: 12px;
 
-      /* fixed bottom bar space (tight) */
-      padding-bottom: calc(130px + var(--safe-bottom));
+      /* tight bottom space */
+      padding-bottom: calc(24px + var(--safe-bottom));
       touch-action: manipulation;
     }
     @media (min-width: 900px){
-      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(140px + var(--safe-bottom));}
+      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(28px + var(--safe-bottom));}
     }
 
     a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -145,13 +145,34 @@
     .menu-items > :first-child{border-top:none;}
     .menu-link:hover,.menu-action:hover{background: rgba(255,255,255,.06);}
     .menu-sheet .hintline{font-size:.82rem;color:var(--muted);font-weight:650;}
-
     .menu-danger{
       color: #fee2e2;
       background: rgba(248,113,113,.10);
     }
-    .menu-danger:hover{
-      background: rgba(248,113,113,.16);
+    .menu-danger:hover{background: rgba(248,113,113,.16);}
+
+    .menu-subpanel{
+      padding: 10px 14px 14px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+      display:none;
+    }
+    .menu-subpanel.open{display:block;}
+    .menu-subtitle{
+      font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;
+      color: var(--muted2); font-weight: 950;
+      margin-bottom: 10px;
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+    }
+    .menu-subpanel select{
+      width:100%;
+      height: 44px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(2,6,23,.35);
+      color: var(--text);
+      padding: 0 12px;
+      font-size: 1rem;
     }
 
     /* ====== Layout blocks ====== */
@@ -183,7 +204,6 @@
     .compact .hint{font-size:.86rem;line-height:1.2rem;}
 
     .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px;}
-    .compact .controls{margin-top:0;gap:8px;}
     select, input{
       height: var(--tap);
       border-radius: 16px;
@@ -194,21 +214,7 @@
       font-size: 1rem;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
-    .compact select{height: 42px; border-radius: 14px; font-size: .98rem;}
     select option{background:#0b1220;color:var(--text);}
-
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size: .86rem;
-      color: var(--text);
-      height: 40px;
-      white-space:nowrap;
-    }
-    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: #bbf7d0;}
 
     .btn{
       height: var(--tap);
@@ -228,10 +234,19 @@
       border-color: rgba(96,165,250,.6);
       color: #071123;
     }
-    .btn-ghost{
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
-      border-color: rgba(255,255,255,.16);
+      font-size: .86rem;
+      color: var(--text);
+      height: 40px;
+      white-space:nowrap;
     }
+    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: #bbf7d0;}
 
     .err{
       margin-top:10px;
@@ -428,48 +443,7 @@
     .pick-name{font-weight: 950;}
     .pick-sub{font-size:.85rem;color:var(--muted);}
 
-    /* Bottom bar (NO session bubble) */
-    .bottom-bar{
-      position: fixed;
-      left: 0; right: 0;
-      bottom: 0;
-      padding: 12px;
-      padding-bottom: calc(12px + var(--safe-bottom));
-      z-index: 80;
-      pointer-events:none;
-    }
-    .bottom-inner{
-      pointer-events:auto;
-      max-width: 980px;
-      margin: 0 auto;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.07));
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      padding: 10px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .bottom-left{
-      display:flex;align-items:center;gap:10px;min-width:0;
-      padding-left: 10px;
-    }
-    .bottom-sub{
-      font-size:.82rem;color:var(--muted);
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-      min-width:0;
-    }
-    .bottom-actions{display:flex;gap:10px;align-items:center;flex-shrink:0;}
-    .bottom-actions .btn{height: 44px;}
-
-    /* Course select hidden once session is live */
-    body.session-live #courseWrap{display:none;}
-
-    /* Log panel (hidden until button pressed) */
+    /* Log panel (hidden until menu pressed) */
     #logPanel{display:none;}
     #logPanel.open{display:block;}
 
@@ -521,6 +495,9 @@
       gap:10px;
     }
     .log-item .mut{color: var(--muted);font-size:.82rem;white-space:nowrap;}
+
+    /* Hide the "Course & hole" card once session starts (hole control moves to menu) */
+    body.session-live #courseHoleCard{display:none;}
   </style>
 </head>
 <body>
@@ -552,7 +529,24 @@
       <a class="menu-link" href="games.html"><span>Games</span><span class="hintline">Choose a game</span></a>
       <a class="menu-link" href="game_history.html"><span>Game History</span><span class="hintline">Past games</span></a>
 
-      <!-- End Session moved here; hidden unless session live -->
+      <!-- In-session controls -->
+      <button id="toggleLogMenuBtn" class="menu-action" type="button" style="display:none;">
+        <span>Log</span>
+        <span class="hintline">Show / hide</span>
+      </button>
+
+      <button id="toggleHoleMenuBtn" class="menu-action" type="button" style="display:none;">
+        <span>Hole</span>
+        <span class="hintline" id="holeMenuHint">Select</span>
+      </button>
+      <div id="holeMenuPanel" class="menu-subpanel" aria-label="Hole selection panel">
+        <div class="menu-subtitle">
+          <span>Hole selection</span>
+          <button id="closeHolePanelBtn" class="menu-close" type="button" aria-label="Close hole panel">✕</button>
+        </div>
+        <select id="menuHoleSelect"></select>
+      </div>
+
       <button id="endSessionMenuBtn" class="menu-action menu-danger" type="button" style="display:none;">
         <span>End session</span>
         <span class="hintline" style="color: rgba(254,226,226,.85);">Close this game</span>
@@ -582,7 +576,7 @@
       <div id="stickyList" class="sticky-list"></div>
     </section>
 
-    <!-- Course & hole (smaller) -->
+    <!-- Course & hole (ONLY pre-session; course hidden once session live) -->
     <section class="card compact" id="courseHoleCard">
       <div class="section-title">Course & hole</div>
 
@@ -595,10 +589,11 @@
         </div>
 
         <div style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
-          <span class="hint" style="font-size:.82rem;">Hole</span>
+          <span class="hint" style="font-size:.82rem;">Starting hole</span>
           <select id="holeSelect"></select>
         </div>
       </div>
+      <div class="hint" style="margin-top:8px;">Course is only chosen here before starting the session.</div>
     </section>
 
     <section id="startCard" class="card">
@@ -630,25 +625,13 @@
       </div>
     </section>
 
-    <!-- Log panel (hidden until user presses button) -->
+    <!-- Log panel (hidden until menu pressed) -->
     <section id="logPanel" class="card">
       <div class="section-title">Log</div>
       <div class="hint">Expand a hole to see records like “Hole 1 - Bingo - Jake Smith”.</div>
       <div id="logWrap" class="log-wrap"></div>
     </section>
   </main>
-
-  <!-- Bottom bar: ONLY Log button + small hint -->
-  <div id="bottomBar" class="bottom-bar" style="display:none;">
-    <div class="bottom-inner">
-      <div class="bottom-left">
-        <div class="bottom-sub" id="bottomSub">Tap + to score · Long-press to undo</div>
-      </div>
-      <div class="bottom-actions">
-        <button id="toggleLogBtn" class="btn btn-ghost" type="button">Log</button>
-      </div>
-    </div>
-  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -701,15 +684,18 @@
     const els = {
       courseSelect: document.getElementById("courseSelect"),
       holeSelect: document.getElementById("holeSelect"),
+
+      menuHoleSelect: document.getElementById("menuHoleSelect"),
+      holeMenuHint: document.getElementById("holeMenuHint"),
+      holeMenuPanel: document.getElementById("holeMenuPanel"),
+      toggleHoleMenuBtn: document.getElementById("toggleHoleMenuBtn"),
+      closeHolePanelBtn: document.getElementById("closeHolePanelBtn"),
+
       holeMetaPill: document.getElementById("holeMetaPill"),
       holeAwardPill: document.getElementById("holeAwardPill"),
 
       startCard: document.getElementById("startCard"),
       newSessionBtn: document.getElementById("newSessionBtn"),
-
-      bottomBar: document.getElementById("bottomBar"),
-      bottomSub: document.getElementById("bottomSub"),
-      toggleLogBtn: document.getElementById("toggleLogBtn"),
 
       pickList: document.getElementById("pickList"),
       scoreGrid: document.getElementById("scoreGrid"),
@@ -731,6 +717,7 @@
       menuOverlay: document.getElementById("menuOverlay"),
       menuCloseBtn: document.getElementById("menuCloseBtn"),
 
+      toggleLogMenuBtn: document.getElementById("toggleLogMenuBtn"),
       endSessionMenuBtn: document.getElementById("endSessionMenuBtn")
     };
 
@@ -775,6 +762,8 @@
       els.hamburgerMenu.style.display="none";
       els.menuOverlay.style.display="none";
       els.hamburgerBtn.setAttribute("aria-expanded","false");
+      // also collapse hole panel when menu closes
+      els.holeMenuPanel.classList.remove("open");
     }
     els.hamburgerBtn?.addEventListener("click",(e)=>{
       e.stopPropagation();
@@ -795,9 +784,9 @@
     function sessionRoot(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}`); }
     function sessionLogRef(id){ return ref(db, `games/bingoBangoBongo/sessions/${id}/log`); }
 
-    function buildHoleSelect(){
+    function buildHoleSelect(selectEl){
       const course = COURSES[currentCourseKey];
-      els.holeSelect.innerHTML = course.holes.map(h => `<option value="${h.n}">Hole ${h.n}</option>`).join("");
+      selectEl.innerHTML = course.holes.map(h => `<option value="${h.n}">Hole ${h.n}</option>`).join("");
     }
     function setHoleMeta(holeNum){
       const course = COURSES[currentCourseKey];
@@ -901,6 +890,8 @@
       const cnt = Number(lastSnapshot?.holeAwards?.[holeNum]?.count || 0);
       els.lbStripAwards.textContent = `${cnt}/3`;
 
+      els.holeMenuHint.textContent = `Current: Hole ${holeNum}`;
+
       if (!lbExpanded){
         els.stickyList.innerHTML = "";
         return;
@@ -953,7 +944,7 @@
       }).join("");
     }
 
-    // ===== Log (hidden until button pressed) =====
+    // ===== Log (hidden until menu pressed) =====
     let logOpen = false;
     let lastLogObj = null;
 
@@ -967,13 +958,13 @@
       if (logOpen){
         els.logPanel.classList.add("open");
         els.logPanel.style.display = "block";
-        els.toggleLogBtn.textContent = "Hide log";
+        els.toggleLogMenuBtn.querySelector(".hintline").textContent = "Hide";
         renderLog(lastLogObj || {});
         setTimeout(()=> els.logPanel.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
       }else{
         els.logPanel.classList.remove("open");
         els.logPanel.style.display = "none";
-        els.toggleLogBtn.textContent = "Log";
+        els.toggleLogMenuBtn.querySelector(".hintline").textContent = "Show";
         els.logWrap.innerHTML = "";
       }
     }
@@ -1050,7 +1041,9 @@
         });
 
         const courseKey = els.courseSelect.value || "southern_oaks";
+        const startHole = Number(els.holeSelect.value || 1);
 
+        // NOTE: Course is stored, but NOT displayed in-session (per your request)
         await set(newRef, {
           createdAt: Date.now(),
           createdAtServer: serverTimestamp(),
@@ -1058,7 +1051,7 @@
           game: "bingoBangoBongo",
           courseKey,
           courseName: COURSES[courseKey]?.name || "Course",
-          currentHole: 1,
+          currentHole: startHole,
           players: playersObj,
           scores: scoresObj
         });
@@ -1094,13 +1087,11 @@
       }
     }
 
-    async function setSessionCourseAndHole(courseKey, holeNum){
+    async function setSessionHole(holeNum){
       if (!sessionId) return;
       try{
         await ensureAnonAuth();
         await update(sessionRoot(sessionId), {
-          courseKey,
-          courseName: COURSES[courseKey]?.name || "Course",
           currentHole: holeNum
         });
       }catch(e){
@@ -1156,23 +1147,23 @@
       }
     }
 
-    function syncCourseHoleUIFromSession(){
+    function syncHoleUIFromSession(){
       if (!lastSnapshot) return;
 
-      const courseKey = lastSnapshot.courseKey || "southern_oaks";
-      currentCourseKey = courseKey;
-
-      if (els.courseSelect.value !== courseKey) els.courseSelect.value = courseKey;
-
-      buildHoleSelect();
-
       const holeNum = Number(lastSnapshot.currentHole || 1);
-      els.holeSelect.value = String((holeNum >= 1 && holeNum <= 18) ? holeNum : 1);
 
-      setHoleMeta(els.holeSelect.value);
-
+      // leaderboard pills
+      setHoleMeta(holeNum);
       const count = Number(lastSnapshot.holeAwards?.[holeNum]?.count || 0);
       setHoleAwardCount(count);
+
+      // menu hole select
+      if (els.menuHoleSelect.value !== String(holeNum)) els.menuHoleSelect.value = String(holeNum);
+      els.holeMenuHint.textContent = `Current: Hole ${holeNum}`;
+
+      // LB strip
+      els.lbStripHole.textContent = `H${holeNum}`;
+      els.lbStripAwards.textContent = `${count}/3`;
     }
 
     // Auto-hide leaderboard while scrolling down
@@ -1248,9 +1239,9 @@
         return;
       }
 
-      buildHoleSelect();
-      setHoleMeta(1);
-      setHoleAwardCount(0);
+      // pre-session (course + starting hole)
+      buildHoleSelect(els.holeSelect);
+      els.holeSelect.value = "1";
 
       onValue(ref(db, "players"), (snap)=>{
         players = snap.val() || {};
@@ -1263,19 +1254,23 @@
 
       if (!sessionId){
         els.startCard.style.display = "block";
-        els.bottomBar.style.display = "none";
         els.stickyLb.classList.add("sticky-hidden");
+        els.toggleLogMenuBtn.style.display = "none";
+        els.toggleHoleMenuBtn.style.display = "none";
         els.endSessionMenuBtn.style.display = "none";
         setLogOpen(false);
         return;
       }
 
-      // session live UI
+      // in-session UI
       document.body.classList.add("session-live");
       els.startCard.style.display = "none";
-      els.bottomBar.style.display = "block";
+      els.toggleLogMenuBtn.style.display = "flex";
+      els.toggleHoleMenuBtn.style.display = "flex";
       els.endSessionMenuBtn.style.display = "flex";
-      setLogOpen(false);
+
+      // menu hole select (always 1-18)
+      buildHoleSelect(els.menuHoleSelect);
 
       onValue(sessionRoot(sessionId), (snap)=>{
         const data = snap.val();
@@ -1283,14 +1278,21 @@
           setError("Session not found. Start a new one.");
           els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
           els.stickyLb.classList.add("sticky-hidden");
-          els.bottomBar.style.display = "none";
+          els.toggleLogMenuBtn.style.display = "none";
+          els.toggleHoleMenuBtn.style.display = "none";
           els.endSessionMenuBtn.style.display = "none";
           setLogOpen(false);
           return;
         }
         lastSnapshot = data;
 
-        syncCourseHoleUIFromSession();
+        // force course key for hole meta; but do NOT show course in-session
+        currentCourseKey = data.courseKey || currentCourseKey || "southern_oaks";
+
+        // Ensure menu hole select has correct options if course changes
+        buildHoleSelect(els.menuHoleSelect);
+
+        syncHoleUIFromSession();
         renderStickyLeaderboard(data.players || {}, data.scores || {});
         renderScoreboard(data.players || {}, data.scores || {});
       }, (err)=>{
@@ -1314,11 +1316,39 @@
       cb.checked ? selected.add(pid) : selected.delete(pid);
     });
 
+    // Pre-session course changes update hole list (still only Southern Oaks right now)
+    els.courseSelect.addEventListener("change", ()=>{
+      currentCourseKey = els.courseSelect.value || "southern_oaks";
+      buildHoleSelect(els.holeSelect);
+      els.holeSelect.value = "1";
+    });
+
     els.newSessionBtn.addEventListener("click", startNewSession);
 
-    // Log button
-    els.toggleLogBtn.addEventListener("click", ()=>{
+    // Log from menu
+    els.toggleLogMenuBtn.addEventListener("click", ()=>{
       setLogOpen(!logOpen);
+      // keep menu open; just update panel below page
+    });
+
+    // Hole panel toggle
+    els.toggleHoleMenuBtn.addEventListener("click", ()=>{
+      const open = els.holeMenuPanel.classList.toggle("open");
+      if (open){
+        // sync selection when opening
+        const holeNum = Number(lastSnapshot?.currentHole || 1);
+        els.menuHoleSelect.value = String(holeNum);
+      }
+    });
+    els.closeHolePanelBtn.addEventListener("click", ()=>{
+      els.holeMenuPanel.classList.remove("open");
+    });
+
+    // Change hole from menu
+    els.menuHoleSelect.addEventListener("change", ()=>{
+      const holeNum = Number(els.menuHoleSelect.value || 1);
+      setSessionHole(holeNum);
+      els.holeMenuPanel.classList.remove("open");
     });
 
     // End session from menu
@@ -1353,30 +1383,6 @@
     els.scoreGrid.addEventListener("pointerup", cancelLongPress, { passive:true });
     els.scoreGrid.addEventListener("pointercancel", cancelLongPress, { passive:true });
     els.scoreGrid.addEventListener("pointerleave", cancelLongPress, { passive:true });
-
-    els.courseSelect.addEventListener("change", async ()=>{
-      currentCourseKey = els.courseSelect.value || "southern_oaks";
-      buildHoleSelect();
-      setHoleMeta(1);
-
-      if (sessionId && lastSnapshot) {
-        await setSessionCourseAndHole(currentCourseKey, 1);
-      } else {
-        els.holeSelect.value = "1";
-        setHoleAwardCount(0);
-      }
-    });
-
-    els.holeSelect.addEventListener("change", async ()=>{
-      const holeNum = Number(els.holeSelect.value || 1);
-      setHoleMeta(holeNum);
-
-      if (sessionId && lastSnapshot) {
-        await setSessionCourseAndHole(currentCourseKey, holeNum);
-      } else {
-        setHoleAwardCount(0);
-      }
-    });
 
     init();
   </script>
