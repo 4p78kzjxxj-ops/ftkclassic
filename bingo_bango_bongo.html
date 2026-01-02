@@ -45,16 +45,17 @@
       padding: 12px;
 
       /* keep fixed bottom bar from covering content */
-      padding-bottom: calc(120px + var(--safe-bottom));
+      padding-bottom: calc(140px + var(--safe-bottom));
 
       touch-action: manipulation;
     }
     body.session-live{
-      padding-bottom: calc(140px + var(--safe-bottom));
+      /* give more room so bottom bar never covers last player */
+      padding-bottom: calc(210px + var(--safe-bottom));
     }
     @media (min-width: 900px){
-      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(130px + var(--safe-bottom));}
-      body.session-live{padding-bottom: calc(150px + var(--safe-bottom));}
+      body{max-width:980px;margin:0 auto;padding:18px;padding-bottom: calc(150px + var(--safe-bottom));}
+      body.session-live{padding-bottom: calc(220px + var(--safe-bottom));}
     }
 
     a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -175,6 +176,11 @@
       -webkit-backdrop-filter: blur(12px);
       padding: 14px;
     }
+    /* smaller sections (Course & hole) */
+    .card.compact{
+      padding: 10px 12px;
+    }
+
     .section-title{
       font-size:.78rem;
       letter-spacing:.14em;
@@ -187,10 +193,14 @@
       gap: 10px;
       margin-bottom: 10px;
     }
+    .compact .section-title{margin-bottom: 8px;}
     .hint{font-size:.92rem;color:var(--muted);line-height:1.35rem;}
+    .compact .hint{font-size:.86rem;line-height:1.2rem;}
 
     .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px;}
+    .compact .controls{margin-top:8px;gap:8px;}
     label{display:flex;flex-direction:column;gap:6px;min-width: 210px;}
+    .compact label{min-width: 180px;}
     select, input{
       height: var(--tap);
       border-radius: 16px;
@@ -201,6 +211,7 @@
       font-size: 1rem;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
+    .compact select{height: 42px; border-radius: 14px; font-size: .98rem;}
     select option{background:#0b1220;color:var(--text);}
 
     .pill{
@@ -467,6 +478,59 @@
     .bottom-sub{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .bottom-actions{display:flex;gap:10px;align-items:center;}
     .bottom-actions .btn{height: 44px;}
+
+    /* Course select hidden once session is live */
+    body.session-live #courseWrap{display:none;}
+
+    /* Hole log */
+    .log-wrap{display:flex;flex-direction:column;gap:10px;margin-top: 8px;}
+    details.log-hole{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.22);
+      box-shadow: 0 8px 18px rgba(0,0,0,.16);
+      overflow:hidden;
+    }
+    details.log-hole > summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight: 950;
+    }
+    details.log-hole > summary::-webkit-details-marker{display:none;}
+    .log-pill{
+      font-size:.82rem;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    .log-items{
+      padding: 0 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .log-item{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 10px 10px;
+      font-size: .92rem;
+      color: var(--text);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .log-item .mut{color: var(--muted);font-size:.82rem;white-space:nowrap;}
   </style>
 </head>
 <body>
@@ -527,24 +591,22 @@
       <div id="stickyList" class="sticky-list"></div>
     </section>
 
-    <section class="card">
+    <!-- Course & hole (smaller) -->
+    <section class="card compact" id="courseHoleCard">
       <div class="section-title">Course & hole</div>
-      <div class="hint">
-        Tracks a <strong>current hole</strong>. Once <strong>3 total points</strong> are awarded on a hole, it advances to the next hole.
-      </div>
 
-      <div class="controls">
-        <label>
-          <span class="hint" style="font-size:.85rem;">Course</span>
+      <div class="controls" style="margin-top:0;">
+        <div id="courseWrap" style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
+          <span class="hint" style="font-size:.82rem;">Course</span>
           <select id="courseSelect">
             <option value="southern_oaks">Southern Oaks</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          <span class="hint" style="font-size:.85rem;">Current hole</span>
+        <div style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
+          <span class="hint" style="font-size:.82rem;">Hole</span>
           <select id="holeSelect"></select>
-        </label>
+        </div>
       </div>
     </section>
 
@@ -570,11 +632,18 @@
     <section class="card">
       <div class="section-title">Scoreboard</div>
       <div class="hint">
-        Tap <strong>+</strong> to add a point. <strong>Long-press</strong> the same button to subtract a point.
+        Tap <strong>+1</strong> to add a point. <strong>Long-press</strong> the same button to subtract a point.
       </div>
       <div id="scoreGrid" class="score-grid">
         <div class="hint">Start a session to begin scoring.</div>
       </div>
+    </section>
+
+    <!-- Hole log (collapsed by hole) -->
+    <section id="logCard" class="card" style="display:none;">
+      <div class="section-title">Log</div>
+      <div class="hint">Each hole is collapsed. Expand to see point awards.</div>
+      <div id="logWrap" class="log-wrap"></div>
     </section>
   </main>
 
@@ -668,6 +737,9 @@
       lbStripHole: document.getElementById("lbStripHole"),
       lbStripAwards: document.getElementById("lbStripAwards"),
 
+      logCard: document.getElementById("logCard"),
+      logWrap: document.getElementById("logWrap"),
+
       hamburgerBtn: document.getElementById("hamburgerBtn"),
       hamburgerMenu: document.getElementById("hamburgerMenu"),
       menuOverlay: document.getElementById("menuOverlay"),
@@ -689,6 +761,20 @@
       const o = {};
       for (const [k,v] of p.entries()) o[k]=v;
       return o;
+    }
+    function bucketLabel(b){
+      if (b === "bingo") return "Bingo";
+      if (b === "bango") return "Bango";
+      if (b === "bongo") return "Bongo";
+      return b || "—";
+    }
+    function fmtTime(ts){
+      const n = Number(ts || 0);
+      if (!n) return "";
+      try{
+        const d = new Date(n);
+        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      }catch(_){ return ""; }
     }
 
     // Menu sheet
@@ -791,9 +877,7 @@
       return `
         <div class="bbb-box">
           <div class="bbb-title">${safeText(title)}</div>
-          <div class="bbb-score">
-            <span>${val}</span>
-          </div>
+          <div class="bbb-score"><span>${val}</span></div>
           <button class="plusBtn"
             data-action="inc"
             data-bucket="${safeText(bucket)}"
@@ -842,7 +926,6 @@
 
       els.stickyLb.classList.remove("sticky-hidden");
 
-      // strip values
       const leader = rows[0];
       els.lbStripLeader.textContent = leader ? `Leader: ${leader.name} ${leader.total}` : "Leader: —";
 
@@ -852,7 +935,6 @@
       const cnt = Number(lastSnapshot?.holeAwards?.[holeNum]?.count || 0);
       els.lbStripAwards.textContent = `${cnt}/3`;
 
-      // expanded list only when expanded
       if (!lbExpanded){
         els.stickyList.innerHTML = "";
         return;
@@ -903,6 +985,66 @@
           </div>
         `;
       }).join("");
+    }
+
+    function renderLog(logObj){
+      // Show only if session is live
+      if (!sessionId){
+        els.logCard.style.display = "none";
+        els.logWrap.innerHTML = "";
+        return;
+      }
+      els.logCard.style.display = "block";
+
+      const entries = Object.entries(logObj || {}).map(([id, v])=> ({
+        id,
+        hole: Number(v?.hole || 0),
+        bucket: String(v?.bucket || ""),
+        delta: Number(v?.delta || 0),
+        pid: String(v?.pid || ""),
+        playerName: String(v?.playerName || ""),
+        createdAt: Number(v?.createdAt || 0)
+      })).filter(x => x.hole >= 1 && x.hole <= 18);
+
+      if (!entries.length){
+        els.logWrap.innerHTML = `<div class="hint">No log entries yet.</div>`;
+        return;
+      }
+
+      // group by hole
+      const byHole = new Map();
+      for (const e of entries){
+        if (!byHole.has(e.hole)) byHole.set(e.hole, []);
+        byHole.get(e.hole).push(e);
+      }
+
+      const holes = Array.from(byHole.keys()).sort((a,b)=>a-b);
+      const html = holes.map(hole=>{
+        const list = byHole.get(hole) || [];
+        list.sort((a,b)=> (a.createdAt - b.createdAt) || a.id.localeCompare(b.id));
+
+        const count = list.length;
+        const items = list.map(e=>{
+          const label = `${bucketLabel(e.bucket)} - ${e.playerName || "Player"}`;
+          // Example requested: "Hole 1 - Bingo - Jake Smith"
+          const main = `Hole ${hole} - ${label}`;
+          const t = fmtTime(e.createdAt);
+          const mut = t ? t : "";
+          return `<div class="log-item"><span>${safeText(main)}</span><span class="mut">${safeText(mut)}</span></div>`;
+        }).join("");
+
+        return `
+          <details class="log-hole">
+            <summary>
+              <span>Hole ${hole}</span>
+              <span class="log-pill">${count} record${count===1?"":"s"}</span>
+            </summary>
+            <div class="log-items">${items}</div>
+          </details>
+        `;
+      }).join("");
+
+      els.logWrap.innerHTML = html;
     }
 
     async function startNewSession(){
@@ -1084,9 +1226,7 @@
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     function wireLbStrip(){
-      function toggle(){
-        setLbExpanded(!lbExpanded);
-      }
+      function toggle(){ setLbExpanded(!lbExpanded); }
       els.lbStrip.addEventListener("click", toggle);
       els.lbStrip.addEventListener("keydown", (e)=>{
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
@@ -1094,7 +1234,6 @@
     }
 
     // ===== MODE C long-press handling =====
-    // Tap +1, Long-press -> -1 (single decrement)
     const LONG_PRESS_MS = 520;
     let lpTimer = null;
     let lpTriggered = false;
@@ -1102,7 +1241,6 @@
     function clearLongPress(){
       if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
     }
-
     function armLongPress(btn){
       clearLongPress();
       lpTriggered = false;
@@ -1114,14 +1252,10 @@
       lpTimer = setTimeout(()=>{
         lpTriggered = true;
         applyDelta(pid, bucket, -1);
-        // keep LB visible when interacting
         setLbAutoHidden(false);
       }, LONG_PRESS_MS);
     }
-
-    function cancelLongPress(){
-      clearLongPress();
-    }
+    function cancelLongPress(){ clearLongPress(); }
 
     async function init(){
       wireLbStrip();
@@ -1162,6 +1296,7 @@
         els.startCard.style.display = "block";
         els.bottomBar.style.display = "none";
         els.stickyLb.classList.add("sticky-hidden");
+        els.logCard.style.display = "none";
         return;
       }
 
@@ -1178,6 +1313,7 @@
           els.scoreGrid.innerHTML = `<div class="hint">No session loaded.</div>`;
           els.stickyLb.classList.add("sticky-hidden");
           els.bottomBar.style.display = "none";
+          els.logCard.style.display = "none";
           document.body.classList.remove("session-live");
           return;
         }
@@ -1189,6 +1325,12 @@
       }, (err)=>{
         console.error(err);
         setError("Read failed: " + (err?.code || err?.message || "unknown"));
+      });
+
+      // Log feed grouped by hole
+      onValue(sessionLogRef(sessionId), (snap)=>{
+        const log = snap.val() || {};
+        renderLog(log);
       });
     }
 
@@ -1209,7 +1351,6 @@
       const btn = e.target.closest("button.plusBtn[data-action='inc']");
       if (!btn) return;
 
-      // if long-press already triggered, ignore the click that follows
       if (lpTriggered) { lpTriggered = false; return; }
 
       const pid = btn.getAttribute("data-pid");
@@ -1220,11 +1361,10 @@
       applyDelta(pid, bucket, +1);
     });
 
-    // Long-press events (pointer-based for mobile + desktop)
+    // Long-press events
     document.getElementById("scoreGrid").addEventListener("pointerdown", (e)=>{
       const btn = e.target.closest("button.plusBtn[data-action='inc']");
       if (!btn) return;
-      // prevent context menu on long press
       btn.addEventListener("contextmenu", (ev)=> ev.preventDefault(), { once:true });
       armLongPress(btn);
     }, { passive:true });
