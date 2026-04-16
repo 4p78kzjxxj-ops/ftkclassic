@@ -482,6 +482,11 @@
       push,
       set,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5fk91DPgPBkJ3_xGnNntD3PQbi5Ib3kg",
@@ -495,6 +500,11 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    signInAnonymously(auth).catch((err) => {
+      console.error("Spectator auth failed:", err);
+    });
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
@@ -537,9 +547,15 @@
       );
     }
 
-    setupPresence(db, "spectator", (count) => {
-      viewerCountEl.textContent =
-        count === 1 ? "Viewing now: 1 person" : `Viewing now: ${count} people`;
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        viewerCountEl.textContent = "Viewing now: 0 people";
+        return;
+      }
+      setupPresence(db, "spectator", (count) => {
+        viewerCountEl.textContent =
+          count === 1 ? "Viewing now: 1 person" : `Viewing now: ${count} people`;
+      });
     });
 
     function getTeamNames() {
@@ -665,7 +681,7 @@
       for (const id of ids) {
         const m = matches[id];
         if (!m) continue;
-        const type = Number(id) <= 6 ? "front" : "back";
+        const type = m.type || (Number(id) <= 6 ? "front" : "back");
         const holes = m.holes || [];
         const state = computeMatchState(holes, type);
         const { diff, done } = state;
@@ -727,7 +743,7 @@
       for (const id of ids) {
         const m = matches[id];
         if (!m) continue;
-        const type = Number(id) <= 6 ? "front" : "back";
+        const type = m.type || (Number(id) <= 6 ? "front" : "back");
         const typeLabel = type === "front" ? "Front 9" : "Back 9";
         const holes = m.holes || [];
 
