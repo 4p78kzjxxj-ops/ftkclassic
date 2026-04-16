@@ -711,7 +711,7 @@
     }
 
     function computeTournamentProjection() {
-      const ids = Object.keys(matches || {});
+      const ids = Object.keys(matches || {}).filter((id) => Number(id) >= 1 && Number(id) <= 12);
       if (!ids.length) return { red: 0, blue: 0 };
 
       let red = 0;
@@ -720,7 +720,7 @@
       for (const id of ids) {
         const m = matches[id];
         if (!m) continue;
-        const type = m.type || (Number(id) <= 8 ? "front" : "back");
+        const type = m.type || (Number(id) <= 6 ? "front" : "back");
         const holes = m.holes || [];
         const state = computeMatchState(holes, type);
         const { diff, done } = state;
@@ -803,7 +803,9 @@
     }
 
     function renderMatches() {
-      const ids = Object.keys(matches || {}).sort((a, b) => Number(a) - Number(b));
+      const ids = Object.keys(matches || {})
+        .filter((id) => Number(id) >= 1 && Number(id) <= 12)
+        .sort((a, b) => Number(a) - Number(b));
       if (!ids.length) {
         matchesContainer.innerHTML = '<div class="empty-state">No matches configured yet.</div>';
         return;
@@ -814,7 +816,7 @@
       for (const id of ids) {
         const m = matches[id];
         if (!m) continue;
-        const type = m.type || (Number(id) <= 8 ? "front" : "back");
+        const type = m.type || (Number(id) <= 6 ? "front" : "back");
         const typeLabel = type === "front" ? "Front 9" : "Back 9";
         const holes = m.holes || [];
 

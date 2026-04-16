@@ -604,12 +604,12 @@
 
     <!-- MATCHES -->
     <section class="card">
-      <div class="section-title">Matches – Front 9 (1–8)</div>
+      <div class="section-title">Matches – Front 9 (1–6)</div>
       <div id="frontMatchesContainer" class="matches-grid"></div>
     </section>
 
     <section class="card">
-      <div class="section-title">Matches – Back 9 (9–16)</div>
+      <div class="section-title">Matches – Back 9 (7–12)</div>
       <div id="backMatchesContainer" class="matches-grid"></div>
     </section>
 
@@ -620,7 +620,7 @@
         Reset ALL match scores (holes)
       </button>
       <div class="status-text">
-        This will set all 18 holes for all 16 matches back to "no result".
+        This will set all 18 holes for all 12 matches back to "no result".
       </div>
 
       <hr style="margin:0.75rem 0; border:none; border-top:1px dashed #e5e7eb;" />
@@ -945,7 +945,8 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
       Object.entries(matches || {}).forEach(([mid, m]) => {
         const idNum = Number(mid);
-        const type = m.type || (idNum <= 8 ? "front" : "back");
+        if (!Number.isFinite(idNum) || idNum < 1 || idNum > 12) return;
+        const type = idNum <= 6 ? "front" : "back";
         const all = [
           ...(m.red?.players || []),
           ...(m.blue?.players || []),
@@ -1126,13 +1127,13 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
       const renderGroup = (isFront) => {
         const container = isFront ? frontMatchesContainer : backMatchesContainer;
-        const startId = isFront ? 1 : 9;
-        const endId = isFront ? 8 : 16;
+        const startId = isFront ? 1 : 7;
+        const endId = isFront ? 6 : 12;
         const html = [];
 
         for (let id = startId; id <= endId; id++) {
           const m = matches[id] || {};
-          const type = m.type || (id <= 8 ? "front" : "back");
+          const type = id <= 6 ? "front" : "back";
           const redPlayers = m.red?.players || [];
           const bluePlayers = m.blue?.players || [];
 
@@ -1178,7 +1179,7 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
     async function updateMatchAssignment(matchId, side, slot, playerId) {
       const idNum = Number(matchId);
-      const type = idNum <= 8 ? "front" : "back";
+      const type = idNum <= 6 ? "front" : "back";
       const m = matches[matchId] || {};
       const redArr = Array.isArray(m.red?.players) ? [...m.red.players] : [];
       const blueArr = Array.isArray(m.blue?.players) ? [...m.blue.players] : [];
@@ -1234,9 +1235,12 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       adminToolsStatus.textContent = "Resetting scores…";
 
       const updatesObj = {};
-      for (let i = 1; i <= 16; i++) {
+      for (let i = 1; i <= 12; i++) {
         const holes = new Array(18).fill("none");
         updatesObj[`matches/${i}/holes`] = holes;
+      }
+      for (let i = 13; i <= 16; i++) {
+        updatesObj[`matches/${i}`] = null;
       }
 
       await update(ref(db), updatesObj);
@@ -1248,7 +1252,7 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
     // Reset scores (page button)
     resetScoresBtn.addEventListener("click", async () => {
       const confirmed = confirm(
-        "Reset ALL scores for ALL matches? This sets all 18 holes to 'no result' for matches 1–16."
+        "Reset ALL scores for ALL matches? This sets all 18 holes to 'no result' for matches 1–12."
       );
       if (!confirmed) return;
 
@@ -1380,7 +1384,7 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
     menuResetScoresBtn.addEventListener("click", () => {
       closeMenu();
-      const confirmed = confirm("Reset ALL match scoring for matches 1–16?");
+      const confirmed = confirm("Reset ALL match scoring for matches 1–12?");
       if (!confirmed) return;
 
       window.requireAdminCode?.(async () => {

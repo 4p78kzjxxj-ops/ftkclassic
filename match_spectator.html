@@ -784,7 +784,7 @@
         return;
       }
 
-      const type = match.type || (Number(matchId) > 8 ? "back" : "front");
+      const type = match.type || (Number(matchId) > 6 ? "back" : "front");
       const arr = Array.isArray(match.holes) ? match.holes : [];
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
@@ -796,32 +796,12 @@
         return;
       }
 
-      const holeConfigs = [
-        { num: 1,  par: 5, yards: 474 },
-        { num: 2,  par: 4, yards: 340 },
-        { num: 3,  par: 4, yards: 360 },
-        { num: 4,  par: 3, yards: 180 },
-        { num: 5,  par: 5, yards: 455 },
-        { num: 6,  par: 4, yards: 390 },
-        { num: 7,  par: 3, yards: 145 },
-        { num: 8,  par: 4, yards: 400 },
-        { num: 9,  par: 4, yards: 270 },
-        { num: 10, par: 3, yards: 155 },
-        { num: 11, par: 4, yards: 335 },
-        { num: 12, par: 3, yards: 160 },
-        { num: 13, par: 4, yards: 385 },
-        { num: 14, par: 3, yards: 170 },
-        { num: 15, par: 5, yards: 500 },
-        { num: 16, par: 4, yards: 435 },
-        { num: 17, par: 4, yards: 355 },
-        { num: 18, par: 5, yards: 490 },
-      ];
 
       const sideLabels = computeSideLabels(match);
 
       let html = "";
       for (let i = start; i < end; i++) {
-        const cfg = holeConfigs[i] || { num: i + 1, par: "–", yards: "–" };
+        const holeNum = i + 1;
         const res = arr[i];
         let statusText = "Not played yet";
 
@@ -832,8 +812,7 @@
         html += `
           <div class="hole-card">
             <div class="hole-header-row">
-              <div class="hole-title">Hole ${cfg.num}</div>
-              <div class="hole-meta">Par ${cfg.par} · ${cfg.yards} yds</div>
+              <div class="hole-title">Hole ${holeNum}</div>
             </div>
             <div class="hole-status">${statusText}</div>
           </div>
@@ -861,7 +840,7 @@
         return;
       }
 
-      const type = match.type || (Number(matchId) > 8 ? "back" : "front");
+      const type = match.type || (Number(matchId) > 6 ? "back" : "front");
       const holes = match.holes || [];
       const sideLabels = computeSideLabels(match);
       const state = computeMatchState(holes, type);
