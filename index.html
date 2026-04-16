@@ -57,7 +57,8 @@
       text-decoration: underline;
     }
 
-    button {
+    button,
+    input {
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -144,6 +145,8 @@
       border: none;
       font-size: 0.95rem;
       font-weight: 600;
+      min-height: var(--tap-target);
+      cursor: pointer;
     }
 
     .hero-btn {
@@ -162,6 +165,7 @@
       justify-content: center;
       gap: 1rem;
       font-size: 0.9rem;
+      flex-wrap: wrap;
     }
 
     .hero-links-row a {
@@ -171,13 +175,120 @@
       border: none;
       color: var(--accent-strong);
     }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,24,39,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(100%, 360px);
+      background: #fff;
+      border-radius: 1.1rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .pin-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.55rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .pin-bubble {
+      height: 58px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .pin-bubble.filled {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+
+    .modal-helper {
+      min-height: 1.15rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .modal-helper.error {
+      color: var(--danger);
+    }
+
+    .hidden-pin-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      min-height: var(--tap-target);
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 0.65rem 1rem;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .modal-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
   </style>
 </head>
 <body>
-  
   <header class="site-header">
     <div class="site-header-left">
-      <img src="IMG_7296.jpg" class="site-logo" />
+      <img src="IMG_7296.jpg" class="site-logo" alt="FTK Classic logo" />
       <div class="site-title-block">
         <div class="site-title">FTK Classic</div>
         <div class="site-subtitle">Powdersville, SC</div>
@@ -187,20 +298,51 @@
 
   <main>
     <section class="hero-card">
-      <img src="IMG_7296.jpg" class="hero-logo" />
+      <img src="IMG_7296.jpg" class="hero-logo" alt="FTK Classic" />
       <div class="hero-title">Welcome to the FTK Classic</div>
 
       <button id="playerBtn" class="hero-btn" type="button">I'm a player</button>
       <button id="spectatorBtn" class="hero-btn-secondary" type="button">I'm a spectator</button>
       <button id="interestBtn" class="hero-btn-secondary" type="button">I'm interested in playing</button>
 
-      <!-- Bottom links now styled as hyperlinks -->
       <div class="hero-links-row">
         <a href="past_winners.html">Past winners</a>
         <a href="#" id="adminLinkFooter">Admin</a>
       </div>
     </section>
   </main>
+
+  <div id="playerCodeModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="playerCodeTitle">
+      <div id="playerCodeTitle" class="modal-title">Enter your player code</div>
+      <div class="modal-subtitle">Use your 4-digit code to open your player page.</div>
+
+      <div class="pin-row" id="pinRow" aria-hidden="true">
+        <div class="pin-bubble" data-index="0"></div>
+        <div class="pin-bubble" data-index="1"></div>
+        <div class="pin-bubble" data-index="2"></div>
+        <div class="pin-bubble" data-index="3"></div>
+      </div>
+
+      <input
+        id="playerCodeInput"
+        class="hidden-pin-input"
+        type="text"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        maxlength="4"
+        autocomplete="one-time-code"
+        aria-label="Player code"
+      />
+
+      <div id="playerCodeMessage" class="modal-helper">Number pad opens automatically on mobile.</div>
+
+      <div class="modal-actions">
+        <button id="cancelPlayerCodeBtn" class="modal-btn" type="button">Cancel</button>
+        <button id="clearPlayerCodeBtn" class="modal-btn" type="button">Clear</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const PLAYER_CODES = {
@@ -225,52 +367,147 @@
       "0508": "Thomas Mull",
       "5752": "Keith Dowling",
       "7954": "Daren Vaughn",
-      "6797": "Jason Williamson",
+      "1111": "Jason Williamson",
       "2222": "Michael Ogden",
-      "3824": "Erik Poole",
-
+      "3824": "Erik Poole"
     };
 
-    document.getElementById('spectatorBtn').addEventListener('click', function() {
+    const spectatorBtn = document.getElementById('spectatorBtn');
+    const interestBtn = document.getElementById('interestBtn');
+    const playerBtn = document.getElementById('playerBtn');
+    const adminLinkFooter = document.getElementById('adminLinkFooter');
+
+    const modal = document.getElementById('playerCodeModal');
+    const codeInput = document.getElementById('playerCodeInput');
+    const codeMessage = document.getElementById('playerCodeMessage');
+    const pinBubbles = Array.from(document.querySelectorAll('.pin-bubble'));
+    const cancelPlayerCodeBtn = document.getElementById('cancelPlayerCodeBtn');
+    const clearPlayerCodeBtn = document.getElementById('clearPlayerCodeBtn');
+
+    let autoSubmitTimer = null;
+
+    spectatorBtn.addEventListener('click', function() {
       window.location.href = 'spectator.html';
     });
 
-    document.getElementById('interestBtn').addEventListener('click', function() {
-      window.location.href =
-        'https://docs.google.com/forms/d/e/1FAIpQLSeLqfM3XcGEqDBMi6NQ5P8RlbAnYrKS3UnD1f9EdiMmFMbbaQ/viewform';
+    interestBtn.addEventListener('click', function() {
+      window.location.href = 'https://docs.google.com/forms/d/e/1FAIpQLSeLqfM3XcGEqDBMi6NQ5P8RlbAnYrKS3UnD1f9EdiMmFMbbaQ/viewform';
     });
 
-    document.getElementById('playerBtn').addEventListener('click', function() {
-      const code = prompt("Enter your player code:");
-      if (!code) return;
+    playerBtn.addEventListener('click', function() {
+      openPlayerCodeModal();
+    });
 
-      const trimmed = code.trim();
+    adminLinkFooter.addEventListener('click', function(e) {
+      e.preventDefault();
+      goToAdmin();
+    });
 
-      if (!PLAYER_CODES[trimmed]) {
-        alert("Invalid player code.");
+    cancelPlayerCodeBtn.addEventListener('click', closePlayerCodeModal);
+
+    clearPlayerCodeBtn.addEventListener('click', function() {
+      codeInput.value = '';
+      renderPinBubbles('');
+      setCodeMessage('Number pad opens automatically on mobile.', false);
+      focusCodeInput();
+    });
+
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closePlayerCodeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (!modal.classList.contains('open')) return;
+      if (e.key === 'Escape') closePlayerCodeModal();
+    });
+
+    codeInput.addEventListener('input', function() {
+      const digitsOnly = codeInput.value.replace(/\D/g, '').slice(0, 4);
+      if (codeInput.value !== digitsOnly) {
+        codeInput.value = digitsOnly;
+      }
+
+      renderPinBubbles(digitsOnly);
+
+      if (digitsOnly.length < 4) {
+        if (autoSubmitTimer) {
+          clearTimeout(autoSubmitTimer);
+          autoSubmitTimer = null;
+        }
+        setCodeMessage('Number pad opens automatically on mobile.', false);
+        return;
+      }
+
+      setCodeMessage('Opening player page…', false);
+      if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
+      autoSubmitTimer = setTimeout(function() {
+        submitPlayerCode(digitsOnly);
+      }, 180);
+    });
+
+    function openPlayerCodeModal() {
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      codeInput.value = '';
+      renderPinBubbles('');
+      setCodeMessage('Number pad opens automatically on mobile.', false);
+      focusCodeInput();
+    }
+
+    function closePlayerCodeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      codeInput.blur();
+      if (autoSubmitTimer) {
+        clearTimeout(autoSubmitTimer);
+        autoSubmitTimer = null;
+      }
+    }
+
+    function focusCodeInput() {
+      setTimeout(function() {
+        codeInput.focus({ preventScroll: true });
+      }, 50);
+    }
+
+    function renderPinBubbles(code) {
+      pinBubbles.forEach(function(bubble, index) {
+        const digit = code[index] || '';
+        bubble.textContent = digit ? '•' : '';
+        bubble.classList.toggle('filled', Boolean(digit));
+      });
+    }
+
+    function setCodeMessage(message, isError) {
+      codeMessage.textContent = message;
+      codeMessage.classList.toggle('error', Boolean(isError));
+    }
+
+    function submitPlayerCode(code) {
+      if (!PLAYER_CODES[code]) {
+        setCodeMessage('Invalid player code.', true);
+        codeInput.value = '';
+        renderPinBubbles('');
+        focusCodeInput();
         return;
       }
 
       try {
-        localStorage.setItem('playerCode', trimmed);
-        localStorage.setItem('playerName', PLAYER_CODES[trimmed]);
+        localStorage.setItem('playerCode', code);
+        localStorage.setItem('playerName', PLAYER_CODES[code]);
       } catch (e) {
         // ignore storage errors
       }
 
-      window.location.href = 'player.html?code=' + encodeURIComponent(trimmed);
-    });
-
-    function goToAdmin() {
-      const pass = prompt("Admin password:");
-      if (pass === "3618") window.location.href = "admin.html";
+      window.location.href = 'player.html?code=' + encodeURIComponent(code);
     }
 
-    document.getElementById('adminLinkFooter').addEventListener('click', function(e) {
-      e.preventDefault();
-      goToAdmin();
-    });
+    function goToAdmin() {
+      const pass = prompt('Admin password:');
+      if (pass === '3618') window.location.href = 'admin.html';
+    }
   </script>
-
 </body>
 </html>
