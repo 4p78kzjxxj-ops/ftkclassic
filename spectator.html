@@ -379,61 +379,6 @@
     .match-score-pill.blue { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
     .match-score-pill.even { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
 
-    /* Player-specific mulligan usage */
-
-    .m-players-block {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-top: 0.18rem;
-      margin-bottom: 0.25rem;
-      font-size: 0.65rem;
-    }
-
-    .m-players-side {
-      display: flex;
-      flex-direction: column;
-      gap: 0.12rem;
-    }
-
-    .m-players-side-right {
-      align-items: flex-end;
-    }
-
-    .m-player {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.12rem;
-    }
-
-    .m-player-name {
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .m-pill {
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      padding: 0.05rem 0.32rem;
-      font-size: 0.63rem;
-      line-height: 1.2;
-      white-space: nowrap;
-    }
-
-    .m-pill.available {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
-      font-weight: 600;
-    }
-
-    .m-pill.used {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #7f1d1d;
-      font-weight: 600;
-    }
-
     .dots-row {
       display: flex;
       gap: 0.25rem;
@@ -768,40 +713,6 @@
       }
     }
 
-    function buildPlayersMulliganHTML(m) {
-      const redIds = m.red?.players || [];
-      const blueIds = m.blue?.players || [];
-
-      if (!redIds.length && !blueIds.length) return "";
-
-      const renderPlayer = (pid) => {
-        const p = players[pid];
-        if (!p) return "";
-        const ln = getLastName(p.name || "Player");
-        const mUsed = !!p.mulliganUsed;
-        const rmUsed = !!p.reverseMulliganUsed;
-
-        return `
-          <span class="m-player">
-            <span class="m-player-name">${ln}</span>
-            <span class="m-pill ${mUsed ? "used" : "available"}">M</span>
-            <span class="m-pill ${rmUsed ? "used" : "available"}">RM</span>
-          </span>
-        `;
-      };
-
-      return `
-        <div class="m-players-block">
-          <div class="m-players-side">
-            ${redIds.map(renderPlayer).join("")}
-          </div>
-          <div class="m-players-side m-players-side-right">
-            ${blueIds.map(renderPlayer).join("")}
-          </div>
-        </div>
-      `;
-    }
-
     function renderMatches() {
       const ids = Object.keys(matches || {})
         .filter((id) => Number(id) >= 1 && Number(id) <= 12)
@@ -868,7 +779,6 @@
         }
 
         const dotsHTML = buildDotsHTML(holes, type);
-        const playersMulliganHTML = buildPlayersMulliganHTML(m);
 
         html += `
           <a class="${cardClass}" href="match_spectator.html?id=${id}">
@@ -881,7 +791,6 @@
               </span>
             </div>
             <div class="${scoreClass}" style="margin-bottom:0.1rem;">${scoreText}</div>
-            ${playersMulliganHTML}
             <div class="dots-row">${dotsHTML}</div>
           </a>
         `;
