@@ -1342,7 +1342,7 @@
       if (meta) meta.textContent = `Hole ${currentIndex - start + 1} of 9`;
     }
 
-    function showToast({ title, body, primaryText, secondaryText, onPrimary }) {
+    function showToast({ title, body, primaryText, secondaryText, onPrimary, onSecondary }) {
       toastContainer.innerHTML = `
         <div class="toast">
           <div class="toast-icon">⚠️</div>
@@ -1370,6 +1370,7 @@
       secondaryBtn.addEventListener("click", () => {
         toastContainer.classList.remove("active");
         toastContainer.innerHTML = "";
+        if (onSecondary) onSecondary();
       });
     }
 
@@ -1543,6 +1544,14 @@
             } catch (err) {
               console.error(err);
               alert("Could not finish the match. Please try again.");
+            }
+          },
+          onSecondary: async () => {
+            try {
+              await update(ref(db), updatesObj);
+            } catch (err) {
+              console.error(err);
+              alert("Could not save that hole result. Please try again.");
             }
           }
         });
