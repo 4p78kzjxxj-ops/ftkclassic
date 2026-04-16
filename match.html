@@ -786,10 +786,6 @@
               <span>📷</span>
               <span>Photo</span>
             </button>
-            <button id="resetFinalMatchButton" class="camera-btn" style="display:none;" type="button">
-              <span>↺</span>
-              <span>Reset match</span>
-            </button>
           </div>
         </div>
 
@@ -898,7 +894,6 @@
     const toastContainer = document.getElementById("toastContainer");
     const cameraButton = document.getElementById("cameraButton");
     const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
-    const resetFinalMatchButton = document.getElementById("resetFinalMatchButton");
     const groupPhotoArea = document.getElementById("groupPhotoArea");
     const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
     const matchTimerEl = document.getElementById("matchTimer");
@@ -1036,11 +1031,11 @@
       return { red: redPlayers, blue: bluePlayers };
     }
 
-    function getMatchProgress(matchObj, mid) {
-      const type = (Number(mid) > 6 ? "back" : "front");
+    function summarizeMatchForList(m, mid) {
+      const type = m?.type || (Number(mid) > 6 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
-      const holes = matchObj?.holes || Array(18).fill("none");
+      const holes = m?.holes || Array(18).fill("none");
 
       let redWins = 0, blueWins = 0, halves = 0;
       for (let i = start; i < end; i++) {
@@ -1054,50 +1049,24 @@
       const holesPlayed = redWins + blueWins + halves;
       const holesRemaining = total - holesPlayed;
       const diff = redWins - blueWins;
-      const clinched = Math.abs(diff) > holesRemaining;
 
-      return { type, start, end, holes, total, redWins, blueWins, halves, holesPlayed, holesRemaining, diff, clinched };
-    }
-
-    function buildFinalSummary(matchObj, mid) {
-      const progress = getMatchProgress(matchObj, mid);
-      if (progress.diff === 0) {
-        return { summary: "Halved", centerText: "Halved" };
-      }
-
-      const winner = progress.diff > 0 ? "Red" : "Blue";
-      const margin = Math.abs(progress.diff);
-      if (progress.holesRemaining > 0) {
-        const text = `${winner} wins ${margin}&${progress.holesRemaining}`;
-        return { summary: text, centerText: text };
-      }
-
-      const text = `${winner} wins ${margin} up`;
-      return { summary: text, centerText: text };
-    }
-
-    function summarizeMatchForList(m, mid) {
-      const progress = getMatchProgress(m, mid);
       let status = m?.status || "upcoming";
       let summary = "Ready to start";
 
-      if (progress.holesPlayed === 0) {
-        status = "upcoming";
-        summary = "Ready to start";
-      } else if (m?.status === "final") {
+      if (holesPlayed === 0) { status = "upcoming"; summary = "Ready to start"; }
+      else if (holesRemaining === 0) {
         status = "final";
-        summary = m?.finalSummary || buildFinalSummary(m, mid).summary;
-      } else if (progress.holesRemaining === 0) {
-        status = "final";
-        summary = buildFinalSummary(m, mid).summary;
+        if (diff === 0) summary = "Halved";
+        else if (diff > 0) summary = "Red wins " + Math.abs(diff) + " up";
+        else summary = "Blue wins " + Math.abs(diff) + " up";
       } else {
         status = "live";
-        if (progress.diff === 0) summary = "All square";
-        else if (progress.diff > 0) summary = "Red " + Math.abs(progress.diff) + " up";
-        else summary = "Blue " + Math.abs(progress.diff) + " up";
+        if (diff === 0) summary = "All square";
+        else if (diff > 0) summary = "Red " + Math.abs(diff) + " up";
+        else summary = "Blue " + Math.abs(diff) + " up";
       }
 
-      return { status, summary, type: progress.type };
+      return { status, summary, type };
     }
 
     function renderMatchList() {
@@ -1148,25 +1117,41 @@
         return { centerText: "Ready to start", statusTag: "Not started", totalHoles: 9, holesPlayed: 0, holesRemaining: 9 };
       }
 
-      const progress = getMatchProgress(matchData, matchId);
+      const type = matchData.type || (Number(matchId) > 6 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      const holes = matchData.holes || Array(18).fill("none");
+
+      let redWins = 0, blueWins = 0, halves = 0;
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      const total = end - start;
+      const holesPlayed = redWins + blueWins + halves;
+      const holesRemaining = total - holesPlayed;
+      const diff = redWins - blueWins;
+
       let centerText = "Ready to start";
-      if (progress.holesPlayed === 0) {
-        centerText = "Ready to start";
-      } else if (matchData.status === "final") {
-        centerText = matchData.finalSummary || buildFinalSummary(matchData, matchId).centerText;
-      } else if (progress.holesRemaining === 0) {
-        centerText = buildFinalSummary(matchData, matchId).centerText;
+      if (holesPlayed === 0) centerText = "Ready to start";
+      else if (holesRemaining === 0) {
+        if (diff === 0) centerText = "Halved";
+        else if (diff > 0) centerText = `Red wins ${Math.abs(diff)} up`;
+        else centerText = `Blue wins ${Math.abs(diff)} up`;
       } else {
-        if (progress.diff === 0) centerText = "All square";
-        else if (progress.diff > 0) centerText = `Red ${Math.abs(progress.diff)} up`;
-        else centerText = `Blue ${Math.abs(progress.diff)} up`;
+        if (diff === 0) centerText = "All square";
+        else if (diff > 0) centerText = `Red ${Math.abs(diff)} up`;
+        else centerText = `Blue ${Math.abs(diff)} up`;
       }
 
       let statusTag = "On course";
-      if (progress.holesPlayed === 0) statusTag = "Not started";
-      else if (matchData.status === "final" || progress.holesRemaining === 0) statusTag = "Final";
+      if (holesPlayed === 0) statusTag = "Not started";
+      else if (holesRemaining === 0) statusTag = "Final";
 
-      return { centerText, statusTag, totalHoles: progress.total, holesPlayed: progress.holesPlayed, holesRemaining: progress.holesRemaining };
+      return { centerText, statusTag, totalHoles: total, holesPlayed, holesRemaining };
     }
 
     function updateScoreUI() {
@@ -1184,9 +1169,6 @@
       const summary = computeScoreSummary();
       scoreCenterLabel.textContent = summary.centerText;
       matchTagEl.textContent = summary.statusTag;
-      if (resetFinalMatchButton) {
-        resetFinalMatchButton.style.display = matchData?.status === "final" ? "inline-flex" : "none";
-      }
 
       if (summary.centerText.includes("Red wins") || summary.centerText.startsWith("Red ")) {
         scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 65%, var(--blue-soft) 65%, var(--blue-soft) 100%)";
@@ -1342,7 +1324,7 @@
       if (meta) meta.textContent = `Hole ${currentIndex - start + 1} of 9`;
     }
 
-    function showToast({ title, body, primaryText, secondaryText, onPrimary, onSecondary }) {
+    function showToast({ title, body, primaryText, secondaryText, onPrimary }) {
       toastContainer.innerHTML = `
         <div class="toast">
           <div class="toast-icon">⚠️</div>
@@ -1370,7 +1352,6 @@
       secondaryBtn.addEventListener("click", () => {
         toastContainer.classList.remove("active");
         toastContainer.innerHTML = "";
-        if (onSecondary) onSecondary();
       });
     }
 
@@ -1479,41 +1460,27 @@
       }
     }
 
-    function redirectBackToPlayer() {
-      if (playerCode) {
-        window.location.href = `player.html?code=${encodeURIComponent(playerCode)}`;
-      } else {
-        window.location.href = "player.html";
-      }
-    }
-
-    async function resetFinalMatch() {
-      if (!matchId || !matchData || matchData.status !== "final") return;
-
-      showToast({
-        title: "Reset final match?",
-        body: "This reopens the match and clears the saved final result so scoring can continue.",
-        primaryText: "Reset Match",
-        secondaryText: "Cancel",
-        onPrimary: async () => {
-          try {
-            await update(ref(db), {
-              [`matches/${matchId}/status`]: "live",
-              [`matches/${matchId}/finalSummary`]: null,
-              [`matches/${matchId}/finishedAt`]: null
-            });
-          } catch (err) {
-            console.error(err);
-            alert("Could not reset the match. Please try again.");
-          }
-        }
-      });
-    }
-
     function handleHoleClick(holeIndex, result) {
       if (!matchId || holeIndex == null) return;
       if (matchData?.status === "final") {
-        alert("This match is already marked final. Use Reset match to reopen it.");
+        showToast({
+          title: "Reset final match?",
+          body: "This match is already final. Reset it to keep scoring.",
+          primaryText: "Reset Match",
+          secondaryText: "Cancel",
+          onPrimary: async () => {
+            try {
+              await update(ref(db), {
+                [`matches/${matchId}/status`]: "live",
+                [`matches/${matchId}/finalSummary`]: null,
+                [`matches/${matchId}/finishedAt`]: null
+              });
+            } catch (err) {
+              console.error(err);
+              alert("Could not reset the match. Please try again.");
+            }
+          }
+        });
         return;
       }
 
@@ -1525,6 +1492,9 @@
       const path = `matches/${matchId}/holes/${holeIndex}`;
       const updatesObj = {};
       updatesObj[path] = result;
+      updatesObj[`matches/${matchId}/status`] = "live";
+      updatesObj[`matches/${matchId}/finalSummary`] = null;
+      updatesObj[`matches/${matchId}/finishedAt`] = null;
 
       if (result !== "none" && progress.clinched && progress.holesPlayed > 0) {
         const finalSummary = buildFinalSummary(nextMatchData, matchId).summary;
@@ -1532,14 +1502,16 @@
           title: "Finish match?",
           body: `Confirm with the players: ${finalSummary}`,
           primaryText: "Finish & Return to Player",
-          secondaryText: "Keep Match Open",
+          secondaryText: "Cancel",
           onPrimary: async () => {
             try {
+              const finishedAt = Date.now();
               const finishUpdates = { ...updatesObj };
               finishUpdates[`matches/${matchId}/status`] = "final";
               finishUpdates[`matches/${matchId}/finalSummary`] = finalSummary;
-              finishUpdates[`matches/${matchId}/finishedAt`] = Date.now();
+              finishUpdates[`matches/${matchId}/finishedAt`] = finishedAt;
               await update(ref(db), finishUpdates);
+              matchData = { ...nextMatchData, status: "final", finalSummary, finishedAt };
               redirectBackToPlayer();
             } catch (err) {
               console.error(err);
@@ -1549,6 +1521,7 @@
           onSecondary: async () => {
             try {
               await update(ref(db), updatesObj);
+              matchData = { ...nextMatchData, status: "live", finalSummary: null, finishedAt: null };
             } catch (err) {
               console.error(err);
               alert("Could not save that hole result. Please try again.");
@@ -1556,7 +1529,14 @@
           }
         });
       } else {
-        update(ref(db), updatesObj).catch(console.error);
+        update(ref(db), updatesObj)
+          .then(() => {
+            matchData = { ...nextMatchData, status: "live", finalSummary: null, finishedAt: null };
+          })
+          .catch(err => {
+            console.error(err);
+            alert("Could not save that hole result. Please try again.");
+          });
       }
 
       // Only send to feed when a winner/half is recorded
@@ -1585,6 +1565,7 @@
       const newFeedRef = push(tournamentFeedRef);
       set(newFeedRef, entry).catch(console.error);
 
+      // ✅ NEW: congratulate winner + prompt for photo (only when red/blue wins)
       if (winnerText) {
         showToast({
           title: `🏆 ${winnerText} wins!`,
@@ -1642,7 +1623,6 @@
     groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
     cameraButton.addEventListener("click", handleCameraClick);
     clearMatchPhotoButton.addEventListener("click", handleClearMatchPhoto);
-    if (resetFinalMatchButton) resetFinalMatchButton.addEventListener("click", resetFinalMatch);
   </script>
 </body>
 </html>
