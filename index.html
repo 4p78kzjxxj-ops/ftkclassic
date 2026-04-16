@@ -253,10 +253,17 @@
 
     .hidden-pin-input {
       position: absolute;
-      opacity: 0;
-      pointer-events: none;
-      width: 1px;
-      height: 1px;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 56px;
+      opacity: 0.01;
+      border: 0;
+      background: transparent;
+      color: transparent;
+      caret-color: transparent;
+      z-index: 2;
     }
 
     .modal-actions {
@@ -317,12 +324,7 @@
       <div id="playerCodeTitle" class="modal-title">Enter your player code</div>
       <div class="modal-subtitle">Use your 4-digit code to open your player page.</div>
 
-      <div class="pin-row" id="pinRow" aria-hidden="true">
-        <div class="pin-bubble" data-index="0"></div>
-        <div class="pin-bubble" data-index="1"></div>
-        <div class="pin-bubble" data-index="2"></div>
-        <div class="pin-bubble" data-index="3"></div>
-      </div>
+      <div class="pin-row" id="pinRow" aria-hidden="true"></div>
 
       <input
         id="playerCodeInput"
@@ -330,10 +332,18 @@
         type="text"
         inputmode="numeric"
         pattern="[0-9]*"
+        enterkeyhint="done"
         maxlength="4"
         autocomplete="one-time-code"
         aria-label="Player code"
       />
+
+      <div class="pin-row" id="pinRowVisual" aria-hidden="true">
+        <div class="pin-bubble" data-index="0"></div>
+        <div class="pin-bubble" data-index="1"></div>
+        <div class="pin-bubble" data-index="2"></div>
+        <div class="pin-bubble" data-index="3"></div>
+      </div>
 
       <div id="playerCodeMessage" class="modal-helper">Number pad opens automatically on mobile.</div>
 
@@ -380,7 +390,7 @@
     const modal = document.getElementById('playerCodeModal');
     const codeInput = document.getElementById('playerCodeInput');
     const codeMessage = document.getElementById('playerCodeMessage');
-    const pinBubbles = Array.from(document.querySelectorAll('.pin-bubble'));
+    const pinBubbles = Array.from(document.querySelectorAll('#pinRowVisual .pin-bubble'));
     const cancelPlayerCodeBtn = document.getElementById('cancelPlayerCodeBtn');
     const clearPlayerCodeBtn = document.getElementById('clearPlayerCodeBtn');
 
@@ -405,11 +415,20 @@
 
     cancelPlayerCodeBtn.addEventListener('click', closePlayerCodeModal);
 
+
+    document.getElementById('pinRowVisual').addEventListener('click', function() {
+      focusCodeInput(true);
+    });
+
+    document.querySelector('.modal-card').addEventListener('click', function() {
+      focusCodeInput(true);
+    });
+
     clearPlayerCodeBtn.addEventListener('click', function() {
       codeInput.value = '';
       renderPinBubbles('');
       setCodeMessage('Number pad opens automatically on mobile.', false);
-      focusCodeInput();
+      focusCodeInput(true);
     });
 
     modal.addEventListener('click', function(e) {
@@ -453,7 +472,7 @@
       codeInput.value = '';
       renderPinBubbles('');
       setCodeMessage('Number pad opens automatically on mobile.', false);
-      focusCodeInput();
+      focusCodeInput(true);
     }
 
     function closePlayerCodeModal() {
@@ -466,10 +485,21 @@
       }
     }
 
-    function focusCodeInput() {
-      setTimeout(function() {
-        codeInput.focus({ preventScroll: true });
-      }, 50);
+    function focusCodeInput(immediate) {
+      const doFocus = function() {
+        try {
+          codeInput.removeAttribute('readonly');
+          codeInput.focus({ preventScroll: true });
+          codeInput.click();
+        } catch (e) {
+          codeInput.focus();
+        }
+      };
+      if (immediate) {
+        doFocus();
+      } else {
+        setTimeout(doFocus, 50);
+      }
     }
 
     function renderPinBubbles(code) {
@@ -490,7 +520,7 @@
         setCodeMessage('Invalid player code.', true);
         codeInput.value = '';
         renderPinBubbles('');
-        focusCodeInput();
+        focusCodeInput(true);
         return;
       }
 
