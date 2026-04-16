@@ -434,6 +434,31 @@
       return entries.join("||");
     }
 
+
+    window.handleBrokenPhotoCard = function(imgEl) {
+      const card = imgEl?.closest?.(".photo-card");
+      const group = imgEl?.closest?.(".group");
+      if (card) card.remove();
+      if (group && !group.querySelector(".photo-card")) group.remove();
+      if (photosRoot && !photosRoot.querySelector(".group")) {
+        photosRoot.className = "empty-state";
+        photosRoot.textContent = "No photos yet.";
+        subtitleEl.textContent = "Photos";
+      }
+    };
+
+    function pruneEmptyGroups() {
+      photosRoot.querySelectorAll(".group").forEach((group) => {
+        if (!group.querySelector(".photo-card")) group.remove();
+      });
+      if (!photosRoot.querySelector(".group")) {
+        photosRoot.className = "empty-state";
+        photosRoot.textContent = "No photos yet.";
+        subtitleEl.textContent = "Photos";
+        gallery = [];
+        indexById = {};
+      }
+    }
     function viewerOpenById(photoId) {
       const idx = indexById[photoId];
       if (idx == null) return;
@@ -512,7 +537,9 @@
     }, { passive: true });
 
     function render() {
-      const list = sortByNewest(toArray(photos));
+      const list = sortByNewest(
+        toArray(photos).filter((p) => p && p.url && String(p.url).trim() !== "")
+      );
 
       if (!list.length) {
         photosRoot.className = "empty-state";
@@ -582,7 +609,7 @@
                       role="button"
                       tabindex="0"
                       aria-label="Open photo">
-                      <img loading="lazy" src="${esc(p.url)}" alt="Photo" />
+                      <img loading="lazy" src="${esc(p.url)}" alt="Photo" onerror="window.handleBrokenPhotoCard(this)" />
                     </div>
 
                     <div class="meta">
@@ -600,7 +627,9 @@
       photosRoot.className = "";
       photosRoot.innerHTML = html.join("");
 
-      photosRoot.querySelectorAll(".thumb").forEach((el) => {
+pruneEmptyGroups();
+
+            photosRoot.querySelectorAll(".thumb").forEach((el) => {
         const id = el.getAttribute("data-id");
         const open = () => viewerOpenById(id);
         el.addEventListener("click", open);
