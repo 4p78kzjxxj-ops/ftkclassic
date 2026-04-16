@@ -1462,82 +1462,11 @@
 
     function handleHoleClick(holeIndex, result) {
       if (!matchId || holeIndex == null) return;
-      if (matchData?.status === "final") {
-        showToast({
-          title: "Reset final match?",
-          body: "This match is already final. Reset it to keep scoring.",
-          primaryText: "Reset Match",
-          secondaryText: "Cancel",
-          onPrimary: async () => {
-            try {
-              await update(ref(db), {
-                [`matches/${matchId}/status`]: "live",
-                [`matches/${matchId}/finalSummary`]: null,
-                [`matches/${matchId}/finishedAt`]: null
-              });
-            } catch (err) {
-              console.error(err);
-              alert("Could not reset the match. Please try again.");
-            }
-          }
-        });
-        return;
-      }
 
-      const holes = Array.isArray(matchData?.holes) ? [...matchData.holes] : Array(18).fill("none");
-      holes[holeIndex] = result;
-
-      const nextMatchData = { ...(matchData || {}), holes };
-      const progress = getMatchProgress(nextMatchData, matchId);
       const path = `matches/${matchId}/holes/${holeIndex}`;
       const updatesObj = {};
       updatesObj[path] = result;
-      updatesObj[`matches/${matchId}/status`] = "live";
-      updatesObj[`matches/${matchId}/finalSummary`] = null;
-      updatesObj[`matches/${matchId}/finishedAt`] = null;
-
-      if (result !== "none" && progress.clinched && progress.holesPlayed > 0) {
-        const finalSummary = buildFinalSummary(nextMatchData, matchId).summary;
-        showToast({
-          title: "Finish match?",
-          body: `Confirm with the players: ${finalSummary}`,
-          primaryText: "Finish & Return to Player",
-          secondaryText: "Cancel",
-          onPrimary: async () => {
-            try {
-              const finishedAt = Date.now();
-              const finishUpdates = { ...updatesObj };
-              finishUpdates[`matches/${matchId}/status`] = "final";
-              finishUpdates[`matches/${matchId}/finalSummary`] = finalSummary;
-              finishUpdates[`matches/${matchId}/finishedAt`] = finishedAt;
-              await update(ref(db), finishUpdates);
-              matchData = { ...nextMatchData, status: "final", finalSummary, finishedAt };
-              redirectBackToPlayer();
-            } catch (err) {
-              console.error(err);
-              alert("Could not finish the match. Please try again.");
-            }
-          },
-          onSecondary: async () => {
-            try {
-              await update(ref(db), updatesObj);
-              matchData = { ...nextMatchData, status: "live", finalSummary: null, finishedAt: null };
-            } catch (err) {
-              console.error(err);
-              alert("Could not save that hole result. Please try again.");
-            }
-          }
-        });
-      } else {
-        update(ref(db), updatesObj)
-          .then(() => {
-            matchData = { ...nextMatchData, status: "live", finalSummary: null, finishedAt: null };
-          })
-          .catch(err => {
-            console.error(err);
-            alert("Could not save that hole result. Please try again.");
-          });
-      }
+      update(ref(db), updatesObj).catch(console.error);
 
       // Only send to feed when a winner/half is recorded
       if (result === "none") return;
