@@ -1031,11 +1031,11 @@
       return { red: redPlayers, blue: bluePlayers };
     }
 
-    function summarizeMatchForList(m, mid) {
-      const type = m?.type || (Number(mid) > 6 ? "back" : "front");
+    function getMatchProgress(matchObj, mid) {
+      const type = (Number(mid) > 6 ? "back" : "front");
       const start = type === "back" ? 9 : 0;
       const end = start + 9;
-      const holes = m?.holes || Array(18).fill("none");
+      const holes = matchObj?.holes || Array(18).fill("none");
 
       let redWins = 0, blueWins = 0, halves = 0;
       for (let i = start; i < end; i++) {
@@ -1049,24 +1049,50 @@
       const holesPlayed = redWins + blueWins + halves;
       const holesRemaining = total - holesPlayed;
       const diff = redWins - blueWins;
+      const clinched = Math.abs(diff) > holesRemaining;
 
+      return { type, start, end, holes, total, redWins, blueWins, halves, holesPlayed, holesRemaining, diff, clinched };
+    }
+
+    function buildFinalSummary(matchObj, mid) {
+      const progress = getMatchProgress(matchObj, mid);
+      if (progress.diff === 0) {
+        return { summary: "Halved", centerText: "Halved" };
+      }
+
+      const winner = progress.diff > 0 ? "Red" : "Blue";
+      const margin = Math.abs(progress.diff);
+      if (progress.holesRemaining > 0) {
+        const text = `${winner} wins ${margin}&${progress.holesRemaining}`;
+        return { summary: text, centerText: text };
+      }
+
+      const text = `${winner} wins ${margin} up`;
+      return { summary: text, centerText: text };
+    }
+
+    function summarizeMatchForList(m, mid) {
+      const progress = getMatchProgress(m, mid);
       let status = m?.status || "upcoming";
       let summary = "Ready to start";
 
-      if (holesPlayed === 0) { status = "upcoming"; summary = "Ready to start"; }
-      else if (holesRemaining === 0) {
+      if (progress.holesPlayed === 0) {
+        status = "upcoming";
+        summary = "Ready to start";
+      } else if (m?.status === "final") {
         status = "final";
-        if (diff === 0) summary = "Halved";
-        else if (diff > 0) summary = "Red wins " + Math.abs(diff) + " up";
-        else summary = "Blue wins " + Math.abs(diff) + " up";
+        summary = m?.finalSummary || buildFinalSummary(m, mid).summary;
+      } else if (progress.holesRemaining === 0) {
+        status = "final";
+        summary = buildFinalSummary(m, mid).summary;
       } else {
         status = "live";
-        if (diff === 0) summary = "All square";
-        else if (diff > 0) summary = "Red " + Math.abs(diff) + " up";
-        else summary = "Blue " + Math.abs(diff) + " up";
+        if (progress.diff === 0) summary = "All square";
+        else if (progress.diff > 0) summary = "Red " + Math.abs(progress.diff) + " up";
+        else summary = "Blue " + Math.abs(progress.diff) + " up";
       }
 
-      return { status, summary, type };
+      return { status, summary, type: progress.type };
     }
 
     function renderMatchList() {
@@ -1117,41 +1143,25 @@
         return { centerText: "Ready to start", statusTag: "Not started", totalHoles: 9, holesPlayed: 0, holesRemaining: 9 };
       }
 
-      const type = matchData.type || (Number(matchId) > 6 ? "back" : "front");
-      const start = type === "back" ? 9 : 0;
-      const end = start + 9;
-      const holes = matchData.holes || Array(18).fill("none");
-
-      let redWins = 0, blueWins = 0, halves = 0;
-      for (let i = start; i < end; i++) {
-        const h = holes[i];
-        if (h === "red") redWins++;
-        else if (h === "blue") blueWins++;
-        else if (h === "half") halves++;
-      }
-
-      const total = end - start;
-      const holesPlayed = redWins + blueWins + halves;
-      const holesRemaining = total - holesPlayed;
-      const diff = redWins - blueWins;
-
+      const progress = getMatchProgress(matchData, matchId);
       let centerText = "Ready to start";
-      if (holesPlayed === 0) centerText = "Ready to start";
-      else if (holesRemaining === 0) {
-        if (diff === 0) centerText = "Halved";
-        else if (diff > 0) centerText = `Red wins ${Math.abs(diff)} up`;
-        else centerText = `Blue wins ${Math.abs(diff)} up`;
+      if (progress.holesPlayed === 0) {
+        centerText = "Ready to start";
+      } else if (matchData.status === "final") {
+        centerText = matchData.finalSummary || buildFinalSummary(matchData, matchId).centerText;
+      } else if (progress.holesRemaining === 0) {
+        centerText = buildFinalSummary(matchData, matchId).centerText;
       } else {
-        if (diff === 0) centerText = "All square";
-        else if (diff > 0) centerText = `Red ${Math.abs(diff)} up`;
-        else centerText = `Blue ${Math.abs(diff)} up`;
+        if (progress.diff === 0) centerText = "All square";
+        else if (progress.diff > 0) centerText = `Red ${Math.abs(progress.diff)} up`;
+        else centerText = `Blue ${Math.abs(progress.diff)} up`;
       }
 
       let statusTag = "On course";
-      if (holesPlayed === 0) statusTag = "Not started";
-      else if (holesRemaining === 0) statusTag = "Final";
+      if (progress.holesPlayed === 0) statusTag = "Not started";
+      else if (matchData.status === "final" || progress.holesRemaining === 0) statusTag = "Final";
 
-      return { centerText, statusTag, totalHoles: total, holesPlayed, holesRemaining };
+      return { centerText, statusTag, totalHoles: progress.total, holesPlayed: progress.holesPlayed, holesRemaining: progress.holesRemaining };
     }
 
     function updateScoreUI() {
@@ -1462,10 +1472,32 @@
 
     function handleHoleClick(holeIndex, result) {
       if (!matchId || holeIndex == null) return;
+      if (matchData?.status === "final") {
+        alert("This match is already marked final.");
+        return;
+      }
 
+      const holes = Array.isArray(matchData?.holes) ? [...matchData.holes] : Array(18).fill("none");
+      holes[holeIndex] = result;
+
+      const nextMatchData = { ...(matchData || {}), holes };
+      const progress = getMatchProgress(nextMatchData, matchId);
       const path = `matches/${matchId}/holes/${holeIndex}`;
       const updatesObj = {};
       updatesObj[path] = result;
+
+      if (result !== "none" && progress.clinched && progress.holesPlayed > 0) {
+        const finalSummary = buildFinalSummary(nextMatchData, matchId).summary;
+        const finishNow = confirm(`Finish match?
+
+Confirm with the players: ${finalSummary}`);
+        if (finishNow) {
+          updatesObj[`matches/${matchId}/status`] = "final";
+          updatesObj[`matches/${matchId}/finalSummary`] = finalSummary;
+          updatesObj[`matches/${matchId}/finishedAt`] = Date.now();
+        }
+      }
+
       update(ref(db), updatesObj).catch(console.error);
 
       // Only send to feed when a winner/half is recorded
@@ -1494,7 +1526,6 @@
       const newFeedRef = push(tournamentFeedRef);
       set(newFeedRef, entry).catch(console.error);
 
-      // ✅ NEW: congratulate winner + prompt for photo (only when red/blue wins)
       if (winnerText) {
         showToast({
           title: `🏆 ${winnerText} wins!`,
