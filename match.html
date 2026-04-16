@@ -968,6 +968,98 @@
     let currentHoleIndex = null;
     let segmentStart = 0;
     let segmentEnd = 9;
+    let lastFinishPromptKey = "";
+
+    function getPlayerReturnUrl() {
+      if (playerCode) return `player.html?code=${encodeURIComponent(playerCode)}`;
+      return "player.html";
+    }
+
+    function getMatchSegmentBounds() {
+      const type = matchData?.type || (Number(matchId) > 6 ? "back" : "front");
+      const start = type === "back" ? 9 : 0;
+      const end = start + 9;
+      return { type, start, end };
+    }
+
+    function getSegmentScoreTotals() {
+      const { start, end } = getMatchSegmentBounds();
+      const holes = matchData?.holes || Array(18).fill("none");
+
+      let redWins = 0, blueWins = 0, halves = 0;
+      for (let i = start; i < end; i++) {
+        const h = holes[i];
+        if (h === "red") redWins++;
+        else if (h === "blue") blueWins++;
+        else if (h === "half") halves++;
+      }
+
+      return { redWins, blueWins, halves, holesPlayed: redWins + blueWins + halves, holesRemaining: (end - start) - (redWins + blueWins + halves) };
+    }
+
+    function getFinishState() {
+      if (!matchData || !matchId) return { isReady: false, promptKey: "" };
+
+      const totals = getSegmentScoreTotals();
+      const { redWins, blueWins, holesPlayed } = totals;
+      const teamNames = getTeamNames();
+
+      let winnerKey = null;
+      let winnerName = "";
+      if (redWins >= 5) {
+        winnerKey = "red";
+        winnerName = teamNames.red;
+      } else if (blueWins >= 5) {
+        winnerKey = "blue";
+        winnerName = teamNames.blue;
+      }
+
+      const promptKey = `${matchId}|${winnerKey || "none"}|${redWins}-${blueWins}|${holesPlayed}`;
+
+      return {
+        isReady: !!winnerKey,
+        winnerKey,
+        winnerName,
+        redWins,
+        blueWins,
+        holesPlayed,
+        promptKey,
+      };
+    }
+
+    function maybePromptFinishMatch() {
+      const finishState = getFinishState();
+      if (!finishState.isReady) {
+        lastFinishPromptKey = "";
+        return;
+      }
+
+      if (lastFinishPromptKey === finishState.promptKey) return;
+      lastFinishPromptKey = finishState.promptKey;
+
+      const scoreText = `${finishState.winnerName} leads ${finishState.redWins}-${finishState.blueWins}`;
+
+      showToast({
+        title: "Finish match?",
+        body: `${scoreText}. Return to player page?`,
+        primaryText: "Finish & return",
+        secondaryText: "Keep editing",
+        onPrimary: async () => {
+          try {
+            await update(ref(db, `matches/${matchId}`), {
+              finalWinner: finishState.winnerKey,
+              finalWinnerName: finishState.winnerName,
+              finalScoreText: `${finishState.redWins}-${finishState.blueWins}`,
+              finalConfirmedAt: Date.now()
+            });
+          } catch (err) {
+            console.error("Failed to mark match complete:", err);
+          }
+
+          window.location.href = getPlayerReturnUrl();
+        },
+      });
+    }
 
     function initCurrentHoleIndex() {
       if (!matchData || !matchId) return;
@@ -1463,47 +1555,54 @@
     function handleHoleClick(holeIndex, result) {
       if (!matchId || holeIndex == null) return;
 
+      const holes = Array.isArray(matchData?.holes) ? [...matchData.holes] : Array(18).fill("none");
+      holes[holeIndex] = result;
+      matchData = { ...(matchData || {}), holes };
+
       const path = `matches/${matchId}/holes/${holeIndex}`;
       const updatesObj = {};
       updatesObj[path] = result;
       update(ref(db), updatesObj).catch(console.error);
 
+      renderScoreBubble();
+
       // Only send to feed when a winner/half is recorded
-      if (result === "none") return;
+      if (result !== "none") {
+        const teamNames = getTeamNames();
+        const config = holeConfigs[holeIndex] || {};
+        const holeNum = config.num ?? (holeIndex + 1);
 
-      const teamNames = getTeamNames();
-      const config = holeConfigs[holeIndex] || {};
-      const holeNum = config.num ?? (holeIndex + 1);
+        let message;
+        let winnerText = null;
 
-      let message;
-      let winnerText = null;
+        if (result === "red") {
+          message = `${teamNames.red} wins Hole ${holeNum}`;
+          winnerText = teamNames.red;
+        } else if (result === "blue") {
+          message = `${teamNames.blue} wins Hole ${holeNum}`;
+          winnerText = teamNames.blue;
+        } else if (result === "half") {
+          message = `Hole ${holeNum} halved`;
+        }
 
-      if (result === "red") {
-        message = `${teamNames.red} wins Hole ${holeNum}`;
-        winnerText = teamNames.red;
-      } else if (result === "blue") {
-        message = `${teamNames.blue} wins Hole ${holeNum}`;
-        winnerText = teamNames.blue;
-      } else if (result === "half") {
-        message = `Hole ${holeNum} halved`;
-      } else {
-        return;
+        if (message) {
+          const entry = { matchId: String(matchId), holeNumber: holeNum, message, createdAt: Date.now(), result };
+          const newFeedRef = push(tournamentFeedRef);
+          set(newFeedRef, entry).catch(console.error);
+        }
+
+        if (winnerText) {
+          showToast({
+            title: `🏆 ${winnerText} wins!`,
+            body: `Great hole! Take a celebratory photo?`,
+            primaryText: "Take photo",
+            secondaryText: "Not now",
+            onPrimary: () => handleCameraClick(),
+          });
+        }
       }
 
-      const entry = { matchId: String(matchId), holeNumber: holeNum, message, createdAt: Date.now(), result };
-      const newFeedRef = push(tournamentFeedRef);
-      set(newFeedRef, entry).catch(console.error);
-
-      // ✅ NEW: congratulate winner + prompt for photo (only when red/blue wins)
-      if (winnerText) {
-        showToast({
-          title: `🏆 ${winnerText} wins!`,
-          body: `Great hole! Take a celebratory photo?`,
-          primaryText: "Take photo",
-          secondaryText: "Not now",
-          onPrimary: () => handleCameraClick(),
-        });
-      }
+      setTimeout(maybePromptFinishMatch, 0);
     }
 
     function renderScoreBubble() {
