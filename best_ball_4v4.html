@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTK Classic – Best Ball 4v4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="IMG_7296.jpg" />
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --shadow-soft:0 10px 30px rgba(15,23,42,.12);
+      --blue:#dbeafe;
+      --red:#fee2e2;
+      --green:#dcfce7;
+      --amber:#fef3c7;
+      --dark:#0f172a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;}
+    html,body{-webkit-text-size-adjust:100%;background:var(--bg);color:var(--text);min-height:100%;}
+    body{min-height:100vh;padding:.75rem;touch-action:manipulation;}
+    @media (min-width:900px){ body{max-width:1200px;margin:0 auto;} }
+    a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+    button,input,select{-webkit-tap-highlight-color:transparent;}
+
+    .menu-overlay{position:fixed;inset:0;display:none;z-index:1000;background:rgba(17,24,39,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+    .site-header{display:flex;align-items:center;gap:.75rem;position:relative;}
+    .site-header-left{display:flex;align-items:center;gap:.6rem;min-width:0;}
+    .site-logo{height:32px;width:auto;border-radius:.45rem;object-fit:cover;background:#e5e7eb;flex-shrink:0;}
+    .site-title-group{display:flex;flex-direction:column;gap:.15rem;min-width:0;}
+    .site-title{font-size:1.05rem;font-weight:800;white-space:nowrap;}
+    .site-subtitle{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+    .nav-links{margin-left:auto;display:flex;gap:.4rem;align-items:center;}
+    .nav-desktop{display:flex;gap:.4rem;align-items:center;}
+    .nav-btn{font-size:.85rem;border-radius:999px;padding:.3rem .9rem;border:1px solid var(--border);background:#fff;color:var(--text);white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;justify-content:center;}
+    .nav-btn.secondary{background:#f9fafb;}
+    .hamburger{display:none;font-size:1.35rem;background:#fff;border:1px solid var(--border);border-radius:999px;padding:.25rem .7rem;min-height:32px;cursor:pointer;line-height:1;}
+    .hamburger-menu{position:absolute;top:44px;right:0;background:#fff;border:1px solid var(--border);border-radius:.9rem;box-shadow:var(--shadow-soft);display:none;flex-direction:column;min-width:220px;z-index:1001;overflow:hidden;}
+    .hamburger-menu a{padding:.7rem .85rem;font-size:.9rem;border-top:1px solid #f3f4f6;}
+    .hamburger-menu a:first-child{border-top:none;}
+    .hamburger-menu a:hover{background:#f3f4f6;}
+    @media (max-width:700px){ .nav-desktop{display:none;} .hamburger{display:inline-flex;align-items:center;justify-content:center;} }
+
+    main{margin-top:.75rem;display:flex;flex-direction:column;gap:.75rem;}
+    .card{background:var(--card);border-radius:.9rem;padding:.9rem;border:1px solid var(--border);box-shadow:var(--shadow-soft);}
+    .section-title{font-size:.82rem;font-weight:650;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px dashed #e5e7eb;padding-bottom:.35rem;margin-bottom:.75rem;}
+    .setup-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.75rem;}
+    .team-card{border:1px solid #e5e7eb;border-radius:.95rem;padding:.8rem;background:#fff;}
+    .team-card.blue{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);}
+    .team-card.red{background:linear-gradient(180deg,#ffffff 0%,#fff9f9 100%);}
+    .team-heading{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.7rem;}
+    .team-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.18rem .6rem;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;font-size:.78rem;color:#374151;}
+    .field-group{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.55rem;}
+    .field-group label{font-size:.78rem;color:var(--muted);font-weight:600;}
+    .field-group input{border:1px solid var(--border);border-radius:.75rem;padding:.72rem .8rem;font-size:.95rem;background:#fff;}
+    .field-group input:focus,.hole-pill:focus{outline:none;border-color:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.18);}
+    .actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.85rem;}
+    .btn{border:none;border-radius:999px;padding:.78rem 1rem;font-size:.92rem;font-weight:750;cursor:pointer;min-height:42px;display:inline-flex;align-items:center;justify-content:center;}
+    .btn.primary{background:var(--dark);color:#fff;}
+    .btn.secondary{background:#fff;color:var(--text);border:1px solid var(--border);}
+    .btn.warn{background:#fff7ed;color:#9a3412;border:1px solid #fdba74;}
+
+    .score-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.8rem;}
+    .hole-pills{display:flex;flex-wrap:wrap;gap:.4rem;}
+    .hole-pill{border:1px solid var(--border);background:#fff;border-radius:999px;padding:.45rem .72rem;font-size:.86rem;font-weight:700;cursor:pointer;min-width:44px;}
+    .hole-pill.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem;margin-bottom:.75rem;}
+    .summary-tile{border:1px solid #e5e7eb;border-radius:.85rem;padding:.75rem;background:#fff;}
+    .summary-label{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem;}
+    .summary-value{font-size:1.2rem;font-weight:850;}
+    .summary-sub{font-size:.82rem;color:var(--muted);margin-top:.22rem;}
+
+    .teams-score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:.75rem;}
+    .player-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.55rem;align-items:center;padding:.55rem 0;border-top:1px solid #f3f4f6;}
+    .player-row:first-of-type{border-top:none;}
+    .player-name{font-size:.95rem;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .score-controls{display:inline-flex;align-items:center;gap:.45rem;}
+    .score-btn{height:36px;width:36px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:1.1rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+    .score-btn:disabled{opacity:.45;cursor:not-allowed;}
+    .score-value{min-width:32px;text-align:center;font-size:1.05rem;font-weight:850;}
+    .low-two-strip{margin-top:.7rem;padding:.65rem .75rem;border-radius:.8rem;background:#f9fafb;border:1px dashed #d1d5db;display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap;}
+    .low-two-strip strong{font-size:.94rem;}
+    .low-two-strip span{font-size:.84rem;color:var(--muted);}
+    .winner-badge{display:inline-flex;align-items:center;justify-content:center;padding:.24rem .6rem;border-radius:999px;font-size:.77rem;font-weight:800;border:1px solid #e5e7eb;}
+    .winner-badge.win{background:var(--green);border-color:#86efac;color:#166534;}
+    .winner-badge.tie{background:var(--amber);border-color:#fcd34d;color:#92400e;}
+
+    .table-wrap{overflow:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.9rem;}
+    th,td{padding:.62rem .55rem;border-top:1px solid #f3f4f6;text-align:center;white-space:nowrap;}
+    th:first-child,td:first-child{text-align:left;}
+    thead th{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;background:#fafafa;}
+    .empty-state{font-size:.92rem;color:var(--muted);}
+
+    .hidden{display:none !important;}
+  </style>
+</head>
+<body>
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <header class="site-header">
+    <div class="site-header-left">
+      <img src="IMG_7296.jpg" alt="FTK Classic logo" class="site-logo" />
+      <div class="site-title-group">
+        <div class="site-title">FTK Classic</div>
+        <div class="site-subtitle">Best Ball 4v4</div>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <div class="nav-desktop">
+        <a href="index.html" class="nav-btn secondary">Home</a>
+        <a href="games.html" class="nav-btn secondary">Games</a>
+        <a href="game_history.html" class="nav-btn secondary">Game History</a>
+      </div>
+
+      <button id="hamburgerBtn" class="hamburger" aria-label="Menu" aria-expanded="false">☰</button>
+
+      <div id="hamburgerMenu" class="hamburger-menu" aria-label="Navigation Menu">
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="game_history.html">Game History</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">Setup</div>
+      <div class="setup-grid">
+        <div class="team-card blue">
+          <div class="team-heading">
+            <h2>Team 1</h2>
+            <span class="team-chip">4 players</span>
+          </div>
+          <div class="field-group">
+            <label for="team1Name">Team name</label>
+            <input id="team1Name" type="text" placeholder="Team 1" maxlength="40" />
+          </div>
+          <div class="field-group"><label for="team1Player1">Player 1</label><input id="team1Player1" type="text" placeholder="Player 1" maxlength="40" /></div>
+          <div class="field-group"><label for="team1Player2">Player 2</label><input id="team1Player2" type="text" placeholder="Player 2" maxlength="40" /></div>
+          <div class="field-group"><label for="team1Player3">Player 3</label><input id="team1Player3" type="text" placeholder="Player 3" maxlength="40" /></div>
+          <div class="field-group"><label for="team1Player4">Player 4</label><input id="team1Player4" type="text" placeholder="Player 4" maxlength="40" /></div>
+        </div>
+
+        <div class="team-card red">
+          <div class="team-heading">
+            <h2>Team 2</h2>
+            <span class="team-chip">4 players</span>
+          </div>
+          <div class="field-group">
+            <label for="team2Name">Team name</label>
+            <input id="team2Name" type="text" placeholder="Team 2" maxlength="40" />
+          </div>
+          <div class="field-group"><label for="team2Player1">Player 1</label><input id="team2Player1" type="text" placeholder="Player 1" maxlength="40" /></div>
+          <div class="field-group"><label for="team2Player2">Player 2</label><input id="team2Player2" type="text" placeholder="Player 2" maxlength="40" /></div>
+          <div class="field-group"><label for="team2Player3">Player 3</label><input id="team2Player3" type="text" placeholder="Player 3" maxlength="40" /></div>
+          <div class="field-group"><label for="team2Player4">Player 4</label><input id="team2Player4" type="text" placeholder="Player 4" maxlength="40" /></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" class="btn primary">Start Best Ball 4v4</button>
+        <button id="loadDemoBtn" class="btn secondary">Load demo names</button>
+        <button id="clearAllBtn" class="btn warn">Clear saved game</button>
+      </div>
+    </section>
+
+    <section id="scoringSection" class="card hidden">
+      <div class="score-header">
+        <div>
+          <div class="section-title" style="margin-bottom:.4rem;">Scoring</div>
+          <div id="matchupTitle" style="font-size:1.05rem;font-weight:850;"></div>
+        </div>
+        <div class="hole-pills" id="holePills"></div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-tile">
+          <div class="summary-label">Selected hole</div>
+          <div class="summary-value" id="selectedHoleLabel">Hole 1</div>
+          <div class="summary-sub">Plus or minus each player score for this hole.</div>
+        </div>
+        <div class="summary-tile">
+          <div class="summary-label">Hole result</div>
+          <div class="summary-value" id="holeResultText">—</div>
+          <div class="summary-sub" id="holeResultSub">Waiting for scores.</div>
+        </div>
+        <div class="summary-tile">
+          <div class="summary-label">Match tally</div>
+          <div class="summary-value" id="matchTallyText">0 - 0</div>
+          <div class="summary-sub" id="matchTallySub">Holes won</div>
+        </div>
+        <div class="summary-tile">
+          <div class="summary-label">Running low-two total</div>
+          <div class="summary-value" id="runningTotalText">0 - 0</div>
+          <div class="summary-sub">Sum of each team’s two best scores across completed holes.</div>
+        </div>
+      </div>
+
+      <div class="teams-score-grid" id="teamsScoreGrid"></div>
+
+      <div class="actions">
+        <button id="clearHoleBtn" class="btn secondary">Clear selected hole</button>
+        <button id="resetRoundBtn" class="btn warn">Reset entire round</button>
+      </div>
+    </section>
+
+    <section id="scoreboardSection" class="card hidden">
+      <div class="section-title">Hole-by-hole</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Hole</th>
+              <th id="team1TableHead">Team 1</th>
+              <th id="team2TableHead">Team 2</th>
+              <th>Winner</th>
+              <th>Low two used</th>
+            </tr>
+          </thead>
+          <tbody id="holeTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'ftk_best_ball_4v4_state_v1';
+    const HOLES = 9;
+    const PLAYERS_PER_TEAM = 4;
+
+    const defaultState = () => ({
+      team1Name: 'Team 1',
+      team2Name: 'Team 2',
+      team1Players: ['', '', '', ''],
+      team2Players: ['', '', '', ''],
+      scores: Array.from({ length: HOLES }, () => ({
+        team1: [0, 0, 0, 0],
+        team2: [0, 0, 0, 0]
+      })),
+      selectedHole: 0,
+      started: false
+    });
+
+    let state = loadState();
+
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const scoringSection = document.getElementById('scoringSection');
+    const scoreboardSection = document.getElementById('scoreboardSection');
+    const teamsScoreGrid = document.getElementById('teamsScoreGrid');
+    const holePills = document.getElementById('holePills');
+    const holeTableBody = document.getElementById('holeTableBody');
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        const base = defaultState();
+        return {
+          ...base,
+          ...parsed,
+          team1Players: Array.isArray(parsed.team1Players) ? parsed.team1Players.slice(0, PLAYERS_PER_TEAM) : base.team1Players,
+          team2Players: Array.isArray(parsed.team2Players) ? parsed.team2Players.slice(0, PLAYERS_PER_TEAM) : base.team2Players,
+          scores: Array.isArray(parsed.scores) && parsed.scores.length === HOLES ? parsed.scores.map(hole => ({
+            team1: Array.isArray(hole?.team1) ? hole.team1.slice(0, PLAYERS_PER_TEAM).map(v => clampScore(v)) : [0,0,0,0],
+            team2: Array.isArray(hole?.team2) ? hole.team2.slice(0, PLAYERS_PER_TEAM).map(v => clampScore(v)) : [0,0,0,0]
+          })) : base.scores,
+          selectedHole: Math.max(0, Math.min(HOLES - 1, Number(parsed.selectedHole) || 0))
+        };
+      } catch {
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function clampScore(value) {
+      const num = Math.max(0, Math.min(20, Number(value) || 0));
+      return num;
+    }
+
+    function openMenu(){
+      hamburgerMenu.style.display='flex';
+      menuOverlay.style.display='block';
+      hamburgerBtn.setAttribute('aria-expanded','true');
+    }
+    function closeMenu(){
+      hamburgerMenu.style.display='none';
+      menuOverlay.style.display='none';
+      hamburgerBtn.setAttribute('aria-expanded','false');
+    }
+    hamburgerBtn?.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      (hamburgerMenu.style.display==='flex') ? closeMenu() : openMenu();
+    });
+    menuOverlay?.addEventListener('click', closeMenu);
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeMenu(); });
+
+    function fillSetupInputs() {
+      document.getElementById('team1Name').value = state.team1Name || 'Team 1';
+      document.getElementById('team2Name').value = state.team2Name || 'Team 2';
+      state.team1Players.forEach((name, i) => document.getElementById(`team1Player${i+1}`).value = name || '');
+      state.team2Players.forEach((name, i) => document.getElementById(`team2Player${i+1}`).value = name || '');
+    }
+
+    function readSetupInputs() {
+      state.team1Name = (document.getElementById('team1Name').value || 'Team 1').trim() || 'Team 1';
+      state.team2Name = (document.getElementById('team2Name').value || 'Team 2').trim() || 'Team 2';
+      state.team1Players = Array.from({ length: PLAYERS_PER_TEAM }, (_, i) => (document.getElementById(`team1Player${i+1}`).value || `Player ${i+1}`).trim() || `Player ${i+1}`);
+      state.team2Players = Array.from({ length: PLAYERS_PER_TEAM }, (_, i) => (document.getElementById(`team2Player${i+1}`).value || `Player ${i+1}`).trim() || `Player ${i+1}`);
+    }
+
+    function computeLowTwo(scores) {
+      const positives = scores.filter(score => score > 0).sort((a, b) => a - b);
+      if (positives.length < 2) {
+        return { total: null, used: [] };
+      }
+      const used = positives.slice(0, 2);
+      return { total: used[0] + used[1], used };
+    }
+
+    function getHoleSummary(holeIndex) {
+      const hole = state.scores[holeIndex];
+      const t1 = computeLowTwo(hole.team1);
+      const t2 = computeLowTwo(hole.team2);
+      let winner = null;
+      if (t1.total !== null && t2.total !== null) {
+        if (t1.total < t2.total) winner = 'team1';
+        else if (t2.total < t1.total) winner = 'team2';
+        else winner = 'tie';
+      }
+      return { t1, t2, winner };
+    }
+
+    function getRoundSummary() {
+      let team1Wins = 0;
+      let team2Wins = 0;
+      let team1Running = 0;
+      let team2Running = 0;
+      state.scores.forEach((_, holeIndex) => {
+        const summary = getHoleSummary(holeIndex);
+        if (summary.winner === 'team1') team1Wins += 1;
+        if (summary.winner === 'team2') team2Wins += 1;
+        if (summary.t1.total !== null) team1Running += summary.t1.total;
+        if (summary.t2.total !== null) team2Running += summary.t2.total;
+      });
+      return { team1Wins, team2Wins, team1Running, team2Running };
+    }
+
+    function renderHolePills() {
+      holePills.innerHTML = '';
+      for (let i = 0; i < HOLES; i += 1) {
+        const btn = document.createElement('button');
+        btn.className = `hole-pill${state.selectedHole === i ? ' active' : ''}`;
+        btn.textContent = `${i + 1}`;
+        btn.addEventListener('click', () => {
+          state.selectedHole = i;
+          saveState();
+          render();
+        });
+        holePills.appendChild(btn);
+      }
+    }
+
+    function scoreControl(teamKey, playerIndex) {
+      const value = state.scores[state.selectedHole][teamKey][playerIndex];
+      return `
+        <div class="score-controls">
+          <button class="score-btn" data-team="${teamKey}" data-player="${playerIndex}" data-delta="-1" ${value <= 0 ? 'disabled' : ''}>−</button>
+          <div class="score-value">${value}</div>
+          <button class="score-btn" data-team="${teamKey}" data-player="${playerIndex}" data-delta="1">+</button>
+        </div>
+      `;
+    }
+
+    function renderScoreTeams() {
+      const teams = [
+        { key: 'team1', name: state.team1Name, players: state.team1Players, theme: 'blue' },
+        { key: 'team2', name: state.team2Name, players: state.team2Players, theme: 'red' }
+      ];
+
+      teamsScoreGrid.innerHTML = teams.map(team => {
+        const lowTwo = computeLowTwo(state.scores[state.selectedHole][team.key]);
+        return `
+          <div class="team-card ${team.theme}">
+            <div class="team-heading">
+              <h2>${escapeHtml(team.name)}</h2>
+              <span class="team-chip">Hole ${state.selectedHole + 1}</span>
+            </div>
+            ${team.players.map((player, idx) => `
+              <div class="player-row">
+                <div class="player-name">${escapeHtml(player || `Player ${idx + 1}`)}</div>
+                ${scoreControl(team.key, idx)}
+              </div>
+            `).join('')}
+            <div class="low-two-strip">
+              <strong>Low two total: ${lowTwo.total ?? '—'}</strong>
+              <span>${lowTwo.used.length === 2 ? `Using ${lowTwo.used[0]} + ${lowTwo.used[1]}` : 'Enter at least 2 scores.'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      teamsScoreGrid.querySelectorAll('.score-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const teamKey = btn.dataset.team;
+          const playerIndex = Number(btn.dataset.player);
+          const delta = Number(btn.dataset.delta);
+          const current = state.scores[state.selectedHole][teamKey][playerIndex];
+          state.scores[state.selectedHole][teamKey][playerIndex] = clampScore(current + delta);
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function renderTopSummary() {
+      document.getElementById('matchupTitle').textContent = `${state.team1Name} vs ${state.team2Name}`;
+      document.getElementById('selectedHoleLabel').textContent = `Hole ${state.selectedHole + 1}`;
+      const currentHole = getHoleSummary(state.selectedHole);
+      const roundSummary = getRoundSummary();
+
+      let holeText = '—';
+      let holeSub = 'Waiting for scores.';
+      if (currentHole.t1.total !== null || currentHole.t2.total !== null) {
+        holeText = `${currentHole.t1.total ?? '—'} - ${currentHole.t2.total ?? '—'}`;
+        if (currentHole.winner === 'team1') holeSub = `${state.team1Name} wins the hole.`;
+        else if (currentHole.winner === 'team2') holeSub = `${state.team2Name} wins the hole.`;
+        else if (currentHole.winner === 'tie') holeSub = 'Hole tied.';
+        else holeSub = 'Need two scores from each team.';
+      }
+
+      document.getElementById('holeResultText').textContent = holeText;
+      document.getElementById('holeResultSub').textContent = holeSub;
+      document.getElementById('matchTallyText').textContent = `${roundSummary.team1Wins} - ${roundSummary.team2Wins}`;
+      document.getElementById('matchTallySub').textContent = `${state.team1Name} vs ${state.team2Name}`;
+      document.getElementById('runningTotalText').textContent = `${roundSummary.team1Running} - ${roundSummary.team2Running}`;
+    }
+
+    function renderTable() {
+      document.getElementById('team1TableHead').textContent = state.team1Name;
+      document.getElementById('team2TableHead').textContent = state.team2Name;
+      holeTableBody.innerHTML = '';
+
+      for (let i = 0; i < HOLES; i += 1) {
+        const summary = getHoleSummary(i);
+        const tr = document.createElement('tr');
+        let winnerBadge = '<span class="winner-badge">Pending</span>';
+        if (summary.winner === 'team1') winnerBadge = `<span class="winner-badge win">${escapeHtml(state.team1Name)}</span>`;
+        else if (summary.winner === 'team2') winnerBadge = `<span class="winner-badge win">${escapeHtml(state.team2Name)}</span>`;
+        else if (summary.winner === 'tie') winnerBadge = '<span class="winner-badge tie">Tie</span>';
+
+        tr.innerHTML = `
+          <td><button class="hole-pill ${state.selectedHole === i ? 'active' : ''}" data-jump-hole="${i}">Hole ${i + 1}</button></td>
+          <td>${summary.t1.total ?? '—'}</td>
+          <td>${summary.t2.total ?? '—'}</td>
+          <td>${winnerBadge}</td>
+          <td>${summary.t1.used.length === 2 ? summary.t1.used.join(' + ') : '—'} / ${summary.t2.used.length === 2 ? summary.t2.used.join(' + ') : '—'}</td>
+        `;
+        holeTableBody.appendChild(tr);
+      }
+
+      holeTableBody.querySelectorAll('[data-jump-hole]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedHole = Number(btn.dataset.jumpHole);
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function render() {
+      fillSetupInputs();
+      scoringSection.classList.toggle('hidden', !state.started);
+      scoreboardSection.classList.toggle('hidden', !state.started);
+      if (!state.started) return;
+      renderHolePills();
+      renderTopSummary();
+      renderScoreTeams();
+      renderTable();
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"]/g, s => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[s]));
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      readSetupInputs();
+      state.started = true;
+      saveState();
+      render();
+      window.scrollTo({ top: scoringSection.offsetTop - 10, behavior: 'smooth' });
+    });
+
+    document.getElementById('loadDemoBtn').addEventListener('click', () => {
+      document.getElementById('team1Name').value = 'Team Bolds';
+      document.getElementById('team2Name').value = 'Team Smith';
+      ['Jake','Brett','Thomas','Eric'].forEach((name, i) => document.getElementById(`team1Player${i+1}`).value = name);
+      ['David','Justin','Keith','Will'].forEach((name, i) => document.getElementById(`team2Player${i+1}`).value = name);
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      state = defaultState();
+      render();
+    });
+
+    document.getElementById('clearHoleBtn').addEventListener('click', () => {
+      state.scores[state.selectedHole] = { team1: [0,0,0,0], team2: [0,0,0,0] };
+      saveState();
+      render();
+    });
+
+    document.getElementById('resetRoundBtn').addEventListener('click', () => {
+      const fresh = defaultState();
+      fresh.team1Name = state.team1Name;
+      fresh.team2Name = state.team2Name;
+      fresh.team1Players = [...state.team1Players];
+      fresh.team2Players = [...state.team2Players];
+      fresh.started = state.started;
+      state = fresh;
+      saveState();
+      render();
+    });
+
+    fillSetupInputs();
+    render();
+  </script>
+</body>
+</html>
