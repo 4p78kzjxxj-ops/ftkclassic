@@ -786,6 +786,10 @@
               <span>📷</span>
               <span>Photo</span>
             </button>
+            <button id="resetFinalMatchButton" class="camera-btn" style="display:none;" type="button">
+              <span>↺</span>
+              <span>Reset match</span>
+            </button>
           </div>
         </div>
 
@@ -894,6 +898,7 @@
     const toastContainer = document.getElementById("toastContainer");
     const cameraButton = document.getElementById("cameraButton");
     const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
+    const resetFinalMatchButton = document.getElementById("resetFinalMatchButton");
     const groupPhotoArea = document.getElementById("groupPhotoArea");
     const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
     const matchTimerEl = document.getElementById("matchTimer");
@@ -1179,6 +1184,9 @@
       const summary = computeScoreSummary();
       scoreCenterLabel.textContent = summary.centerText;
       matchTagEl.textContent = summary.statusTag;
+      if (resetFinalMatchButton) {
+        resetFinalMatchButton.style.display = matchData?.status === "final" ? "inline-flex" : "none";
+      }
 
       if (summary.centerText.includes("Red wins") || summary.centerText.startsWith("Red ")) {
         scoreSliderFill.style.background = "linear-gradient(to right, var(--red-soft) 0%, var(--red-soft) 65%, var(--blue-soft) 65%, var(--blue-soft) 100%)";
@@ -1470,10 +1478,41 @@
       }
     }
 
+    function redirectBackToPlayer() {
+      if (playerCode) {
+        window.location.href = `player.html?code=${encodeURIComponent(playerCode)}`;
+      } else {
+        window.location.href = "player.html";
+      }
+    }
+
+    async function resetFinalMatch() {
+      if (!matchId || !matchData || matchData.status !== "final") return;
+
+      showToast({
+        title: "Reset final match?",
+        body: "This reopens the match and clears the saved final result so scoring can continue.",
+        primaryText: "Reset Match",
+        secondaryText: "Cancel",
+        onPrimary: async () => {
+          try {
+            await update(ref(db), {
+              [`matches/${matchId}/status`]: "live",
+              [`matches/${matchId}/finalSummary`]: null,
+              [`matches/${matchId}/finishedAt`]: null
+            });
+          } catch (err) {
+            console.error(err);
+            alert("Could not reset the match. Please try again.");
+          }
+        }
+      });
+    }
+
     function handleHoleClick(holeIndex, result) {
       if (!matchId || holeIndex == null) return;
       if (matchData?.status === "final") {
-        alert("This match is already marked final.");
+        alert("This match is already marked final. Use Reset match to reopen it.");
         return;
       }
 
@@ -1488,17 +1527,28 @@
 
       if (result !== "none" && progress.clinched && progress.holesPlayed > 0) {
         const finalSummary = buildFinalSummary(nextMatchData, matchId).summary;
-        const finishNow = confirm(`Finish match?
-
-Confirm with the players: ${finalSummary}`);
-        if (finishNow) {
-          updatesObj[`matches/${matchId}/status`] = "final";
-          updatesObj[`matches/${matchId}/finalSummary`] = finalSummary;
-          updatesObj[`matches/${matchId}/finishedAt`] = Date.now();
-        }
+        showToast({
+          title: "Finish match?",
+          body: `Confirm with the players: ${finalSummary}`,
+          primaryText: "Finish & Return to Player",
+          secondaryText: "Keep Match Open",
+          onPrimary: async () => {
+            try {
+              const finishUpdates = { ...updatesObj };
+              finishUpdates[`matches/${matchId}/status`] = "final";
+              finishUpdates[`matches/${matchId}/finalSummary`] = finalSummary;
+              finishUpdates[`matches/${matchId}/finishedAt`] = Date.now();
+              await update(ref(db), finishUpdates);
+              redirectBackToPlayer();
+            } catch (err) {
+              console.error(err);
+              alert("Could not finish the match. Please try again.");
+            }
+          }
+        });
+      } else {
+        update(ref(db), updatesObj).catch(console.error);
       }
-
-      update(ref(db), updatesObj).catch(console.error);
 
       // Only send to feed when a winner/half is recorded
       if (result === "none") return;
@@ -1583,6 +1633,7 @@ Confirm with the players: ${finalSummary}`);
     groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
     cameraButton.addEventListener("click", handleCameraClick);
     clearMatchPhotoButton.addEventListener("click", handleClearMatchPhoto);
+    if (resetFinalMatchButton) resetFinalMatchButton.addEventListener("click", resetFinalMatch);
   </script>
 </body>
 </html>
