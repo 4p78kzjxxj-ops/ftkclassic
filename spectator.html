@@ -665,7 +665,7 @@
       for (const id of ids) {
         const m = matches[id];
         if (!m) continue;
-        const type = m.type || (Number(id) <= 6 ? "front" : "back");
+        const type = Number(id) <= 6 ? "front" : "back";
         const holes = m.holes || [];
         const state = computeMatchState(holes, type);
         const { diff, done } = state;
@@ -727,7 +727,7 @@
       for (const id of ids) {
         const m = matches[id];
         if (!m) continue;
-        const type = m.type || (Number(id) <= 6 ? "front" : "back");
+        const type = Number(id) <= 6 ? "front" : "back";
         const typeLabel = type === "front" ? "Front 9" : "Back 9";
         const holes = m.holes || [];
 
