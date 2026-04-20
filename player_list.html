@@ -15,21 +15,35 @@
       --muted: #6b7280;
       --shadow: 0 14px 40px rgba(15,23,42,0.14);
       --tap: 44px;
+
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --red-border: #fecaca;
+
+      --blue: #1d4ed8;
+      --blue-soft: #eff6ff;
+      --blue-border: #bfdbfe;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
 
     body {
       background: var(--bg);
       padding: 1rem;
+      color: var(--text);
     }
 
-    /* Top bar */
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 0.75rem;
+      gap: 0.75rem;
     }
 
     .title {
@@ -53,9 +67,50 @@
       box-shadow: 0 6px 18px rgba(15,23,42,0.06);
     }
 
-    .hamburger svg { width: 22px; height: 22px; }
+    .hamburger svg {
+      width: 22px;
+      height: 22px;
+    }
 
-    /* Drawer */
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.85rem;
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .legend-red .legend-dot {
+      background: var(--red);
+    }
+
+    .legend-blue .legend-dot {
+      background: var(--blue);
+    }
+
+    .legend-neutral .legend-dot {
+      background: #9ca3af;
+    }
+
     .overlay {
       position: fixed;
       inset: 0;
@@ -89,7 +144,9 @@
       gap: 0.75rem;
     }
 
-    .drawer.show { transform: translateX(0); }
+    .drawer.show {
+      transform: translateX(0);
+    }
 
     .drawerHeader {
       display: flex;
@@ -133,17 +190,22 @@
       color: var(--muted);
     }
 
+    .tableWrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+    }
+
     .table {
       width: 100%;
       border-collapse: collapse;
       background: var(--card);
-      border-radius: 0.5rem;
-      overflow: hidden;
-      border: 1px solid var(--border);
     }
 
     th, td {
-      padding: 0.6rem;
+      padding: 0.7rem 0.6rem;
       border-bottom: 1px solid var(--border);
       font-size: 0.95rem;
     }
@@ -153,23 +215,75 @@
       font-weight: 700;
     }
 
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
     td.hcp {
       text-align: right;
       color: var(--muted);
-      width: 80px;
+      width: 90px;
+      font-weight: 600;
     }
 
     td.num {
-      width: 35px;
+      width: 42px;
       text-align: right;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
+    }
+
+    td.playerName {
+      font-weight: 700;
+    }
+
+    tr.team-red {
+      background: var(--red-soft);
+    }
+
+    tr.team-red td {
+      border-bottom-color: var(--red-border);
+    }
+
+    tr.team-red td.playerName {
+      color: var(--red);
+    }
+
+    tr.team-blue {
+      background: var(--blue-soft);
+    }
+
+    tr.team-blue td {
+      border-bottom-color: var(--blue-border);
+    }
+
+    tr.team-blue td.playerName {
+      color: var(--blue);
+    }
+
+    tr.team-red td:first-child,
+    tr.team-blue td:first-child {
+      box-shadow: inset 4px 0 0 0 currentColor;
+    }
+
+    tr.team-red td:first-child {
+      color: var(--red);
+    }
+
+    tr.team-blue td:first-child {
+      color: var(--blue);
+    }
+
+    .emptyState {
+      padding: 1rem;
+      text-align: center;
+      color: var(--muted);
+      background: #fff;
     }
   </style>
 </head>
 
 <body>
-  <!-- Drawer -->
   <div id="overlay" class="overlay"></div>
 
   <aside id="drawer" class="drawer">
@@ -187,7 +301,7 @@
 
   <div class="topbar">
     <div class="title">Player List</div>
-    <button id="openDrawer" class="hamburger">
+    <button id="openDrawer" class="hamburger" aria-label="Open menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M4 6h16"></path>
         <path d="M4 12h16"></path>
@@ -196,16 +310,37 @@
     </button>
   </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Player</th>
-        <th style="text-align:right;">Handicap</th>
-      </tr>
-    </thead>
-    <tbody id="playerList"></tbody>
-  </table>
+  <div class="legend" id="teamLegend">
+    <div class="legend-chip legend-red">
+      <span class="legend-dot"></span>
+      <span id="redTeamLegend">Red Team</span>
+    </div>
+    <div class="legend-chip legend-blue">
+      <span class="legend-dot"></span>
+      <span id="blueTeamLegend">Blue Team</span>
+    </div>
+    <div class="legend-chip legend-neutral">
+      <span class="legend-dot"></span>
+      <span>Unassigned</span>
+    </div>
+  </div>
+
+  <div class="tableWrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th style="text-align:right;">Handicap</th>
+        </tr>
+      </thead>
+      <tbody id="playerList">
+        <tr>
+          <td colspan="3" class="emptyState">Loading players...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -225,19 +360,71 @@
     const db = getDatabase(app);
 
     const playersRef = ref(db, "players");
+    const settingsRef = ref(db, "settings");
+
     const listEl = document.getElementById("playerList");
+    const redTeamLegend = document.getElementById("redTeamLegend");
+    const blueTeamLegend = document.getElementById("blueTeamLegend");
+
+    let settings = {};
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function getTeamNames() {
+      const t = settings.teamNames || {};
+      return {
+        red: (t.red || "Red Team").trim(),
+        blue: (t.blue || "Blue Team").trim()
+      };
+    }
+
+    function renderPlayers(rawPlayers) {
+      const players = Object.values(rawPlayers || {});
+      players.sort((a, b) => {
+        const aHcp = parseFloat(a.handicap ?? 999);
+        const bHcp = parseFloat(b.handicap ?? 999);
+        return aHcp - bHcp;
+      });
+
+      if (!players.length) {
+        listEl.innerHTML = `
+          <tr>
+            <td colspan="3" class="emptyState">No players found.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = players.map((p, i) => {
+        const team = (p.team === "red" || p.team === "blue") ? p.team : "";
+        const rowClass = team ? `team-${team}` : "";
+        return `
+          <tr class="${rowClass}">
+            <td class="num">${i + 1}</td>
+            <td class="playerName">${escapeHtml(p.name || "Unknown Player")}</td>
+            <td class="hcp">${escapeHtml(p.handicap ?? "N/A")}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    onValue(settingsRef, (snap) => {
+      settings = snap.val() || {};
+      const names = getTeamNames();
+      redTeamLegend.textContent = names.red;
+      blueTeamLegend.textContent = names.blue;
+    });
 
     onValue(playersRef, (snap) => {
-      const players = Object.values(snap.val() || {});
-      players.sort((a, b) => (parseFloat(a.handicap ?? 999) - parseFloat(b.handicap ?? 999)));
-
-      listEl.innerHTML = players.map((p, i) => `
-        <tr>
-          <td class="num">${i + 1}</td>
-          <td>${p.name || "Unknown Player"}</td>
-          <td class="hcp">${p.handicap ?? "N/A"}</td>
-        </tr>
-      `).join("");
+      renderPlayers(snap.val() || {});
     });
 
     const drawer = document.getElementById("drawer");
