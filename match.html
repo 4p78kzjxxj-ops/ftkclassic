@@ -408,53 +408,6 @@
     .camera-btn:hover { background: #fef9c3; }
     .camera-btn:active { transform: scale(0.97); }
 
-    .match-timer-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.35rem;
-      margin-bottom: 0.3rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-      flex-wrap: wrap;
-    }
-
-    .match-timer-label {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.72rem;
-    }
-
-    .match-timer-value {
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .match-timer-value.timer-done { color: var(--red); }
-
-    .match-timer-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .match-timer-btn {
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f3f4f6;
-      padding: 0.25rem 0.7rem;
-      font-size: 0.8rem;
-      cursor: pointer;
-      min-height: var(--tap-target);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      white-space: nowrap;
-    }
-
-    .match-timer-btn:active { transform: scale(0.97); }
-
     .score-line {
       display: flex;
       justify-content: space-between;
@@ -789,17 +742,6 @@
           </div>
         </div>
 
-        <div class="match-timer-row">
-          <div>
-            <div class="match-timer-label">Pace of play timer</div>
-          </div>
-          <div class="match-timer-controls">
-            <span id="matchTimer" class="match-timer-value">1:00</span>
-            <button type="button" id="matchTimerStart" class="match-timer-btn">Start</button>
-            <button type="button" id="matchTimerReset" class="match-timer-btn">Reset</button>
-          </div>
-        </div>
-
         <div class="score-line">
           <span id="scoreRedLabel">Red</span>
           <span id="scoreCenterLabel">All square</span>
@@ -896,56 +838,7 @@
     const clearMatchPhotoButton = document.getElementById("clearMatchPhotoButton");
     const groupPhotoArea = document.getElementById("groupPhotoArea");
     const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
-    const matchTimerEl = document.getElementById("matchTimer");
-    const matchTimerStartBtn = document.getElementById("matchTimerStart");
-    const matchTimerResetBtn = document.getElementById("matchTimerReset");
 
-    let timerInterval = null;
-    let timerRemainingSeconds = 60;
-
-    function formatTimer(seconds) {
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      return m + ":" + String(s).padStart(2, "0");
-    }
-
-    function updateMatchTimerDisplay() {
-      if (!matchTimerEl) return;
-      matchTimerEl.textContent = formatTimer(timerRemainingSeconds);
-    }
-
-    function resetMatchTimer() {
-      if (!matchTimerEl) return;
-      clearInterval(timerInterval);
-      timerInterval = null;
-      timerRemainingSeconds = 60;
-      matchTimerEl.classList.remove("timer-done");
-      updateMatchTimerDisplay();
-    }
-
-    function startMatchTimer() {
-      if (!matchId || !matchTimerEl) return;
-      if (timerInterval) return;
-      if (timerRemainingSeconds <= 0 || timerRemainingSeconds > 60) timerRemainingSeconds = 60;
-      matchTimerEl.classList.remove("timer-done");
-      updateMatchTimerDisplay();
-      timerInterval = setInterval(() => {
-        timerRemainingSeconds -= 1;
-        if (timerRemainingSeconds <= 0) {
-          timerRemainingSeconds = 0;
-          updateMatchTimerDisplay();
-          matchTimerEl.classList.add("timer-done");
-          clearInterval(timerInterval);
-          timerInterval = null;
-          return;
-        }
-        updateMatchTimerDisplay();
-      }, 1000);
-    }
-
-    if (matchTimerStartBtn) matchTimerStartBtn.addEventListener("click", startMatchTimer);
-    if (matchTimerResetBtn) matchTimerResetBtn.addEventListener("click", resetMatchTimer);
-    if (matchTimerEl) { timerRemainingSeconds = 60; updateMatchTimerDisplay(); }
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 }, { num: 2,  par: 4, yards: 340 }, { num: 3,  par: 4, yards: 360 },
