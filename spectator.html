@@ -407,10 +407,10 @@
 
     .feed-popup-wrap {
       position: fixed;
+      top: 0.75rem;
       left: 0.75rem;
       right: 0.75rem;
-      bottom: 1rem;
-      z-index: 2000;
+      z-index: 3000;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
@@ -435,6 +435,54 @@
       border: 1px solid rgba(255, 255, 255, 0.14);
       animation: feedPopupIn 0.22s ease-out;
       overflow: hidden;
+    }
+
+    .feed-popup.red {
+      background: #7f1d1d;
+      border-color: rgba(254, 202, 202, 0.45);
+    }
+
+    .feed-popup.blue {
+      background: #1e3a8a;
+      border-color: rgba(147, 197, 253, 0.45);
+    }
+
+    .scorecard-flyer {
+      position: fixed;
+      z-index: 2999;
+      border-radius: 0.9rem;
+      pointer-events: none;
+      opacity: 0.92;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+      transition: transform 0.38s ease, opacity 0.38s ease;
+      overflow: hidden;
+    }
+
+    .scorecard-flyer.red {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+
+    .scorecard-flyer.blue {
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+    }
+
+    .scorecard-flyer.neutral {
+      background: #e5e7eb;
+      border: 1px solid #d1d5db;
+    }
+
+    .match-card.scorecard-flash-red {
+      animation: scorecardFlashRed 0.75s ease;
+    }
+
+    .match-card.scorecard-flash-blue {
+      animation: scorecardFlashBlue 0.75s ease;
+    }
+
+    .match-card.scorecard-flash-neutral {
+      animation: scorecardFlashNeutral 0.75s ease;
     }
 
     .feed-popup-title {
@@ -463,13 +511,31 @@
     }
 
     @keyframes feedPopupIn {
-      from { transform: translateY(14px); opacity: 0; }
+      from { transform: translateY(-14px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
 
     @keyframes feedPopupOut {
       from { transform: translateY(0); opacity: 1; }
-      to { transform: translateY(14px); opacity: 0; }
+      to { transform: translateY(-14px); opacity: 0; }
+    }
+
+    @keyframes scorecardFlashRed {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(248,113,113,0); }
+      35% { transform: scale(1.015); box-shadow: 0 0 0 4px rgba(248,113,113,0.42); }
+      100% { transform: scale(1); box-shadow: inherit; }
+    }
+
+    @keyframes scorecardFlashBlue {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(59,130,246,0); }
+      35% { transform: scale(1.015); box-shadow: 0 0 0 4px rgba(59,130,246,0.42); }
+      100% { transform: scale(1); box-shadow: inherit; }
+    }
+
+    @keyframes scorecardFlashNeutral {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(148,163,184,0); }
+      35% { transform: scale(1.015); box-shadow: 0 0 0 4px rgba(148,163,184,0.42); }
+      100% { transform: scale(1); box-shadow: inherit; }
     }
   </style>
 </head>
@@ -596,7 +662,15 @@
     let players = {};
     let matches = {};
     let closestToPin = {};
-    let feedPopupsReady = false;
+    let spectatorReady = false;
+    let lastMatchesJSON = "";
+    let lastCtpJSON = "";
+    let lastMatchesData = null;
+    let lastCtpData = null;
+
+    setTimeout(() => {
+      spectatorReady = true;
+    }, 2000);
 
     function setupPresence(db, pageKey, onCountChange) {
       const connectionsRef = ref(db, `presence/${pageKey}`);
@@ -871,7 +945,7 @@
         const dotsHTML = buildDotsHTML(holes, type);
 
         html += `
-          <a class="${cardClass}" href="match_spectator.html?id=${id}">
+          <a id="matchCard-${id}" class="${cardClass}" href="match_spectator.html?id=${id}">
             <div class="match-line1">${title}</div>
             <div class="match-line2">
               <span class="match-type-label">Match ${id} • ${typeLabel}</span>
@@ -968,44 +1042,216 @@
       );
     }
 
-    function showFeedPopup(item) {
-      const text = getFeedText(item);
-      if (!text) return;
+    function formatDistance(feet, inches) {
+      const f = feet ?? 0;
+      const i = inches ?? 0;
+      return `${f}'${i}"`;
+    }
 
-      const popup = document.createElement("div");
-      popup.className = "feed-popup";
-      popup.innerHTML = `
-        <div class="feed-popup-title">Live Feed Update</div>
-        <div class="feed-popup-text">${escapeHTML(text)}</div>
-        <div class="feed-popup-meta">${escapeHTML(formatFeedTime(item))}</div>
-      `;
+    function getTeamDisplay(team) {
+      const teamNames = getTeamNames();
+      if (team === "red") return teamNames.red || "Red";
+      if (team === "blue") return teamNames.blue || "Blue";
+      return "";
+    }
 
-      feedPopupWrap.appendChild(popup);
+    function findPlayerTeamByName(name) {
+      if (!name) return "";
+      const target = String(name).trim().toLowerCase();
+      for (const id of Object.keys(players || {})) {
+        const p = players[id] || {};
+        const playerName = String(p.name || "").trim().toLowerCase();
+        if (playerName !== target) continue;
+        const rawTeam = String(p.team || p.teamKey || p.color || "").toLowerCase();
+        if (rawTeam.includes("red") || rawTeam.includes("bolds")) return "red";
+        if (rawTeam.includes("blue") || rawTeam.includes("smith")) return "blue";
+      }
+      return "";
+    }
 
-      while (feedPopupWrap.children.length > 3) {
-        feedPopupWrap.removeChild(feedPopupWrap.firstElementChild);
+    function buildMatchUpdateMessages(oldMatches, newMatches) {
+      const messages = [];
+      if (!oldMatches || !newMatches) return messages;
+
+      const ids = Object.keys(newMatches || {})
+        .filter((id) => Number(id) >= 1 && Number(id) <= 12)
+        .sort((a, b) => Number(a) - Number(b));
+
+      for (const id of ids) {
+        const oldMatch = oldMatches[id] || {};
+        const newMatch = newMatches[id] || {};
+        const oldHoles = Array.isArray(oldMatch.holes) ? oldMatch.holes : [];
+        const newHoles = Array.isArray(newMatch.holes) ? newMatch.holes : [];
+
+        for (let i = 0; i < 18; i++) {
+          const oldResult = oldHoles[i] || "none";
+          const newResult = newHoles[i] || "none";
+
+          if (oldResult === newResult || newResult === "none") continue;
+
+          const holeNumber = i + 1;
+          const pairLabels = computeMatchPairLabels(newMatch);
+
+          if (newResult === "red") {
+            messages.push({
+              text: `Match ${id}: ${getTeamDisplay("red")} - ${pairLabels.redPair} won hole ${holeNumber}`,
+              team: "red",
+              matchId: id
+            });
+          } else if (newResult === "blue") {
+            messages.push({
+              text: `Match ${id}: ${getTeamDisplay("blue")} - ${pairLabels.bluePair} won hole ${holeNumber}`,
+              team: "blue",
+              matchId: id
+            });
+          } else if (newResult === "half") {
+            messages.push({
+              text: `Match ${id}: Hole ${holeNumber} halved`,
+              team: "neutral",
+              matchId: id
+            });
+          }
+        }
       }
 
+      return messages;
+    }
+
+    function buildCtpUpdateMessages(oldCtp, newCtp) {
+      const messages = [];
+      if (!oldCtp || !newCtp) return messages;
+
+      const holes = [
+        { key: "hole4", label: "Hole 4" },
+        { key: "hole13", label: "Hole 13" }
+      ];
+
+      for (const h of holes) {
+        const oldData = oldCtp[h.key] || {};
+        const newData = newCtp[h.key] || {};
+
+        if (JSON.stringify(oldData) === JSON.stringify(newData)) continue;
+        if (!newData.name) continue;
+
+        const team = findPlayerTeamByName(newData.name) || "neutral";
+        messages.push({
+          text: `${newData.name} - Closest to the Pin - ${h.label} - ${formatDistance(newData.feet, newData.inches)}`,
+          team
+        });
+      }
+
+      return messages;
+    }
+
+    function animateFromScorecard(matchId, team) {
+      if (!matchId) return;
+      const card = document.getElementById(`matchCard-${matchId}`);
+      if (!card) return;
+
+      const flashClass = team === "red"
+        ? "scorecard-flash-red"
+        : team === "blue"
+          ? "scorecard-flash-blue"
+          : "scorecard-flash-neutral";
+
+      card.classList.remove("scorecard-flash-red", "scorecard-flash-blue", "scorecard-flash-neutral");
+      void card.offsetWidth;
+      card.classList.add(flashClass);
+      setTimeout(() => card.classList.remove(flashClass), 800);
+
+      const rect = card.getBoundingClientRect();
+      const flyer = document.createElement("div");
+      flyer.className = `scorecard-flyer ${team === "red" || team === "blue" ? team : "neutral"}`;
+      flyer.style.left = `${rect.left}px`;
+      flyer.style.top = `${rect.top}px`;
+      flyer.style.width = `${rect.width}px`;
+      flyer.style.height = `${Math.min(rect.height, 72)}px`;
+      document.body.appendChild(flyer);
+
+      const targetX = window.innerWidth / 2 - (rect.left + rect.width / 2);
+      const targetY = 16 - rect.top;
+
+      requestAnimationFrame(() => {
+        flyer.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.2)`;
+        flyer.style.opacity = "0";
+      });
+
+      setTimeout(() => flyer.remove(), 430);
+    }
+
+    function showFeedPopup(update) {
+      const payload = typeof update === "string" ? { text: update } : (update || {});
+      const text = payload.text || "";
+      const team = payload.team || "neutral";
+
+      if (!spectatorReady || !text) return;
+
+      animateFromScorecard(payload.matchId, team);
+
+      const popup = document.createElement("div");
+      popup.className = `feed-popup ${team === "red" || team === "blue" ? team : ""}`;
+      popup.innerHTML = `
+        <div class="feed-popup-title">Live Update</div>
+        <div class="feed-popup-text">${escapeHTML(text)}</div>
+      `;
+
       setTimeout(() => {
-        popup.classList.add("hide");
-        setTimeout(() => popup.remove(), 300);
-      }, 6000);
+        feedPopupWrap.appendChild(popup);
+
+        while (feedPopupWrap.children.length > 2) {
+          feedPopupWrap.removeChild(feedPopupWrap.firstElementChild);
+        }
+
+        setTimeout(() => {
+          popup.classList.add("hide");
+          setTimeout(() => popup.remove(), 300);
+        }, 4500);
+      }, payload.matchId ? 260 : 0);
     }
 
     onChildAdded(feedRef, (snap) => {
-      const item = snap.val();
-      if (!feedPopupsReady) return;
-      showFeedPopup(item || {});
+      const item = snap.val() || {};
+      showFeedPopup(getFeedText(item));
     });
-
-    setTimeout(() => {
-      feedPopupsReady = true;
-    }, 1500);
 
     onValue(settingsRef, (s) => { settings = s.val() || {}; renderAll(); });
     onValue(playersRef,  (s) => { players  = s.val() || {}; renderAll(); });
-    onValue(matchesRef,  (s) => { matches  = s.val() || {}; renderAll(); });
-    onValue(ctpRef,      (s) => { closestToPin = s.val() || {}; renderClosestToPin(); });
+    onValue(matchesRef,  (s) => {
+      const newMatches = s.val() || {};
+      const newJSON = JSON.stringify(newMatches);
+
+      if (spectatorReady && lastMatchesJSON && newJSON !== lastMatchesJSON) {
+        const messages = buildMatchUpdateMessages(lastMatchesData, newMatches);
+        if (messages.length) {
+          messages.slice(0, 3).forEach(showFeedPopup);
+        } else {
+          showFeedPopup("Match score updated");
+        }
+      }
+
+      lastMatchesJSON = newJSON;
+      lastMatchesData = newMatches;
+      matches = newMatches;
+      renderAll();
+    });
+    onValue(ctpRef,      (s) => {
+      const newCtp = s.val() || {};
+      const newJSON = JSON.stringify(newCtp);
+
+      if (spectatorReady && lastCtpJSON && newJSON !== lastCtpJSON) {
+        const messages = buildCtpUpdateMessages(lastCtpData, newCtp);
+        if (messages.length) {
+          messages.slice(0, 2).forEach(showFeedPopup);
+        } else {
+          showFeedPopup("Closest to the Pin updated");
+        }
+      }
+
+      lastCtpJSON = newJSON;
+      lastCtpData = newCtp;
+      closestToPin = newCtp;
+      renderClosestToPin();
+    });
 
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const hamburgerMenu = document.getElementById("hamburgerMenu");
