@@ -432,6 +432,43 @@
       max-height: 320px;
       object-fit: cover;
     }
+
+    /* Closest to the Pin */
+    .closest-pin-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 600px) {
+      .closest-pin-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .closest-pin-box {
+      border-radius: 0.85rem;
+      border: 1px solid #e5e7eb;
+      padding: 0.55rem 0.6rem;
+      background: #ffffff;
+    }
+
+    .closest-pin-hole-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .closest-pin-current {
+      font-size: 0.78rem;
+      color: #111827;
+      line-height: 1.35;
+    }
+
+    .closest-pin-current.empty {
+      color: var(--muted);
+    }
+
   </style>
 </head>
 <body>
@@ -501,6 +538,22 @@
           </div>
         </section>
 
+
+        <!-- CLOSEST TO THE PIN -->
+        <section class="card" id="closestPinCard">
+          <div class="section-title">Closest to the Pin</div>
+          <div class="closest-pin-grid">
+            <div class="closest-pin-box">
+              <div class="closest-pin-hole-title">Hole 4</div>
+              <div id="ctp4Current" class="closest-pin-current empty">No winner posted yet</div>
+            </div>
+            <div class="closest-pin-box">
+              <div class="closest-pin-hole-title">Hole 13</div>
+              <div id="ctp13Current" class="closest-pin-current empty">No winner posted yet</div>
+            </div>
+          </div>
+        </section>
+
         <!-- HOLE BY HOLE -->
         <section class="card">
           <div class="section-title" id="holesTitle">Hole-by-hole</div>
@@ -535,6 +588,7 @@
 
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
+    const closestToPinRef = ref(db, "closestToPin");
 
     function getQueryParam(name) {
       const params = new URLSearchParams(window.location.search);
@@ -563,9 +617,13 @@
     const groupPhotoImg = document.getElementById("groupPhotoImg");
     const groupPhotoLink = document.getElementById("groupPhotoLink");
 
+    const ctp4Current = document.getElementById("ctp4Current");
+    const ctp13Current = document.getElementById("ctp13Current");
+
     let settings = {};
     let players = {};
     let match = null;
+    let closestToPin = {};
 
     onValue(settingsRef, (snap) => {
       settings = snap.val() || {};
@@ -574,6 +632,11 @@
 
     onValue(playersRef, (snap) => {
       players = snap.val() || {};
+      renderAll();
+    });
+
+    onValue(closestToPinRef, (snap) => {
+      closestToPin = snap.val() || {};
       renderAll();
     });
 
@@ -942,9 +1005,34 @@
       }
     }
 
+
+    function formatClosestPin(data) {
+      if (!data || !data.name) return "No winner posted yet";
+
+      const feet = Number.isFinite(Number(data.feet)) ? Number(data.feet) : 0;
+      const inches = Number.isFinite(Number(data.inches)) ? Number(data.inches) : 0;
+      return `${data.name} — ${feet}' ${inches}"`;
+    }
+
+    function renderClosestToPin() {
+      const hole4 = closestToPin?.hole4 || null;
+      const hole13 = closestToPin?.hole13 || null;
+
+      if (ctp4Current) {
+        ctp4Current.textContent = formatClosestPin(hole4);
+        ctp4Current.classList.toggle("empty", !hole4 || !hole4.name);
+      }
+
+      if (ctp13Current) {
+        ctp13Current.textContent = formatClosestPin(hole13);
+        ctp13Current.classList.toggle("empty", !hole13 || !hole13.name);
+      }
+    }
+
     function renderAll() {
       renderScoreHeader();
       renderPlayers();
+      renderClosestToPin();
       renderHoles();
     }
 
