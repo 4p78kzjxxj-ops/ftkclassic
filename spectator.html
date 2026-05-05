@@ -978,9 +978,15 @@
 
         const feet = data.feet ?? 0;
         const inches = data.inches ?? 0;
+        const team = findPlayerTeamByName(data.name);
+        const cardClass = team === "red"
+          ? "match-card red-live"
+          : team === "blue"
+            ? "match-card blue-live"
+            : "match-card even-live";
 
         return `
-          <div class="match-card even-live">
+          <div class="${cardClass}">
             <div class="match-line1">🎯 ${label}</div>
             <div class="match-line2">
               <span>${data.name}</span>
@@ -1058,14 +1064,34 @@
     function findPlayerTeamByName(name) {
       if (!name) return "";
       const target = String(name).trim().toLowerCase();
+      let matchedId = "";
+
       for (const id of Object.keys(players || {})) {
         const p = players[id] || {};
         const playerName = String(p.name || "").trim().toLowerCase();
         if (playerName !== target) continue;
+
+        matchedId = id;
         const rawTeam = String(p.team || p.teamKey || p.color || "").toLowerCase();
         if (rawTeam.includes("red") || rawTeam.includes("bolds")) return "red";
         if (rawTeam.includes("blue") || rawTeam.includes("smith")) return "blue";
       }
+
+      for (const matchId of Object.keys(matches || {})) {
+        const m = matches[matchId] || {};
+        const redIds = m.red?.players || [];
+        const blueIds = m.blue?.players || [];
+
+        if (matchedId && redIds.includes(matchedId)) return "red";
+        if (matchedId && blueIds.includes(matchedId)) return "blue";
+
+        const redHasName = redIds.some((id) => String(players[id]?.name || "").trim().toLowerCase() === target);
+        const blueHasName = blueIds.some((id) => String(players[id]?.name || "").trim().toLowerCase() === target);
+
+        if (redHasName) return "red";
+        if (blueHasName) return "blue";
+      }
+
       return "";
     }
 
