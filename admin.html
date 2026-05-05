@@ -520,6 +520,7 @@
           <button id="menuDeletePhotosBtn" class="menu-item danger" type="button">Delete photos</button>
           <button id="menuDeleteMatchPhotosBtn" class="menu-item danger" type="button">Delete match photos only</button>
           <button id="menuResetScoresBtn" class="menu-item danger" type="button">Reset match scores</button>
+          <button id="menuResetCtpBtn" class="menu-item danger" type="button">Reset closest to pin</button>
                   <button id="menuClearGamesBtn" class="menu-item danger" type="button">Clear games</button>
 </div>
 
@@ -621,6 +622,15 @@
       </button>
       <div class="status-text">
         This will set all 18 holes for all 12 matches back to "no result".
+      </div>
+
+      <hr style="margin:0.75rem 0; border:none; border-top:1px dashed #e5e7eb;" />
+
+      <button id="resetCtpBtn" type="button" class="btn btn-danger">
+        Reset closest to the pin winners
+      </button>
+      <div class="danger-note">
+        This clears the Hole 4 and Hole 13 closest-to-the-pin winners across all match pages.
       </div>
 
       <hr style="margin:0.75rem 0; border:none; border-top:1px dashed #e5e7eb;" />
@@ -866,6 +876,7 @@
     const backMatchesContainer = document.getElementById("backMatchesContainer");
 
     const resetScoresBtn = document.getElementById("resetScoresBtn");
+    const resetCtpBtn = document.getElementById("resetCtpBtn");
     const deletePhotosBtn = document.getElementById("deletePhotosBtn");
     const adminToolsStatus = document.getElementById("adminToolsStatus");
 
@@ -877,6 +888,7 @@
     const menuDeletePhotosBtn = document.getElementById("menuDeletePhotosBtn");
     const menuDeleteMatchPhotosBtn = document.getElementById("menuDeleteMatchPhotosBtn");
     const menuResetScoresBtn = document.getElementById("menuResetScoresBtn");
+    const menuResetCtpBtn = document.getElementById("menuResetCtpBtn");
     
     const menuClearGamesBtn = document.getElementById("menuClearGamesBtn");
 const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
@@ -1308,6 +1320,13 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       setTimeout(() => (adminToolsStatus.textContent = ""), 4000);
     }
 
+    async function doResetClosestToPin() {
+      adminToolsStatus.textContent = "Resetting closest to the pin winners…";
+      await set(ref(db, "closestToPin"), null);
+      adminToolsStatus.textContent = "Closest to the pin winners reset.";
+      setTimeout(() => (adminToolsStatus.textContent = ""), 4000);
+    }
+
     // Reset scores (page button)
     resetScoresBtn.addEventListener("click", async () => {
       const confirmed = confirm(
@@ -1321,6 +1340,26 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
         console.error(err);
         adminToolsStatus.textContent =
           "Failed to reset scores: " + (err?.code || err?.message || "unknown error");
+      }
+    });
+
+    resetCtpBtn.addEventListener("click", () => {
+      const confirmed = confirm("Reset closest to the pin winners for Hole 4 and Hole 13?");
+      if (!confirmed) return;
+
+      if (window.requireAdminCode) {
+        window.requireAdminCode(async () => {
+          try {
+            await doResetClosestToPin();
+          } catch (err) {
+            console.error(err);
+            adminToolsStatus.textContent =
+              "Failed to reset closest to the pin winners: " + (err?.code || err?.message || "unknown error");
+          }
+        }, {
+          title: "Reset closest to the pin",
+          message: "Enter the admin code to reset the closest to the pin winners.",
+        });
       }
     });
 
@@ -1459,6 +1498,25 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
         message: "Enter the admin code to reset ALL match scores.",
       });
     
+    });
+
+    menuResetCtpBtn?.addEventListener("click", () => {
+      closeMenu();
+      const confirmed = confirm("Reset closest to the pin winners for Hole 4 and Hole 13?");
+      if (!confirmed) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          await doResetClosestToPin();
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to reset closest to the pin winners: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Reset closest to the pin",
+        message: "Enter the admin code to reset the closest to the pin winners.",
+      });
     });
 
     // Clear games (delete ALL game sessions)
