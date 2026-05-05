@@ -666,218 +666,141 @@
     .toast-btn.secondary { background: #e5e7eb; color: #374151; }
 
 
-    /* Closest to the Pin */
+    /* Closest to the Pin - compact bottom card */
     .closest-pin-card { display: none; }
 
     .closest-pin-compact-row {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 0.4rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 0.45rem;
       align-items: center;
     }
 
-    .closest-pin-chip {
+    .closest-pin-pill {
       border: 1px solid #e5e7eb;
       border-radius: 999px;
       background: #f9fafb;
-      padding: 0.32rem 0.55rem;
+      padding: 0.35rem 0.55rem;
+      font-size: 0.78rem;
       min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      min-height: 34px;
-    }
-
-    .closest-pin-chip-label {
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: #111827;
-      flex-shrink: 0;
-    }
-
-    .closest-pin-chip-value {
-      font-size: 0.78rem;
-      color: #374151;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      min-width: 0;
     }
 
-    .closest-pin-chip-value.empty {
+    .closest-pin-pill strong {
+      font-size: 0.8rem;
+      margin-right: 0.25rem;
+    }
+
+    .closest-pin-pill span {
       color: var(--muted);
       font-style: italic;
     }
 
     .closest-pin-update-btn {
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: 1px solid #d1d5db;
       background: #fefce8;
-      padding: 0.25rem 0.75rem;
-      font-size: 0.78rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.82rem;
       cursor: pointer;
       min-height: 34px;
-      white-space: nowrap;
     }
 
-    .closest-pin-update-btn:active { transform: scale(0.97); }
-
-    @media (max-width: 430px) {
-      .closest-pin-compact-row {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .closest-pin-update-btn {
-        grid-column: 1 / -1;
-        width: 100%;
-      }
-    }
-
-    .bottom-sheet-overlay {
+    .closest-pin-sheet-overlay {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.45);
       display: none;
       align-items: flex-end;
       justify-content: center;
-      z-index: 9999;
+      z-index: 120;
       padding: 0.75rem;
     }
 
-    .bottom-sheet-overlay.open { display: flex; }
+    .closest-pin-sheet-overlay.active { display: flex; }
 
-    .bottom-sheet {
+    .closest-pin-sheet {
       width: 100%;
       max-width: 520px;
       background: #ffffff;
       border-radius: 1.2rem 1.2rem 0.9rem 0.9rem;
-      box-shadow: 0 24px 70px rgba(15,23,42,0.45);
-      padding: 0.75rem;
-      animation: sheet-slide-up 0.18s ease-out;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.42);
+      padding: 0.8rem;
+      animation: ctp-sheet-in 0.2s ease-out;
     }
 
-    .bottom-sheet-handle {
+    .closest-pin-sheet-handle {
       width: 42px;
-      height: 4px;
+      height: 5px;
       border-radius: 999px;
       background: #d1d5db;
-      margin: 0 auto 0.65rem;
+      margin: 0 auto 0.7rem;
     }
 
-    .bottom-sheet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.65rem;
+    .closest-pin-sheet-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
     }
 
-    .bottom-sheet-title {
-      font-size: 1rem;
-      font-weight: 800;
-    }
-
-    .bottom-sheet-subtitle {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 0.1rem;
-    }
-
-    .bottom-sheet-close {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      font-size: 1.1rem;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .bottom-sheet-tabs {
+    .closest-pin-sheet-tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.4rem;
-      margin-bottom: 0.6rem;
-      background: #f3f4f6;
-      border-radius: 999px;
-      padding: 0.25rem;
+      margin-bottom: 0.55rem;
     }
 
-    .bottom-sheet-tab {
-      border: none;
-      background: transparent;
+    .closest-pin-tab {
       border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
       padding: 0.45rem 0.6rem;
-      font-size: 0.86rem;
-      font-weight: 700;
+      font-size: 0.85rem;
       cursor: pointer;
-      color: #4b5563;
-      min-height: 38px;
     }
 
-    .bottom-sheet-tab.active {
+    .closest-pin-tab.active {
       background: #111827;
       color: #ffffff;
+      border-color: #111827;
     }
 
-    .bottom-sheet-current {
-      font-size: 0.84rem;
-      color: #374151;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.85rem;
-      padding: 0.55rem 0.65rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .bottom-sheet-current.empty {
+    .closest-pin-sheet label {
+      display: block;
+      font-size: 0.75rem;
       color: var(--muted);
-      font-style: italic;
+      margin: 0.45rem 0 0.2rem;
     }
 
-    .bottom-sheet-form input {
+    .closest-pin-sheet select,
+    .closest-pin-sheet input {
       width: 100%;
       border: 1px solid #d1d5db;
-      border-radius: 0.8rem;
-      padding: 0.7rem;
-      margin-top: 0.45rem;
+      border-radius: 0.75rem;
+      padding: 0.65rem;
       font-size: 0.95rem;
       min-height: var(--tap-target);
       background: #ffffff;
     }
 
-    .bottom-sheet-distance-row {
+    .closest-pin-distance-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.45rem;
     }
 
-    .bottom-sheet-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .closest-pin-sheet-actions {
+      display: flex;
+      justify-content: flex-end;
       gap: 0.45rem;
-      margin-top: 0.7rem;
+      margin-top: 0.75rem;
     }
 
-    .bottom-sheet-action {
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f3f4f6;
-      padding: 0.55rem 0.8rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      min-height: var(--tap-target);
-    }
-
-    .bottom-sheet-action.primary {
-      background: #fefce8;
-      border-color: #d1d5db;
-      font-weight: 700;
-    }
-
-    @keyframes sheet-slide-up {
-      from { opacity: 0; transform: translateY(24px); }
+    @keyframes ctp-sheet-in {
+      from { opacity: 0; transform: translateY(28px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -972,6 +895,7 @@
       </div>
     </section>
 
+
     <section id="holesCard" class="card holes-card">
       <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
       <div id="holesContainer"></div>
@@ -980,50 +904,43 @@
     <section id="closestPinCard" class="card closest-pin-card">
       <div class="section-title">Closest to the Pin</div>
       <div class="closest-pin-compact-row">
-        <div class="closest-pin-chip">
-          <span class="closest-pin-chip-label">H4</span>
-          <span id="ctp4Summary" class="closest-pin-chip-value empty">No winner</span>
-        </div>
-        <div class="closest-pin-chip">
-          <span class="closest-pin-chip-label">H13</span>
-          <span id="ctp13Summary" class="closest-pin-chip-value empty">No winner</span>
-        </div>
-        <button id="openCtpSheetBtn" class="closest-pin-update-btn" type="button">Update</button>
+        <div class="closest-pin-pill" id="ctp4Display"><strong>H4</strong><span>No winner</span></div>
+        <div class="closest-pin-pill" id="ctp13Display"><strong>H13</strong><span>No winner</span></div>
+        <button id="openClosestPinSheetBtn" class="closest-pin-update-btn" type="button">Update</button>
       </div>
     </section>
-
   </main>
 
   <div id="toastContainer"></div>
 
-  <div id="ctpSheetOverlay" class="bottom-sheet-overlay" aria-hidden="true">
-    <div class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="ctpSheetTitle">
-      <div class="bottom-sheet-handle"></div>
-      <div class="bottom-sheet-header">
+
+  <div id="closestPinSheetOverlay" class="closest-pin-sheet-overlay">
+    <div class="closest-pin-sheet" role="dialog" aria-modal="true" aria-label="Update closest to the pin">
+      <div class="closest-pin-sheet-handle"></div>
+      <div class="closest-pin-sheet-title">Update closest to the pin</div>
+
+      <div class="closest-pin-sheet-tabs">
+        <button id="ctpSheetHole4Btn" class="closest-pin-tab active" type="button">Hole 4</button>
+        <button id="ctpSheetHole13Btn" class="closest-pin-tab" type="button">Hole 13</button>
+      </div>
+
+      <label for="ctpSheetPlayer">Player</label>
+      <select id="ctpSheetPlayer" aria-label="Closest to the pin player"></select>
+
+      <div class="closest-pin-distance-row">
         <div>
-          <div id="ctpSheetTitle" class="bottom-sheet-title">Update Closest to the Pin</div>
-          <div class="bottom-sheet-subtitle">One tournament-wide winner per hole.</div>
-        </div>
-        <button id="closeCtpSheetBtn" class="bottom-sheet-close" type="button" aria-label="Close">×</button>
-      </div>
-
-      <div class="bottom-sheet-tabs" role="tablist" aria-label="Closest to the Pin holes">
-        <button id="ctpSheetTab4" class="bottom-sheet-tab active" type="button" role="tab" aria-selected="true">Hole 4</button>
-        <button id="ctpSheetTab13" class="bottom-sheet-tab" type="button" role="tab" aria-selected="false">Hole 13</button>
-      </div>
-
-      <div id="ctpSheetCurrent" class="bottom-sheet-current empty">No winner posted yet</div>
-
-      <div class="bottom-sheet-form">
-        <input id="ctpSheetName" type="text" placeholder="Name" autocomplete="name" />
-        <div class="bottom-sheet-distance-row">
+          <label for="ctpSheetFeet">Feet</label>
           <input id="ctpSheetFeet" type="number" inputmode="numeric" min="0" placeholder="Feet" />
+        </div>
+        <div>
+          <label for="ctpSheetInches">Inches</label>
           <input id="ctpSheetInches" type="number" inputmode="numeric" min="0" max="11" placeholder="Inches" />
         </div>
-        <div class="bottom-sheet-actions">
-          <button id="cancelCtpSheetBtn" class="bottom-sheet-action" type="button">Cancel</button>
-          <button id="saveCtpSheetBtn" class="bottom-sheet-action primary" type="button">Save</button>
-        </div>
+      </div>
+
+      <div class="closest-pin-sheet-actions">
+        <button id="closeClosestPinSheetBtn" class="camera-btn" type="button">Cancel</button>
+        <button id="saveClosestPinSheetBtn" class="camera-btn" type="button">Save</button>
       </div>
     </div>
   </div>
@@ -1105,20 +1022,17 @@
     const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
 
     const closestPinCard = document.getElementById("closestPinCard");
-    const ctp4Summary = document.getElementById("ctp4Summary");
-    const ctp13Summary = document.getElementById("ctp13Summary");
-    const openCtpSheetBtn = document.getElementById("openCtpSheetBtn");
-    const ctpSheetOverlay = document.getElementById("ctpSheetOverlay");
-    const closeCtpSheetBtn = document.getElementById("closeCtpSheetBtn");
-    const cancelCtpSheetBtn = document.getElementById("cancelCtpSheetBtn");
-    const ctpSheetTab4 = document.getElementById("ctpSheetTab4");
-    const ctpSheetTab13 = document.getElementById("ctpSheetTab13");
-    const ctpSheetCurrent = document.getElementById("ctpSheetCurrent");
-    const ctpSheetName = document.getElementById("ctpSheetName");
+    const ctp4Display = document.getElementById("ctp4Display");
+    const ctp13Display = document.getElementById("ctp13Display");
+    const openClosestPinSheetBtn = document.getElementById("openClosestPinSheetBtn");
+    const closestPinSheetOverlay = document.getElementById("closestPinSheetOverlay");
+    const closeClosestPinSheetBtn = document.getElementById("closeClosestPinSheetBtn");
+    const saveClosestPinSheetBtn = document.getElementById("saveClosestPinSheetBtn");
+    const ctpSheetHole4Btn = document.getElementById("ctpSheetHole4Btn");
+    const ctpSheetHole13Btn = document.getElementById("ctpSheetHole13Btn");
+    const ctpSheetPlayer = document.getElementById("ctpSheetPlayer");
     const ctpSheetFeet = document.getElementById("ctpSheetFeet");
     const ctpSheetInches = document.getElementById("ctpSheetInches");
-    const saveCtpSheetBtn = document.getElementById("saveCtpSheetBtn");
-    let activeClosestPinHole = "hole4";
 
 
     const holeConfigs = [
@@ -1135,6 +1049,7 @@
     let matchesAll = {};
     let matchData = null;
     let closestPins = {};
+    let activeClosestPinHole = "hole4";
 
     let settingsLoaded = false;
     let playersLoaded = false;
@@ -1713,70 +1628,110 @@
     }
 
 
-    function formatClosestPin(data, emptyText = "No winner posted yet") {
-      if (!data || !data.name) return emptyText;
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getClosestPinDisplay(data) {
+      if (!data || !data.name) return "No winner";
       const feet = data.feet ?? 0;
       const inches = data.inches ?? 0;
       return `${data.name} — ${feet}' ${inches}"`;
     }
 
-    function setClosestPinSummary(el, data) {
-      if (!el) return;
-      el.textContent = formatClosestPin(data, "No winner");
-      el.classList.toggle("empty", !(data && data.name));
+    function getClosestPinHoleLabel(holeKey) {
+      return holeKey === "hole13" ? "Hole 13" : "Hole 4";
     }
 
-    function selectClosestPinHole(holeKey) {
-      activeClosestPinHole = holeKey;
-      const isHole4 = holeKey === "hole4";
+    function populateClosestPinPlayerSelect(selectedPlayerId) {
+      if (!ctpSheetPlayer) return;
 
-      ctpSheetTab4.classList.toggle("active", isHole4);
-      ctpSheetTab13.classList.toggle("active", !isHole4);
-      ctpSheetTab4.setAttribute("aria-selected", isHole4 ? "true" : "false");
-      ctpSheetTab13.setAttribute("aria-selected", !isHole4 ? "true" : "false");
+      const { red, blue } = getMatchPlayersFor(matchData || {});
+      const teamNames = getTeamNames();
+      const selectedId = selectedPlayerId ? String(selectedPlayerId) : "";
 
-      fillClosestPinSheet();
-    }
+      const makeOptions = (list, teamKey) => list
+        .filter(p => p && p.id)
+        .map(p => {
+          const pid = String(p.id);
+          const label = escapeHtml(p.name || "Player");
+          const selected = pid === selectedId ? " selected" : "";
+          return `<option value="${escapeHtml(pid)}" data-team="${teamKey}"${selected}>${label}</option>`;
+        })
+        .join("");
 
-    function fillClosestPinSheet() {
-      const data = closestPins[activeClosestPinHole] || {};
-      ctpSheetCurrent.textContent = formatClosestPin(data);
-      ctpSheetCurrent.classList.toggle("empty", !(data && data.name));
-      ctpSheetName.value = data.name || "";
-      ctpSheetFeet.value = data.feet ?? "";
-      ctpSheetInches.value = data.inches ?? "";
-      saveCtpSheetBtn.textContent = activeClosestPinHole === "hole4" ? "Save Hole 4" : "Save Hole 13";
-    }
+      const redOptions = makeOptions(red, "red");
+      const blueOptions = makeOptions(blue, "blue");
 
-    function openClosestPinSheet(holeKey = "hole4") {
-      selectClosestPinHole(holeKey);
-      ctpSheetOverlay.classList.add("open");
-      ctpSheetOverlay.setAttribute("aria-hidden", "false");
-      setTimeout(() => ctpSheetName.focus(), 50);
-    }
+      let html = '<option value="">Select player</option>';
+      if (redOptions) html += `<optgroup label="${escapeHtml(teamNames.red)}">${redOptions}</optgroup>`;
+      if (blueOptions) html += `<optgroup label="${escapeHtml(teamNames.blue)}">${blueOptions}</optgroup>`;
+      if (!redOptions && !blueOptions) html += '<option value="" disabled>No players assigned to this match</option>';
 
-    function closeClosestPinSheet() {
-      ctpSheetOverlay.classList.remove("open");
-      ctpSheetOverlay.setAttribute("aria-hidden", "true");
+      ctpSheetPlayer.innerHTML = html;
+
+      const hasSelected = Array.from(ctpSheetPlayer.options).some(opt => opt.value === selectedId);
+      ctpSheetPlayer.value = hasSelected ? selectedId : "";
     }
 
     function renderClosestPins() {
-      setClosestPinSummary(ctp4Summary, closestPins.hole4 || {});
-      setClosestPinSummary(ctp13Summary, closestPins.hole13 || {});
-      if (ctpSheetOverlay.classList.contains("open")) fillClosestPinSheet();
+      if (!matchId) return;
+
+      const hole4 = closestPins.hole4 || {};
+      const hole13 = closestPins.hole13 || {};
+
+      if (ctp4Display) ctp4Display.innerHTML = `<strong>H4</strong><span>${escapeHtml(getClosestPinDisplay(hole4))}</span>`;
+      if (ctp13Display) ctp13Display.innerHTML = `<strong>H13</strong><span>${escapeHtml(getClosestPinDisplay(hole13))}</span>`;
+
+      if (closestPinSheetOverlay?.classList.contains("active")) {
+        loadClosestPinSheetValues(activeClosestPinHole);
+      }
     }
 
-    async function saveClosestPin() {
-      const holeKey = activeClosestPinHole;
-      const name = ctpSheetName.value.trim();
+    function loadClosestPinSheetValues(holeKey) {
+      activeClosestPinHole = holeKey === "hole13" ? "hole13" : "hole4";
+      const data = closestPins[activeClosestPinHole] || {};
+
+      ctpSheetHole4Btn?.classList.toggle("active", activeClosestPinHole === "hole4");
+      ctpSheetHole13Btn?.classList.toggle("active", activeClosestPinHole === "hole13");
+
+      populateClosestPinPlayerSelect(data.playerId || "");
+      if (ctpSheetFeet) ctpSheetFeet.value = data.feet ?? "";
+      if (ctpSheetInches) ctpSheetInches.value = data.inches ?? "";
+    }
+
+    function openClosestPinSheet(holeKey = "hole4") {
+      if (!matchId) return;
+      loadClosestPinSheetValues(holeKey);
+      closestPinSheetOverlay?.classList.add("active");
+      setTimeout(() => ctpSheetPlayer?.focus(), 50);
+    }
+
+    function closeClosestPinSheet() {
+      closestPinSheetOverlay?.classList.remove("active");
+    }
+
+    async function saveClosestPin(holeKey) {
+      if (!matchId) return;
+
+      const playerId = ctpSheetPlayer.value.trim();
+      const selectedOption = ctpSheetPlayer.options[ctpSheetPlayer.selectedIndex] || null;
+      const selectedTeam = selectedOption ? selectedOption.getAttribute("data-team") || "" : "";
+      const player = playerId ? players[playerId] : null;
+      const name = player?.name || selectedOption?.textContent || "";
       const feetRaw = ctpSheetFeet.value.trim();
       const inchesRaw = ctpSheetInches.value.trim();
       const feet = feetRaw === "" ? 0 : Number.parseInt(feetRaw, 10);
       const inches = inchesRaw === "" ? 0 : Number.parseInt(inchesRaw, 10);
 
-      if (!name) {
-        alert("Enter a name.");
-        ctpSheetName.focus();
+      if (!playerId || !player) {
+        alert("Select one of the players from this match.");
+        ctpSheetPlayer.focus();
         return;
       }
 
@@ -1794,24 +1749,25 @@
 
       try {
         const updatedAt = Date.now();
-        const holeNumber = holeKey === "hole4" ? 4 : 13;
+        const holeNumber = holeKey === "hole13" ? 13 : 4;
         const distanceText = `${feet}' ${inches}"`;
         const message = `🎯 Closest to the Pin update: Hole ${holeNumber} — ${name} is closest at ${distanceText}`;
 
         const feedKey = push(tournamentFeedRef).key;
-        const matchIdForFeed = matchId ? String(matchId) : "tournament";
         const updates = {};
 
         updates[`closestToPin/${holeKey}`] = {
+          playerId,
           name,
+          team: selectedTeam,
           feet,
           inches,
           updatedAt,
-          updatedFromMatch: matchIdForFeed
+          updatedFromMatch: String(matchId)
         };
 
         updates[`tournamentFeed/${feedKey}`] = {
-          matchId: matchIdForFeed,
+          matchId: String(matchId),
           holeNumber,
           message,
           createdAt: updatedAt,
@@ -1821,7 +1777,9 @@
           closestToPin: {
             holeKey,
             holeNumber,
+            playerId,
             name,
+            team: selectedTeam,
             feet,
             inches
           }
@@ -1957,17 +1915,15 @@
     groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
     cameraButton.addEventListener("click", handleCameraClick);
     clearMatchPhotoButton.addEventListener("click", handleClearMatchPhoto);
-    openCtpSheetBtn.addEventListener("click", () => openClosestPinSheet("hole4"));
-    ctpSheetTab4.addEventListener("click", () => selectClosestPinHole("hole4"));
-    ctpSheetTab13.addEventListener("click", () => selectClosestPinHole("hole13"));
-    closeCtpSheetBtn.addEventListener("click", closeClosestPinSheet);
-    cancelCtpSheetBtn.addEventListener("click", closeClosestPinSheet);
-    saveCtpSheetBtn.addEventListener("click", saveClosestPin);
-    ctpSheetOverlay.addEventListener("click", (e) => {
-      if (e.target === ctpSheetOverlay) closeClosestPinSheet();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && ctpSheetOverlay.classList.contains("open")) closeClosestPinSheet();
+    openClosestPinSheetBtn.addEventListener("click", () => openClosestPinSheet("hole4"));
+    ctp4Display.addEventListener("click", () => openClosestPinSheet("hole4"));
+    ctp13Display.addEventListener("click", () => openClosestPinSheet("hole13"));
+    ctpSheetHole4Btn.addEventListener("click", () => loadClosestPinSheetValues("hole4"));
+    ctpSheetHole13Btn.addEventListener("click", () => loadClosestPinSheetValues("hole13"));
+    closeClosestPinSheetBtn.addEventListener("click", closeClosestPinSheet);
+    saveClosestPinSheetBtn.addEventListener("click", () => saveClosestPin(activeClosestPinHole));
+    closestPinSheetOverlay.addEventListener("click", (e) => {
+      if (e.target === closestPinSheetOverlay) closeClosestPinSheet();
     });
   </script>
 </body>
