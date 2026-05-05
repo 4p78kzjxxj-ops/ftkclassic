@@ -665,6 +665,80 @@
     .toast-btn.primary { background: #fbbf24; color: #111827; }
     .toast-btn.secondary { background: #e5e7eb; color: #374151; }
 
+
+    /* Closest to the Pin */
+    .closest-pin-card { display: none; }
+
+    .closest-pin-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 600px) {
+      .closest-pin-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .closest-pin-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.9rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+    }
+
+    .closest-pin-hole-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .closest-pin-current {
+      font-size: 0.9rem;
+      color: #374151;
+      margin-top: 0.25rem;
+      margin-bottom: 0.55rem;
+      min-height: 1.25rem;
+    }
+
+    .closest-pin-current.empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .closest-pin-form {
+      display: none;
+      margin-top: 0.45rem;
+    }
+
+    .closest-pin-form.open { display: block; }
+
+    .closest-pin-form input {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 0.7rem;
+      padding: 0.65rem;
+      margin-top: 0.45rem;
+      font-size: 0.95rem;
+      min-height: var(--tap-target);
+      background: #ffffff;
+    }
+
+    .closest-pin-distance-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    .closest-pin-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin-top: 0.55rem;
+    }
+
     @keyframes toast-pop-in {
       from { opacity: 0; transform: scale(0.92) translateY(6px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
@@ -756,6 +830,46 @@
       </div>
     </section>
 
+
+    <section id="closestPinCard" class="card closest-pin-card">
+      <div class="section-title">Closest to the Pin</div>
+      <div class="closest-pin-grid">
+        <div class="closest-pin-box">
+          <div class="closest-pin-hole-title">Hole 4</div>
+          <div id="ctp4Current" class="closest-pin-current empty">No winner posted yet</div>
+          <button id="updateCtp4" class="camera-btn" type="button">Update</button>
+          <div id="ctp4Form" class="closest-pin-form">
+            <input id="ctp4Name" type="text" placeholder="Name" autocomplete="name" />
+            <div class="closest-pin-distance-row">
+              <input id="ctp4Feet" type="number" inputmode="numeric" min="0" placeholder="Feet" />
+              <input id="ctp4Inches" type="number" inputmode="numeric" min="0" max="11" placeholder="Inches" />
+            </div>
+            <div class="closest-pin-actions">
+              <button id="cancelCtp4" class="camera-btn" type="button">Cancel</button>
+              <button id="saveCtp4" class="camera-btn" type="button">Save Hole 4</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="closest-pin-box">
+          <div class="closest-pin-hole-title">Hole 13</div>
+          <div id="ctp13Current" class="closest-pin-current empty">No winner posted yet</div>
+          <button id="updateCtp13" class="camera-btn" type="button">Update</button>
+          <div id="ctp13Form" class="closest-pin-form">
+            <input id="ctp13Name" type="text" placeholder="Name" autocomplete="name" />
+            <div class="closest-pin-distance-row">
+              <input id="ctp13Feet" type="number" inputmode="numeric" min="0" placeholder="Feet" />
+              <input id="ctp13Inches" type="number" inputmode="numeric" min="0" max="11" placeholder="Inches" />
+            </div>
+            <div class="closest-pin-actions">
+              <button id="cancelCtp13" class="camera-btn" type="button">Cancel</button>
+              <button id="saveCtp13" class="camera-btn" type="button">Save Hole 13</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="holesCard" class="card holes-card">
       <div class="section-title" id="holesSectionTitle">Hole-by-hole</div>
       <div id="holesContainer"></div>
@@ -813,6 +927,7 @@
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
+    const tournamentClosestToPinRef = ref(db, "closestToPin");
     const tournamentFeedRef = ref(db, "tournamentFeed");
 
     const matchListCard = document.getElementById("matchListCard");
@@ -839,6 +954,24 @@
     const groupPhotoArea = document.getElementById("groupPhotoArea");
     const groupPhotoBigButton = document.getElementById("groupPhotoBigButton");
 
+    const closestPinCard = document.getElementById("closestPinCard");
+    const ctp4Current = document.getElementById("ctp4Current");
+    const ctp4Form = document.getElementById("ctp4Form");
+    const ctp4Name = document.getElementById("ctp4Name");
+    const ctp4Feet = document.getElementById("ctp4Feet");
+    const ctp4Inches = document.getElementById("ctp4Inches");
+    const updateCtp4 = document.getElementById("updateCtp4");
+    const cancelCtp4 = document.getElementById("cancelCtp4");
+    const saveCtp4 = document.getElementById("saveCtp4");
+    const ctp13Current = document.getElementById("ctp13Current");
+    const ctp13Form = document.getElementById("ctp13Form");
+    const ctp13Name = document.getElementById("ctp13Name");
+    const ctp13Feet = document.getElementById("ctp13Feet");
+    const ctp13Inches = document.getElementById("ctp13Inches");
+    const updateCtp13 = document.getElementById("updateCtp13");
+    const cancelCtp13 = document.getElementById("cancelCtp13");
+    const saveCtp13 = document.getElementById("saveCtp13");
+
 
     const holeConfigs = [
       { num: 1,  par: 5, yards: 474 }, { num: 2,  par: 4, yards: 340 }, { num: 3,  par: 4, yards: 360 },
@@ -853,6 +986,7 @@
     let players = {};
     let matchesAll = {};
     let matchData = null;
+    let closestPins = {};
 
     let settingsLoaded = false;
     let playersLoaded = false;
@@ -981,6 +1115,11 @@
         if (currentHoleIndex === null) initCurrentHoleIndex();
       }
       renderMain();
+    });
+
+    onValue(tournamentClosestToPinRef, (snap) => {
+      closestPins = snap.val() || {};
+      renderClosestPins();
     });
 
     function getTeamNames() {
@@ -1425,6 +1564,99 @@
       });
     }
 
+
+    function formatClosestPin(data) {
+      if (!data || !data.name) return "No winner posted yet";
+      const feet = data.feet ?? 0;
+      const inches = data.inches ?? 0;
+      return `${data.name} — ${feet}' ${inches}"`;
+    }
+
+    function setClosestPinCurrent(el, data) {
+      if (!el) return;
+      el.textContent = formatClosestPin(data);
+      el.classList.toggle("empty", !(data && data.name));
+    }
+
+    function fillClosestPinForm(holeKey) {
+      const data = closestPins[holeKey] || {};
+      if (holeKey === "hole4") {
+        ctp4Name.value = data.name || "";
+        ctp4Feet.value = data.feet ?? "";
+        ctp4Inches.value = data.inches ?? "";
+      } else if (holeKey === "hole13") {
+        ctp13Name.value = data.name || "";
+        ctp13Feet.value = data.feet ?? "";
+        ctp13Inches.value = data.inches ?? "";
+      }
+    }
+
+    function openClosestPinForm(holeKey) {
+      if (holeKey === "hole4") {
+        fillClosestPinForm("hole4");
+        ctp4Form.classList.add("open");
+        ctp4Name.focus();
+      } else if (holeKey === "hole13") {
+        fillClosestPinForm("hole13");
+        ctp13Form.classList.add("open");
+        ctp13Name.focus();
+      }
+    }
+
+    function closeClosestPinForm(holeKey) {
+      if (holeKey === "hole4") ctp4Form.classList.remove("open");
+      else if (holeKey === "hole13") ctp13Form.classList.remove("open");
+    }
+
+    function renderClosestPins() {
+      setClosestPinCurrent(ctp4Current, closestPins.hole4 || {});
+      setClosestPinCurrent(ctp13Current, closestPins.hole13 || {});
+
+      if (ctp4Form.classList.contains("open")) fillClosestPinForm("hole4");
+      if (ctp13Form.classList.contains("open")) fillClosestPinForm("hole13");
+    }
+
+    async function saveClosestPin(holeKey, nameEl, feetEl, inchesEl) {
+      const name = nameEl.value.trim();
+      const feetRaw = feetEl.value.trim();
+      const inchesRaw = inchesEl.value.trim();
+      const feet = feetRaw === "" ? 0 : Number.parseInt(feetRaw, 10);
+      const inches = inchesRaw === "" ? 0 : Number.parseInt(inchesRaw, 10);
+
+      if (!name) {
+        alert("Enter a name.");
+        nameEl.focus();
+        return;
+      }
+
+      if (Number.isNaN(feet) || feet < 0) {
+        alert("Enter a valid feet value.");
+        feetEl.focus();
+        return;
+      }
+
+      if (Number.isNaN(inches) || inches < 0 || inches > 11) {
+        alert("Enter a valid inches value from 0 to 11.");
+        inchesEl.focus();
+        return;
+      }
+
+      try {
+        await update(ref(db, `closestToPin/${holeKey}`), {
+          name,
+          feet,
+          inches,
+          updatedAt: Date.now(),
+          updatedFromMatch: matchId ? String(matchId) : null
+        });
+
+        closeClosestPinForm(holeKey);
+      } catch (err) {
+        console.error("Failed to save closest to the pin:", err);
+        alert("Could not save closest to the pin.");
+      }
+    }
+
     function renderGroupPhotoState() {
       if (!matchData || !matchId) {
         groupPhotoArea.style.display = "block";
@@ -1529,6 +1761,7 @@
         headerSubtitleEl.textContent = "Match admin – select a match";
         matchListCard.style.display = "block";
         scoreWrapper.style.display = "none";
+        closestPinCard.style.display = "none";
         holesCard.style.display = "none";
         renderMatchList();
         return;
@@ -1536,14 +1769,23 @@
 
       matchListCard.style.display = "none";
       scoreWrapper.style.display = "block";
+      closestPinCard.style.display = "block";
       holesCard.style.display = "block";
       headerSubtitleEl.textContent = `Match admin – Match ${matchId}`;
       renderScoreBubble();
+      renderClosestPins();
     }
 
     groupPhotoBigButton.addEventListener("click", handleGroupPhotoClick);
     cameraButton.addEventListener("click", handleCameraClick);
     clearMatchPhotoButton.addEventListener("click", handleClearMatchPhoto);
+    updateCtp4.addEventListener("click", () => openClosestPinForm("hole4"));
+    cancelCtp4.addEventListener("click", () => closeClosestPinForm("hole4"));
+    saveCtp4.addEventListener("click", () => saveClosestPin("hole4", ctp4Name, ctp4Feet, ctp4Inches));
+
+    updateCtp13.addEventListener("click", () => openClosestPinForm("hole13"));
+    cancelCtp13.addEventListener("click", () => closeClosestPinForm("hole13"));
+    saveCtp13.addEventListener("click", () => saveClosestPin("hole13", ctp13Name, ctp13Feet, ctp13Inches));
   </script>
 </body>
 </html>
