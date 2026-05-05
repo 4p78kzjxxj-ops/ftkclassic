@@ -464,6 +464,13 @@
     </section>
 
     <section class="card">
+      <div class="section-title">Closest to the Pin</div>
+      <div id="ctpContainer" class="matches-list">
+        <div class="empty-state">No winners yet.</div>
+      </div>
+    </section>
+
+    <section class="card">
       <div class="section-title">All matches</div>
       <div id="matchesContainer" class="matches-list">
         <div class="empty-state">Loading matches…</div>
@@ -509,6 +516,7 @@
     const settingsRef = ref(db, "settings");
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
+    const ctpRef = ref(db, "closestToPin");
 
     const viewerCountEl = document.getElementById("viewerCount");
     const overallRedNameEl = document.getElementById("overallRedName");
@@ -519,10 +527,12 @@
     const overallSliderBlueEl = document.getElementById("overallSliderBlue");
     const overallSliderTextEl = document.getElementById("overallSliderText");
     const matchesContainer = document.getElementById("matchesContainer");
+    const ctpContainer = document.getElementById("ctpContainer");
 
     let settings = {};
     let players = {};
     let matches = {};
+    let closestToPin = {};
 
     function setupPresence(db, pageKey, onCountChange) {
       const connectionsRef = ref(db, `presence/${pageKey}`);
@@ -815,14 +825,48 @@
       matchesContainer.innerHTML = html;
     }
 
+    function renderClosestToPin() {
+      if (!ctpContainer) return;
+
+      function renderHole(label, data) {
+        if (!data || !data.name) {
+          return `
+            <div class="match-card not-started">
+              <div class="match-line1">${label}</div>
+              <div class="match-line2">No winner yet</div>
+            </div>
+          `;
+        }
+
+        const feet = data.feet ?? 0;
+        const inches = data.inches ?? 0;
+
+        return `
+          <div class="match-card even-live">
+            <div class="match-line1">🎯 ${label}</div>
+            <div class="match-line2">
+              <span>${data.name}</span>
+              <span>${feet}' ${inches}"</span>
+            </div>
+          </div>
+        `;
+      }
+
+      ctpContainer.innerHTML =
+        renderHole("Hole 4", closestToPin.hole4) +
+        renderHole("Hole 13", closestToPin.hole13);
+    }
+
     function renderAll() {
       renderTournamentOverview();
+      renderClosestToPin();
       renderMatches();
     }
 
     onValue(settingsRef, (s) => { settings = s.val() || {}; renderAll(); });
     onValue(playersRef,  (s) => { players  = s.val() || {}; renderAll(); });
     onValue(matchesRef,  (s) => { matches  = s.val() || {}; renderAll(); });
+    onValue(ctpRef,      (s) => { closestToPin = s.val() || {}; renderClosestToPin(); });
 
     // Hamburger JS (required)
     const hamburgerBtn = document.getElementById("hamburgerBtn");
