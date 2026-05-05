@@ -1642,12 +1642,33 @@
       }
 
       try {
+        const updatedAt = Date.now();
+        const holeNumber = holeKey === "hole4" ? 4 : 13;
+        const distanceText = `${feet}' ${inches}"`;
+        const message = `🎯 Closest to the Pin update: Hole ${holeNumber} — ${name} is closest at ${distanceText}`;
+
         await update(ref(db, `closestToPin/${holeKey}`), {
           name,
           feet,
           inches,
-          updatedAt: Date.now(),
+          updatedAt,
           updatedFromMatch: matchId ? String(matchId) : null
+        });
+
+        const newFeedRef = push(tournamentFeedRef);
+        await set(newFeedRef, {
+          matchId: matchId ? String(matchId) : null,
+          holeNumber,
+          message,
+          createdAt: updatedAt,
+          result: "closestToPin",
+          type: "closestToPin",
+          closestToPin: {
+            holeKey,
+            name,
+            feet,
+            inches
+          }
         });
 
         closeClosestPinForm(holeKey);
