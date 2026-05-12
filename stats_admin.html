@@ -319,7 +319,7 @@
 
     <div class="help-text">
       Calculated numbers come from the current match data. Manual numbers are added on top.
-      Final Total is what the stats page should show.
+      Final Total is what the public stats page should show.
     </div>
 
     <div class="save-all-wrap">
@@ -340,7 +340,6 @@
     getDatabase,
     ref,
     onValue,
-    set,
     update,
     remove
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
@@ -390,9 +389,14 @@
     }
   }
 
-  function numberValue(value) {
-    const n = parseInt(value, 10);
+  function statNumber(value) {
+    const n = Number(value);
     return Number.isFinite(n) && n >= 0 ? n : 0;
+  }
+
+  function getManualStat(manual, key) {
+    if (!manual) return 0;
+    return statNumber(manual[key]);
   }
 
   function computeWinnerColor(matchObj) {
@@ -413,7 +417,7 @@
     let holesWon = 0;
     let matchesWon = 0;
 
-    for (const [id, m] of Object.entries(matches)) {
+    for (const [id, m] of Object.entries(matches || {})) {
       const redP = m.red?.players || [];
       const blueP = m.blue?.players || [];
       let side = null;
@@ -437,13 +441,41 @@
     };
   }
 
+  function getCardValues(card) {
+    const playerId = card.dataset.playerId;
+
+    return {
+      playerId,
+      holeWins: statNumber(card.querySelector('[data-stat="holeWins"]').value),
+      matchWins: statNumber(card.querySelector('[data-stat="matchWins"]').value),
+      tournamentsWon: statNumber(card.querySelector('[data-stat="tournamentsWon"]').value)
+    };
+  }
+
+  function updateCardTotals(card) {
+    const playerId = card.dataset.playerId;
+    const calculated = getCalculatedStatsForPlayer(playerId);
+
+    const manualHoleWins = statNumber(card.querySelector('[data-stat="holeWins"]').value);
+    const manualMatchWins = statNumber(card.querySelector('[data-stat="matchWins"]').value);
+    const manualTournamentsWon = statNumber(card.querySelector('[data-stat="tournamentsWon"]').value);
+
+    card.querySelector('[data-total="holeWins"]').textContent = calculated.holeWins + manualHoleWins;
+    card.querySelector('[data-total="matchWins"]').textContent = calculated.matchWins + manualMatchWins;
+    card.querySelector('[data-total="tournamentsWon"]').textContent = calculated.tournamentsWon + manualTournamentsWon;
+  }
+
   function renderAdmin() {
     if (!playersLoaded || !matchesLoaded || !manualStatsLoaded) return;
 
-    const rows = Object.entries(players)
+    const rows = Object.entries(players || {})
       .map(([id, p]) => {
         const calculated = getCalculatedStatsForPlayer(id);
         const manual = manualStats[id] || {};
+
+        const manualHoleWins = getManualStat(manual, "holeWins");
+        const manualMatchWins = getManualStat(manual, "matchWins");
+        const manualTournamentsWon = getManualStat(manual, "tournamentsWon");
 
         return {
           id,
@@ -453,13 +485,13 @@
           calculatedMatchWins: calculated.matchWins,
           calculatedTournamentsWon: calculated.tournamentsWon,
 
-          manualHoleWins: manual.holeWins || 0,
-          manualMatchWins: manual.matchWins || 0,
-          manualTournamentsWon: manual.tournamentsWon || 0,
+          manualHoleWins,
+          manualMatchWins,
+          manualTournamentsWon,
 
-          totalHoleWins: calculated.holeWins + (manual.holeWins || 0),
-          totalMatchWins: calculated.matchWins + (manual.matchWins || 0),
-          totalTournamentsWon: calculated.tournamentsWon + (manual.tournamentsWon || 0)
+          totalHoleWins: calculated.holeWins + manualHoleWins,
+          totalMatchWins: calculated.matchWins + manualMatchWins,
+          totalTournamentsWon: calculated.tournamentsWon + manualTournamentsWon
         };
       })
       .sort((a, b) => {
@@ -547,38 +579,23 @@
     `).join("");
   }
 
-  function updateCardTotals(card) {
-    const playerId = card.dataset.playerId;
-    const calculated = getCalculatedStatsForPlayer(playerId);
-
-    const manualHoleWins = numberValue(card.querySelector('[data-stat="holeWins"]').value);
-    const manualMatchWins = numberValue(card.querySelector('[data-stat="matchWins"]').value);
-    const manualTournamentsWon = numberValue(card.querySelector('[data-stat="tournamentsWon"]').value);
-
-    card.querySelector('[data-total="holeWins"]').textContent = calculated.holeWins + manualHoleWins;
-    card.querySelector('[data-total="matchWins"]').textContent = calculated.matchWins + manualMatchWins;
-    card.querySelector('[data-total="tournamentsWon"]').textContent = calculated.tournamentsWon + manualTournamentsWon;
-  }
-
-  function getCardValues(card) {
-    const playerId = card.dataset.playerId;
-
-    return {
-      playerId,
-      holeWins: numberValue(card.querySelector('[data-stat="holeWins"]').value),
-      matchWins: numberValue(card.querySelector('[data-stat="matchWins"]').value),
-      tournamentsWon: numberValue(card.querySelector('[data-stat="tournamentsWon"]').value)
-    };
-  }
-
   async function savePlayer(card) {
     const values = getCardValues(card);
 
-    await set(ref(db, `manualStats/players/${values.playerId}`), {
+    const updates = {};
+    updates[`manualStats/players/${values.playerId}/holeWins`] = values.holeWins;
+    updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
+    updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+
+    await update(ref(db), updates);
+
+    manualStats[values.playerId] = {
       holeWins: values.holeWins,
       matchWins: values.matchWins,
       tournamentsWon: values.tournamentsWon
-    });
+    };
+
+    updateCardTotals(card);
 
     showStatus("Player stats saved.", "success");
   }
@@ -592,6 +609,22 @@
 
     await remove(ref(db, `manualStats/players/${playerId}`));
 
+    manualStats[playerId] = {
+      holeWins: 0,
+      matchWins: 0,
+      tournamentsWon: 0
+    };
+
+    const holeInput = card.querySelector('[data-stat="holeWins"]');
+    const matchInput = card.querySelector('[data-stat="matchWins"]');
+    const tournamentInput = card.querySelector('[data-stat="tournamentsWon"]');
+
+    holeInput.value = 0;
+    matchInput.value = 0;
+    tournamentInput.value = 0;
+
+    updateCardTotals(card);
+
     showStatus("Manual stats reset.", "success");
   }
 
@@ -602,7 +635,11 @@
     for (const card of cards) {
       const values = getCardValues(card);
 
-      updates[`manualStats/players/${values.playerId}`] = {
+      updates[`manualStats/players/${values.playerId}/holeWins`] = values.holeWins;
+      updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
+      updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+
+      manualStats[values.playerId] = {
         holeWins: values.holeWins,
         matchWins: values.matchWins,
         tournamentsWon: values.tournamentsWon
@@ -610,6 +647,10 @@
     }
 
     await update(ref(db), updates);
+
+    document.querySelectorAll(".player-card").forEach(card => {
+      updateCardTotals(card);
+    });
 
     showStatus("All manual stats saved.", "success");
   }
