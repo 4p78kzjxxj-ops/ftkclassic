@@ -318,12 +318,12 @@
     <div class="card-title">Manual Stats Editor</div>
 
     <div class="help-text">
-      Calculated numbers come from the current match data. Manual numbers are added on top.
+      Calculated numbers come from match data. Manual numbers are added on top.
       Final Total is what the public stats page should show.
     </div>
 
     <div class="save-all-wrap">
-      <button class="save-all-btn" id="saveAllBtn">Save All Changes</button>
+      <button class="save-all-btn" id="saveAllBtn" type="button">Save All Changes</button>
     </div>
 
     <div id="playersList" class="players-list">
@@ -341,7 +341,8 @@
     ref,
     onValue,
     update,
-    remove
+    remove,
+    get
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
   const firebaseConfig = {
@@ -373,19 +374,14 @@
   let matchesLoaded = false;
   let manualStatsLoaded = false;
 
+  let isSaving = false;
+
   function showStatus(message, type = "") {
     statusEl.textContent = message;
     statusEl.className = "status";
 
     if (type) {
       statusEl.classList.add(type);
-    }
-
-    if (message) {
-      setTimeout(() => {
-        statusEl.textContent = "";
-        statusEl.className = "status";
-      }, 3000);
     }
   }
 
@@ -467,6 +463,7 @@
 
   function renderAdmin() {
     if (!playersLoaded || !matchesLoaded || !manualStatsLoaded) return;
+    if (isSaving) return;
 
     const rows = Object.entries(players || {})
       .map(([id, p]) => {
@@ -572,8 +569,8 @@
         </table>
 
         <div class="player-actions">
-          <button class="reset-btn" data-action="reset">Reset Manual Stats</button>
-          <button class="save-btn" data-action="save">Save Player</button>
+          <button class="reset-btn" data-action="reset" type="button">Reset Manual Stats</button>
+          <button class="save-btn" data-action="save" type="button">Save Player</button>
         </div>
       </article>
     `).join("");
@@ -581,23 +578,43 @@
 
   async function savePlayer(card) {
     const values = getCardValues(card);
+    isSaving = true;
 
-    const updates = {};
-    updates[`manualStats/players/${values.playerId}/holeWins`] = values.holeWins;
-    updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
-    updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+    const playerPath = `manualStats/players/${values.playerId}`;
 
-    await update(ref(db), updates);
+    try {
+      await update(ref(db, playerPath), {
+        holeWins: values.holeWins,
+        matchWins: values.matchWins,
+        tournamentsWon: values.tournamentsWon
+      });
 
-    manualStats[values.playerId] = {
-      holeWins: values.holeWins,
-      matchWins: values.matchWins,
-      tournamentsWon: values.tournamentsWon
-    };
+      const verifySnap = await get(ref(db, playerPath));
+      const saved = verifySnap.val();
 
-    updateCardTotals(card);
+      if (!saved) {
+        throw new Error("Firebase save did not create manualStats record.");
+      }
 
-    showStatus("Player stats saved.", "success");
+      manualStats[values.playerId] = {
+        holeWins: statNumber(saved.holeWins),
+        matchWins: statNumber(saved.matchWins),
+        tournamentsWon: statNumber(saved.tournamentsWon)
+      };
+
+      card.querySelector('[data-stat="holeWins"]').value = manualStats[values.playerId].holeWins;
+      card.querySelector('[data-stat="matchWins"]').value = manualStats[values.playerId].matchWins;
+      card.querySelector('[data-stat="tournamentsWon"]').value = manualStats[values.playerId].tournamentsWon;
+
+      updateCardTotals(card);
+
+      showStatus("Player stats saved.", "success");
+    } catch (err) {
+      console.error(err);
+      showStatus("Save failed. Check Firebase rules or browser console.", "error");
+    } finally {
+      isSaving = false;
+    }
   }
 
   async function resetPlayer(card) {
@@ -607,52 +624,76 @@
     const ok = confirm(`Reset manual stats for ${playerName}?`);
     if (!ok) return;
 
-    await remove(ref(db, `manualStats/players/${playerId}`));
+    isSaving = true;
 
-    manualStats[playerId] = {
-      holeWins: 0,
-      matchWins: 0,
-      tournamentsWon: 0
-    };
+    try {
+      await remove(ref(db, `manualStats/players/${playerId}`));
 
-    const holeInput = card.querySelector('[data-stat="holeWins"]');
-    const matchInput = card.querySelector('[data-stat="matchWins"]');
-    const tournamentInput = card.querySelector('[data-stat="tournamentsWon"]');
+      manualStats[playerId] = {
+        holeWins: 0,
+        matchWins: 0,
+        tournamentsWon: 0
+      };
 
-    holeInput.value = 0;
-    matchInput.value = 0;
-    tournamentInput.value = 0;
+      card.querySelector('[data-stat="holeWins"]').value = 0;
+      card.querySelector('[data-stat="matchWins"]').value = 0;
+      card.querySelector('[data-stat="tournamentsWon"]').value = 0;
 
-    updateCardTotals(card);
+      updateCardTotals(card);
 
-    showStatus("Manual stats reset.", "success");
+      showStatus("Manual stats reset.", "success");
+    } catch (err) {
+      console.error(err);
+      showStatus("Reset failed. Check Firebase rules or browser console.", "error");
+    } finally {
+      isSaving = false;
+    }
   }
 
   async function saveAllPlayers() {
     const cards = Array.from(document.querySelectorAll(".player-card"));
-    const updates = {};
+    isSaving = true;
 
-    for (const card of cards) {
-      const values = getCardValues(card);
+    try {
+      const updates = {};
 
-      updates[`manualStats/players/${values.playerId}/holeWins`] = values.holeWins;
-      updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
-      updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+      for (const card of cards) {
+        const values = getCardValues(card);
 
-      manualStats[values.playerId] = {
-        holeWins: values.holeWins,
-        matchWins: values.matchWins,
-        tournamentsWon: values.tournamentsWon
-      };
+        updates[`manualStats/players/${values.playerId}/holeWins`] = values.holeWins;
+        updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
+        updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+
+        manualStats[values.playerId] = {
+          holeWins: values.holeWins,
+          matchWins: values.matchWins,
+          tournamentsWon: values.tournamentsWon
+        };
+      }
+
+      await update(ref(db), updates);
+
+      const verifySnap = await get(manualStatsRef);
+      manualStats = verifySnap.val() || {};
+
+      document.querySelectorAll(".player-card").forEach(card => {
+        const playerId = card.dataset.playerId;
+        const saved = manualStats[playerId] || {};
+
+        card.querySelector('[data-stat="holeWins"]').value = getManualStat(saved, "holeWins");
+        card.querySelector('[data-stat="matchWins"]').value = getManualStat(saved, "matchWins");
+        card.querySelector('[data-stat="tournamentsWon"]').value = getManualStat(saved, "tournamentsWon");
+
+        updateCardTotals(card);
+      });
+
+      showStatus("All manual stats saved.", "success");
+    } catch (err) {
+      console.error(err);
+      showStatus("Save all failed. Check Firebase rules or browser console.", "error");
+    } finally {
+      isSaving = false;
     }
-
-    await update(ref(db), updates);
-
-    document.querySelectorAll(".player-card").forEach(card => {
-      updateCardTotals(card);
-    });
-
-    showStatus("All manual stats saved.", "success");
   }
 
   playersListEl.addEventListener("input", e => {
@@ -671,29 +712,19 @@
     const card = e.target.closest(".player-card");
     if (!card) return;
 
-    try {
-      const action = button.dataset.action;
+    const action = button.dataset.action;
 
-      if (action === "save") {
-        await savePlayer(card);
-      }
+    if (action === "save") {
+      await savePlayer(card);
+    }
 
-      if (action === "reset") {
-        await resetPlayer(card);
-      }
-    } catch (err) {
-      console.error(err);
-      showStatus("Something went wrong. Check the console.", "error");
+    if (action === "reset") {
+      await resetPlayer(card);
     }
   });
 
   saveAllBtn.addEventListener("click", async () => {
-    try {
-      await saveAllPlayers();
-    } catch (err) {
-      console.error(err);
-      showStatus("Something went wrong saving all stats.", "error");
-    }
+    await saveAllPlayers();
   });
 
   onValue(playersRef, snap => {
@@ -709,6 +740,8 @@
   });
 
   onValue(manualStatsRef, snap => {
+    if (isSaving) return;
+
     manualStats = snap.val() || {};
     manualStatsLoaded = true;
     renderAdmin();
