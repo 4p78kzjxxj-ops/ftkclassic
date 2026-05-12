@@ -16,6 +16,7 @@
       --shadow-soft: 0 10px 30px rgba(15,23,42,0.12);
       --green: #16a34a;
       --red: #dc2626;
+      --blue: #2563eb;
     }
 
     * {
@@ -34,7 +35,7 @@
 
     @media (min-width: 768px) {
       body {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
       }
     }
@@ -124,64 +125,86 @@
     .players-list {
       display: flex;
       flex-direction: column;
-      gap: 0.55rem;
+      gap: 0.65rem;
     }
 
     .player-card {
       border-radius: 0.9rem;
       border: 2px solid #9ca3af;
       background: #ffffff;
-      padding: 0.7rem;
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.55rem;
+      gap: 0.65rem;
     }
 
     .player-name {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
+      font-weight: 750;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+    }
+
+    .stats-table th,
+    .stats-table td {
+      padding: 0.45rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+      font-size: 0.82rem;
+    }
+
+    .stats-table th {
+      background: #f9fafb;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
       font-weight: 700;
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.45rem;
+    .stats-table tr:last-child td {
+      border-bottom: none;
     }
 
-    @media (max-width: 600px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+    .stat-label {
+      text-align: left !important;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
     }
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .field label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    .calculated-value {
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    .field input {
-      width: 100%;
+    .manual-input {
+      width: 72px;
+      max-width: 100%;
       border: 1px solid var(--border);
-      border-radius: 0.55rem;
-      padding: 0.45rem 0.55rem;
-      font-size: 0.95rem;
-      background: #f9fafb;
+      border-radius: 0.5rem;
+      padding: 0.35rem;
+      font-size: 0.9rem;
+      text-align: center;
+      background: #ffffff;
       color: var(--text);
     }
 
-    .field input:focus {
+    .manual-input:focus {
       outline: none;
       border-color: #111827;
-      background: #ffffff;
+    }
+
+    .total-value {
+      color: var(--blue);
+      font-weight: 800;
+      font-size: 0.9rem;
     }
 
     .player-actions {
@@ -246,6 +269,28 @@
       text-align: center;
       color: var(--muted);
     }
+
+    @media (max-width: 600px) {
+      .stats-table th,
+      .stats-table td {
+        padding: 0.38rem 0.25rem;
+        font-size: 0.76rem;
+      }
+
+      .stats-table th {
+        font-size: 0.62rem;
+      }
+
+      .manual-input {
+        width: 58px;
+        font-size: 0.82rem;
+      }
+
+      .nav-btn {
+        font-size: 0.78rem;
+        padding: 0.28rem 0.65rem;
+      }
+    }
   </style>
 </head>
 
@@ -273,8 +318,8 @@
     <div class="card-title">Manual Stats Editor</div>
 
     <div class="help-text">
-      These numbers are manual additions. They do not erase or change match scorecard data.
-      The public stats page adds these values on top of the live match totals.
+      Calculated numbers come from the current match data. Manual numbers are added on top.
+      Final Total is what the stats page should show.
     </div>
 
     <div class="save-all-wrap">
@@ -314,6 +359,7 @@
   const db = getDatabase(app);
 
   const playersRef = ref(db, "players");
+  const matchesRef = ref(db, "matches");
   const manualStatsRef = ref(db, "manualStats/players");
 
   const playersListEl = document.getElementById("playersList");
@@ -321,9 +367,11 @@
   const saveAllBtn = document.getElementById("saveAllBtn");
 
   let players = {};
+  let matches = {};
   let manualStats = {};
 
   let playersLoaded = false;
+  let matchesLoaded = false;
   let manualStatsLoaded = false;
 
   function showStatus(message, type = "") {
@@ -347,18 +395,79 @@
     return Number.isFinite(n) && n >= 0 ? n : 0;
   }
 
+  function computeWinnerColor(matchObj) {
+    const holes = matchObj.holes || [];
+    let red = 0;
+    let blue = 0;
+
+    for (const h of holes) {
+      if (h === "red") red++;
+      if (h === "blue") blue++;
+    }
+
+    if (red === blue) return null;
+    return red > blue ? "red" : "blue";
+  }
+
+  function getCalculatedStatsForPlayer(playerId) {
+    let holesWon = 0;
+    let matchesWon = 0;
+
+    for (const [id, m] of Object.entries(matches)) {
+      const redP = m.red?.players || [];
+      const blueP = m.blue?.players || [];
+      let side = null;
+
+      if (redP.includes(playerId)) side = "red";
+      if (blueP.includes(playerId)) side = "blue";
+      if (!side) continue;
+
+      for (const h of m.holes || []) {
+        if (h === side) holesWon++;
+      }
+
+      const winningSide = computeWinnerColor(m);
+      if (winningSide === side) matchesWon++;
+    }
+
+    return {
+      holeWins: holesWon,
+      matchWins: matchesWon,
+      tournamentsWon: 0
+    };
+  }
+
   function renderAdmin() {
-    if (!playersLoaded || !manualStatsLoaded) return;
+    if (!playersLoaded || !matchesLoaded || !manualStatsLoaded) return;
 
     const rows = Object.entries(players)
-      .map(([id, p]) => ({
-        id,
-        name: p.name || id,
-        holeWins: manualStats[id]?.holeWins || 0,
-        matchWins: manualStats[id]?.matchWins || 0,
-        tournamentsWon: manualStats[id]?.tournamentsWon || 0
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .map(([id, p]) => {
+        const calculated = getCalculatedStatsForPlayer(id);
+        const manual = manualStats[id] || {};
+
+        return {
+          id,
+          name: p.name || id,
+
+          calculatedHoleWins: calculated.holeWins,
+          calculatedMatchWins: calculated.matchWins,
+          calculatedTournamentsWon: calculated.tournamentsWon,
+
+          manualHoleWins: manual.holeWins || 0,
+          manualMatchWins: manual.matchWins || 0,
+          manualTournamentsWon: manual.tournamentsWon || 0,
+
+          totalHoleWins: calculated.holeWins + (manual.holeWins || 0),
+          totalMatchWins: calculated.matchWins + (manual.matchWins || 0),
+          totalTournamentsWon: calculated.tournamentsWon + (manual.tournamentsWon || 0)
+        };
+      })
+      .sort((a, b) => {
+        if (b.totalHoleWins !== a.totalHoleWins) return b.totalHoleWins - a.totalHoleWins;
+        if (b.totalMatchWins !== a.totalMatchWins) return b.totalMatchWins - a.totalMatchWins;
+        if (b.totalTournamentsWon !== a.totalTournamentsWon) return b.totalTournamentsWon - a.totalTournamentsWon;
+        return a.name.localeCompare(b.name);
+      });
 
     if (!rows.length) {
       playersListEl.innerHTML = `<div class="empty-state">No players found.</div>`;
@@ -369,40 +478,66 @@
       <article class="player-card" data-player-id="${p.id}">
         <div class="player-name">${p.name}</div>
 
-        <div class="stats-grid">
-          <div class="field">
-            <label>Holes Won</label>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value="${p.holeWins}"
-              data-stat="holeWins"
-            />
-          </div>
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Calculated</th>
+              <th>Manual</th>
+              <th>Final Total</th>
+            </tr>
+          </thead>
 
-          <div class="field">
-            <label>Matches Won</label>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value="${p.matchWins}"
-              data-stat="matchWins"
-            />
-          </div>
+          <tbody>
+            <tr>
+              <td class="stat-label">Holes Won</td>
+              <td class="calculated-value">${p.calculatedHoleWins}</td>
+              <td>
+                <input
+                  class="manual-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="${p.manualHoleWins}"
+                  data-stat="holeWins"
+                />
+              </td>
+              <td class="total-value" data-total="holeWins">${p.totalHoleWins}</td>
+            </tr>
 
-          <div class="field">
-            <label>Tournaments Won</label>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value="${p.tournamentsWon}"
-              data-stat="tournamentsWon"
-            />
-          </div>
-        </div>
+            <tr>
+              <td class="stat-label">Matches Won</td>
+              <td class="calculated-value">${p.calculatedMatchWins}</td>
+              <td>
+                <input
+                  class="manual-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="${p.manualMatchWins}"
+                  data-stat="matchWins"
+                />
+              </td>
+              <td class="total-value" data-total="matchWins">${p.totalMatchWins}</td>
+            </tr>
+
+            <tr>
+              <td class="stat-label">Tournaments Won</td>
+              <td class="calculated-value">${p.calculatedTournamentsWon}</td>
+              <td>
+                <input
+                  class="manual-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="${p.manualTournamentsWon}"
+                  data-stat="tournamentsWon"
+                />
+              </td>
+              <td class="total-value" data-total="tournamentsWon">${p.totalTournamentsWon}</td>
+            </tr>
+          </tbody>
+        </table>
 
         <div class="player-actions">
           <button class="reset-btn" data-action="reset">Reset Manual Stats</button>
@@ -410,6 +545,19 @@
         </div>
       </article>
     `).join("");
+  }
+
+  function updateCardTotals(card) {
+    const playerId = card.dataset.playerId;
+    const calculated = getCalculatedStatsForPlayer(playerId);
+
+    const manualHoleWins = numberValue(card.querySelector('[data-stat="holeWins"]').value);
+    const manualMatchWins = numberValue(card.querySelector('[data-stat="matchWins"]').value);
+    const manualTournamentsWon = numberValue(card.querySelector('[data-stat="tournamentsWon"]').value);
+
+    card.querySelector('[data-total="holeWins"]').textContent = calculated.holeWins + manualHoleWins;
+    card.querySelector('[data-total="matchWins"]').textContent = calculated.matchWins + manualMatchWins;
+    card.querySelector('[data-total="tournamentsWon"]').textContent = calculated.tournamentsWon + manualTournamentsWon;
   }
 
   function getCardValues(card) {
@@ -466,6 +614,15 @@
     showStatus("All manual stats saved.", "success");
   }
 
+  playersListEl.addEventListener("input", e => {
+    if (!e.target.matches(".manual-input")) return;
+
+    const card = e.target.closest(".player-card");
+    if (!card) return;
+
+    updateCardTotals(card);
+  });
+
   playersListEl.addEventListener("click", async e => {
     const button = e.target.closest("button");
     if (!button) return;
@@ -501,6 +658,12 @@
   onValue(playersRef, snap => {
     players = snap.val() || {};
     playersLoaded = true;
+    renderAdmin();
+  });
+
+  onValue(matchesRef, snap => {
+    matches = snap.val() || {};
+    matchesLoaded = true;
     renderAdmin();
   });
 
