@@ -527,6 +527,7 @@
         <div class="menu-section">
           <div class="menu-section-title">Fall 2025</div>
           <button id="menuUploadFall2025Btn" class="menu-item" type="button">Upload photos from Fall 2025 Classic</button>
+          <button id="menuUploadSpring2026Btn" class="menu-item" type="button">Upload photos from 2026 Spring Classic</button>
         </div>
       </div>
     </div>
@@ -646,8 +647,9 @@
     </section>
   </main>
 
-  <!-- Hidden file input for Fall 2025 upload -->
+  <!-- Hidden file inputs for historical photo uploads -->
   <input id="fall2025FileInput" type="file" accept="image/*" multiple style="display:none;" />
+  <input id="spring2026FileInput" type="file" accept="image/*" multiple style="display:none;" />
 
   <!-- AUTH / PASSWORD MODAL LOGIC -->
   <script>
@@ -892,7 +894,9 @@
     
     const menuClearGamesBtn = document.getElementById("menuClearGamesBtn");
 const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
+    const menuUploadSpring2026Btn = document.getElementById("menuUploadSpring2026Btn");
     const fall2025FileInput = document.getElementById("fall2025FileInput");
+    const spring2026FileInput = document.getElementById("spring2026FileInput");
 
     let settings = {};
     let players = {};
@@ -1587,6 +1591,60 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
         }
 
         adminToolsStatus.textContent = "Fall 2025 photos uploaded.";
+        setTimeout(() => (adminToolsStatus.textContent = ""), 4500);
+      } catch (err) {
+        console.error(err);
+        adminToolsStatus.textContent =
+          "Upload failed: " + (err?.code || err?.message || "unknown error");
+      }
+    });
+
+
+    // Spring 2026 upload
+    menuUploadSpring2026Btn.addEventListener("click", () => {
+      closeMenu();
+
+      window.requireAdminCode?.(() => {
+        spring2026FileInput.value = "";
+        spring2026FileInput.click();
+      }, {
+        title: "Upload Spring 2026 photos",
+        message: "Enter the admin code to upload 2026 Spring Classic photos.",
+      });
+    });
+
+    spring2026FileInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []).filter(Boolean);
+      if (!files.length) return;
+
+      try {
+        adminToolsStatus.textContent = `Uploading ${files.length} photo${files.length === 1 ? "" : "s"}…`;
+
+        const fixedTs = new Date("2026-05-11T12:00:00").getTime();
+
+        for (const file of files) {
+          const safeName = (file.name || "photo").replace(/[^\w.\-]+/g, "_");
+          const path = `tournamentPhotos/spring2026/${Date.now()}_${safeName}`;
+          const sref = storageRef(storage, path);
+
+          await uploadBytes(sref, file, { contentType: file.type || "image/jpeg" });
+          const url = await getDownloadURL(sref);
+
+          const photoRef = push(ref(db, "photos"));
+          await set(photoRef, {
+            url,
+            storagePath: path,
+            timestamp: fixedTs,
+            createdAt: fixedTs,
+            matchLabel: "2026 Spring Classic",
+            matchId: "",
+            hole: "",
+            group: true,
+            comment: "2026 Spring Classic",
+          });
+        }
+
+        adminToolsStatus.textContent = "2026 Spring Classic photos uploaded.";
         setTimeout(() => (adminToolsStatus.textContent = ""), 4500);
       } catch (err) {
         console.error(err);
