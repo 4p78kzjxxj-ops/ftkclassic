@@ -390,9 +390,14 @@
     return Number.isFinite(n) && n >= 0 ? n : 0;
   }
 
-  function getManualStat(manual, key) {
-    if (!manual) return 0;
-    return statNumber(manual[key]);
+  function getManualStat(manual, key, player = null) {
+    if (manual && manual[key] !== undefined) return statNumber(manual[key]);
+
+    if (key === "tournamentsWon" && player && player.tournamentsWon !== undefined) {
+      return statNumber(player.tournamentsWon);
+    }
+
+    return 0;
   }
 
   function computeWinnerColor(matchObj) {
@@ -470,9 +475,9 @@
         const calculated = getCalculatedStatsForPlayer(id);
         const manual = manualStats[id] || {};
 
-        const manualHoleWins = getManualStat(manual, "holeWins");
-        const manualMatchWins = getManualStat(manual, "matchWins");
-        const manualTournamentsWon = getManualStat(manual, "tournamentsWon");
+        const manualHoleWins = getManualStat(manual, "holeWins", p);
+        const manualMatchWins = getManualStat(manual, "matchWins", p);
+        const manualTournamentsWon = getManualStat(manual, "tournamentsWon", p);
 
         return {
           id,
@@ -580,16 +585,18 @@
     const values = getCardValues(card);
     isSaving = true;
 
-    const playerPath = `manualStats/players/${values.playerId}`;
-
     try {
-      await update(ref(db, playerPath), {
-        holeWins: values.holeWins,
-        matchWins: values.matchWins,
-        tournamentsWon: values.tournamentsWon
-      });
+      const updates = {};
 
-      const verifySnap = await get(ref(db, playerPath));
+      updates[`manualStats/players/${values.playerId}/holeWins`] = values.holeWins;
+      updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
+      updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+
+      updates[`players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+
+      await update(ref(db), updates);
+
+      const verifySnap = await get(ref(db, `manualStats/players/${values.playerId}`));
       const saved = verifySnap.val();
 
       if (!saved) {
@@ -601,6 +608,9 @@
         matchWins: statNumber(saved.matchWins),
         tournamentsWon: statNumber(saved.tournamentsWon)
       };
+
+      if (!players[values.playerId]) players[values.playerId] = {};
+      players[values.playerId].tournamentsWon = manualStats[values.playerId].tournamentsWon;
 
       card.querySelector('[data-stat="holeWins"]').value = manualStats[values.playerId].holeWins;
       card.querySelector('[data-stat="matchWins"]').value = manualStats[values.playerId].matchWins;
@@ -627,13 +637,20 @@
     isSaving = true;
 
     try {
-      await remove(ref(db, `manualStats/players/${playerId}`));
+      const updates = {};
+      updates[`manualStats/players/${playerId}`] = null;
+      updates[`players/${playerId}/tournamentsWon`] = 0;
+
+      await update(ref(db), updates);
 
       manualStats[playerId] = {
         holeWins: 0,
         matchWins: 0,
         tournamentsWon: 0
       };
+
+      if (!players[playerId]) players[playerId] = {};
+      players[playerId].tournamentsWon = 0;
 
       card.querySelector('[data-stat="holeWins"]').value = 0;
       card.querySelector('[data-stat="matchWins"]').value = 0;
@@ -664,11 +681,16 @@
         updates[`manualStats/players/${values.playerId}/matchWins`] = values.matchWins;
         updates[`manualStats/players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
 
+        updates[`players/${values.playerId}/tournamentsWon`] = values.tournamentsWon;
+
         manualStats[values.playerId] = {
           holeWins: values.holeWins,
           matchWins: values.matchWins,
           tournamentsWon: values.tournamentsWon
         };
+
+        if (!players[values.playerId]) players[values.playerId] = {};
+        players[values.playerId].tournamentsWon = values.tournamentsWon;
       }
 
       await update(ref(db), updates);
@@ -680,9 +702,9 @@
         const playerId = card.dataset.playerId;
         const saved = manualStats[playerId] || {};
 
-        card.querySelector('[data-stat="holeWins"]').value = getManualStat(saved, "holeWins");
-        card.querySelector('[data-stat="matchWins"]').value = getManualStat(saved, "matchWins");
-        card.querySelector('[data-stat="tournamentsWon"]').value = getManualStat(saved, "tournamentsWon");
+        card.querySelector('[data-stat="holeWins"]').value = getManualStat(saved, "holeWins", players[playerId]);
+        card.querySelector('[data-stat="matchWins"]').value = getManualStat(saved, "matchWins", players[playerId]);
+        card.querySelector('[data-stat="tournamentsWon"]').value = getManualStat(saved, "tournamentsWon", players[playerId]);
 
         updateCardTotals(card);
       });
