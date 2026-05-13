@@ -75,7 +75,6 @@
       margin-top: 0.15rem;
     }
 
-    /* HAMBURGER MENU */
     .menu-wrap {
       margin-left: auto;
       position: relative;
@@ -103,6 +102,7 @@
       height: 12px;
       position: relative;
     }
+
     .hamburger-icon span {
       position: absolute;
       left: 0;
@@ -111,6 +111,7 @@
       background: #111827;
       border-radius: 999px;
     }
+
     .hamburger-icon span:nth-child(1) { top: 0; }
     .hamburger-icon span:nth-child(2) { top: 5px; }
     .hamburger-icon span:nth-child(3) { top: 10px; }
@@ -320,7 +321,6 @@
       align-items: center;
     }
 
-    /* changed: team selector (allows swap + none) */
     .player-team-select {
       width: 56px;
       min-width: 56px;
@@ -405,7 +405,6 @@
       margin-top: 0.2rem;
     }
 
-    /* AUTH MODAL */
     #authOverlay {
       position: fixed;
       inset: 0;
@@ -519,10 +518,11 @@
           <button id="menuClearChatBtn" class="menu-item danger" type="button">Clear chat</button>
           <button id="menuDeletePhotosBtn" class="menu-item danger" type="button">Delete photos</button>
           <button id="menuDeleteMatchPhotosBtn" class="menu-item danger" type="button">Delete match photos only</button>
+          <button id="menuMoveSpring2026PhotosBtn" class="menu-item danger" type="button">Move Spring 2026 photos</button>
           <button id="menuResetScoresBtn" class="menu-item danger" type="button">Reset match scores</button>
           <button id="menuResetCtpBtn" class="menu-item danger" type="button">Reset closest to pin</button>
-                  <button id="menuClearGamesBtn" class="menu-item danger" type="button">Clear games</button>
-</div>
+          <button id="menuClearGamesBtn" class="menu-item danger" type="button">Clear games</button>
+        </div>
 
         <div class="menu-section">
           <div class="menu-section-title">Fall 2025</div>
@@ -533,7 +533,6 @@
     </div>
   </header>
 
-  <!-- AUTH MODAL OVERLAY -->
   <div id="authOverlay">
     <div id="authBox">
       <h2 id="authTitle">Admin access</h2>
@@ -551,7 +550,6 @@
   </div>
 
   <main>
-    <!-- TEAM SETTINGS -->
     <section class="card">
       <div class="section-title">Teams & settings</div>
       <div class="form-row">
@@ -572,7 +570,6 @@
       <div id="teamsStatus" class="status-text"></div>
     </section>
 
-    <!-- PLAYERS -->
     <section class="card">
       <div class="section-title">Players & handicaps</div>
 
@@ -595,7 +592,6 @@
         </div>
       </div>
 
-      <!-- NEW: players without a team -->
       <div class="team-block" style="margin-top:.6rem;">
         <div class="team-block-title" id="noTeamLabel">No team</div>
         <div id="noTeamPlayersList" class="players-list"></div>
@@ -604,7 +600,6 @@
       <div id="playersStatus" class="status-text"></div>
     </section>
 
-    <!-- MATCHES -->
     <section class="card">
       <div class="section-title">Matches – Front 9 (1–6)</div>
       <div id="frontMatchesContainer" class="matches-grid"></div>
@@ -615,7 +610,6 @@
       <div id="backMatchesContainer" class="matches-grid"></div>
     </section>
 
-    <!-- GLOBAL ADMIN TOOLS -->
     <section class="card">
       <div class="section-title">Admin tools</div>
       <button id="resetScoresBtn" type="button" class="btn">
@@ -647,15 +641,13 @@
     </section>
   </main>
 
-  <!-- Hidden file inputs for historical photo uploads -->
   <input id="fall2025FileInput" type="file" accept="image/*" multiple style="display:none;" />
   <input id="spring2026FileInput" type="file" accept="image/*" multiple style="display:none;" />
 
-  <!-- AUTH / PASSWORD MODAL LOGIC -->
   <script>
     (function () {
-      const ADMIN_PASSWORD = "admin123"; // change here if you want a different password
-      const ADMIN_CODE = "3618"; // admin code for destructive actions
+      const ADMIN_PASSWORD = "admin123";
+      const ADMIN_CODE = "3618";
 
       const overlay = document.getElementById("authOverlay");
       const titleEl = document.getElementById("authTitle");
@@ -667,7 +659,7 @@
 
       let currentAction = null;
       let redirectHomeOnCancel = false;
-      let currentValidator = null; // function(value) => boolean
+      let currentValidator = null;
       let restoreInputType = "password";
       let restorePlaceholder = "Admin password";
 
@@ -748,7 +740,6 @@
         }
       });
 
-      // Expose helpers
       window.requireAdminPassword = function (onSuccess, options) {
         showOverlay({
           title: options?.title || "Admin confirmation",
@@ -779,7 +770,6 @@
         });
       };
 
-      // Initial gate: only once per tab
       window.addEventListener("load", () => {
         const already = sessionStorage.getItem("ftkAdminAuthorized") === "true";
         if (!already) {
@@ -809,6 +799,7 @@
       set,
       update,
       push,
+      get,
       serverTimestamp,
       onDisconnect,
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
@@ -843,7 +834,6 @@
     const storage = getStorage(app);
     const auth = getAuth(app);
 
-    // Anonymous auth for secured DB rules
     signInAnonymously(auth).catch((err) => {
       console.error("Admin auth failed:", err);
     });
@@ -858,7 +848,6 @@
     const playersRef = ref(db, "players");
     const matchesRef = ref(db, "matches");
 
-    // DOM
     const viewerCountEl = document.getElementById("viewerCount");
 
     const redTeamNameInput = document.getElementById("redTeamName");
@@ -869,7 +858,7 @@
     const addPlayerBtn = document.getElementById("addPlayerBtn");
     const redPlayersList = document.getElementById("redPlayersList");
     const bluePlayersList = document.getElementById("bluePlayersList");
-    const noTeamPlayersList = document.getElementById("noTeamPlayersList"); // NEW
+    const noTeamPlayersList = document.getElementById("noTeamPlayersList");
     const playersStatusEl = document.getElementById("playersStatus");
     const redTeamLabel = document.getElementById("redTeamLabel");
     const blueTeamLabel = document.getElementById("blueTeamLabel");
@@ -889,11 +878,11 @@
     const menuClearChatBtn = document.getElementById("menuClearChatBtn");
     const menuDeletePhotosBtn = document.getElementById("menuDeletePhotosBtn");
     const menuDeleteMatchPhotosBtn = document.getElementById("menuDeleteMatchPhotosBtn");
+    const menuMoveSpring2026PhotosBtn = document.getElementById("menuMoveSpring2026PhotosBtn");
     const menuResetScoresBtn = document.getElementById("menuResetScoresBtn");
     const menuResetCtpBtn = document.getElementById("menuResetCtpBtn");
-    
     const menuClearGamesBtn = document.getElementById("menuClearGamesBtn");
-const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
+    const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
     const menuUploadSpring2026Btn = document.getElementById("menuUploadSpring2026Btn");
     const fall2025FileInput = document.getElementById("fall2025FileInput");
     const spring2026FileInput = document.getElementById("spring2026FileInput");
@@ -931,7 +920,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
     let seededDefaultPlayers = false;
 
-    // Menu logic
     function closeMenu() { menuPanel.classList.remove("open"); }
     function toggleMenu() { menuPanel.classList.toggle("open"); }
 
@@ -950,7 +938,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       if (e.key === "Escape") closeMenu();
     });
 
-    // Presence
     function setupPresence(pageKey) {
       const connectionsRef = ref(db, `presence/${pageKey}`);
       const connectedRef = ref(db, ".info/connected");
@@ -978,7 +965,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
     setupPresence("admin_main");
 
-    // Helpers
     function getTeamNames() {
       const t = settings.teamNames || {};
       return { red: t.red || "Red", blue: t.blue || "Blue" };
@@ -1037,7 +1023,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       return { usedFront, usedBack };
     }
 
-    // Settings
     function renderSettings() {
       const { red, blue } = getTeamNames();
       if (!redTeamNameInput.value) redTeamNameInput.value = red;
@@ -1059,7 +1044,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       }
     });
 
-    // Players
     function renderPlayers() {
       const { red: redTeamName, blue: blueTeamName } = getTeamNames();
       redTeamLabel.textContent = redTeamName + " team";
@@ -1100,7 +1084,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       noTeamPlayersList.innerHTML = noneList.join("") || '<div style="font-size:0.78rem;color:#9ca3af;">No unassigned players.</div>';
     }
 
-    // prompt-based add player
     addPlayerBtn.addEventListener("click", async () => {
       const first = prompt("First name:");
       if (first === null) return;
@@ -1154,13 +1137,11 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
       const nameInput = row.querySelector(".player-name-input");
       const hcpInput = row.querySelector(".player-hcp-input");
-      const teamSelect = row.querySelector(".player-team-select"); // NEW
+      const teamSelect = row.querySelector(".player-team-select");
       if (!nameInput || !hcpInput || !teamSelect) return;
 
       const newName = nameInput.value.trim();
       const newHcp = parseFloat(hcpInput.value || "0") || 0;
-
-      // NEW: allow "no team" by saving "" (or null) and let UI treat it as unassigned
       const teamVal = (teamSelect.value === "red" || teamSelect.value === "blue") ? teamSelect.value : "";
 
       update(ref(db, `players/${playerId}`), {
@@ -1172,18 +1153,17 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
 
     redPlayersList.addEventListener("change", handlePlayerListClick);
     bluePlayersList.addEventListener("change", handlePlayerListClick);
-    noTeamPlayersList.addEventListener("change", handlePlayerListClick); // NEW
+    noTeamPlayersList.addEventListener("change", handlePlayerListClick);
     redPlayersList.addEventListener("click", handlePlayerListClick);
     bluePlayersList.addEventListener("click", handlePlayerListClick);
-    noTeamPlayersList.addEventListener("click", handlePlayerListClick); // NEW
+    noTeamPlayersList.addEventListener("click", handlePlayerListClick);
 
-    // Matches
     function buildPlayerOptions(team, selectedId, groupType, usedFront, usedBack) {
       const usedSet = groupType === "front" ? usedFront : usedBack;
       const opts = ['<option value="">—</option>'];
 
       Object.entries(players || {})
-        .filter(([, p]) => (p.team || "") === team)  // (players with no team won't appear)
+        .filter(([, p]) => (p.team || "") === team)
         .sort(([, a], [, b]) => (a.name || "").localeCompare(b.name || ""))
         .forEach(([id, p]) => {
           const disabled = usedSet.has(id) && id !== selectedId;
@@ -1305,7 +1285,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       updateMatchAssignment(matchId, side, slot, playerId);
     });
 
-    // Reset scores (shared logic)
     async function doResetAllScores() {
       adminToolsStatus.textContent = "Resetting scores…";
 
@@ -1331,7 +1310,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       setTimeout(() => (adminToolsStatus.textContent = ""), 4000);
     }
 
-    // Reset scores (page button)
     resetScoresBtn.addEventListener("click", async () => {
       const confirmed = confirm(
         "Reset ALL scores for ALL matches? This sets all 18 holes to 'no result' for matches 1–12."
@@ -1367,7 +1345,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       }
     });
 
-    // Delete ALL photos (Storage + DB)
     async function deleteAllPhotosInStorage() {
       const roots = ["matchPhotos", "match_photos", "group_photos", "tournamentPhotos"];
 
@@ -1390,8 +1367,46 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       adminToolsStatus.textContent = "Deleting all photos…";
       await deleteAllPhotosInStorage();
       await set(ref(db, "photos"), null);
+      await set(ref(db, "spring2026Photos"), null);
       adminToolsStatus.textContent = "All photos deleted.";
       setTimeout(() => (adminToolsStatus.textContent = ""), 5000);
+    }
+
+    async function moveSpring2026Photos() {
+      adminToolsStatus.textContent = "Moving Spring 2026 photos…";
+
+      const photosSnap = await get(ref(db, "photos"));
+      const photos = photosSnap.val() || {};
+      const updatesObj = {};
+      let movedCount = 0;
+
+      Object.entries(photos).forEach(([photoId, photo]) => {
+        const storagePath = String(photo?.storagePath || "");
+        const matchLabel = String(photo?.matchLabel || "");
+        const comment = String(photo?.comment || "");
+
+        const isSpring2026 =
+          storagePath.includes("spring2026") ||
+          matchLabel === "2026 Spring Classic" ||
+          comment === "2026 Spring Classic";
+
+        if (!isSpring2026) return;
+
+        updatesObj[`spring2026Photos/${photoId}`] = photo;
+        updatesObj[`photos/${photoId}`] = null;
+        movedCount++;
+      });
+
+      if (!movedCount) {
+        adminToolsStatus.textContent = "No Spring 2026 photos found to move.";
+        setTimeout(() => (adminToolsStatus.textContent = ""), 4500);
+        return;
+      }
+
+      await update(ref(db), updatesObj);
+
+      adminToolsStatus.textContent = `${movedCount} Spring 2026 photo${movedCount === 1 ? "" : "s"} moved.`;
+      setTimeout(() => (adminToolsStatus.textContent = ""), 4500);
     }
 
     deletePhotosBtn.addEventListener("click", () => {
@@ -1416,7 +1431,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       }
     });
 
-    // MENU ACTIONS (admin code)
     menuClearFeedBtn.addEventListener("click", () => {
       closeMenu();
       if (!confirm("Clear the tournament feed?")) return;
@@ -1481,8 +1495,27 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       });
     });
 
-    // (kept your existing match-photos-only logic as-is)
-    // NOTE: leaving untouched here since your snippet already had it wired up.
+    menuMoveSpring2026PhotosBtn.addEventListener("click", () => {
+      closeMenu();
+
+      const confirmed = confirm(
+        "Move existing 2026 Spring Classic photos out of Match Photos and into Spring 2026? This does not re-upload or delete the image files."
+      );
+      if (!confirmed) return;
+
+      window.requireAdminCode?.(async () => {
+        try {
+          await moveSpring2026Photos();
+        } catch (err) {
+          console.error(err);
+          adminToolsStatus.textContent =
+            "Failed to move Spring 2026 photos: " + (err?.code || err?.message || "unknown error");
+        }
+      }, {
+        title: "Move Spring 2026 photos",
+        message: "Enter the admin code to move Spring 2026 photos.",
+      });
+    });
 
     menuResetScoresBtn.addEventListener("click", () => {
       closeMenu();
@@ -1501,7 +1534,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
         title: "Reset match scores",
         message: "Enter the admin code to reset ALL match scores.",
       });
-    
     });
 
     menuResetCtpBtn?.addEventListener("click", () => {
@@ -1523,7 +1555,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       });
     });
 
-    // Clear games (delete ALL game sessions)
     menuClearGamesBtn?.addEventListener("click", () => {
       closeMenu();
       const confirmed = confirm("Clear ALL game sessions (this removes every previous game session)? This cannot be undone.");
@@ -1546,7 +1577,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       });
     });
 
-    // Fall 2025 upload
     menuUploadFall2025Btn.addEventListener("click", () => {
       closeMenu();
 
@@ -1599,8 +1629,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       }
     });
 
-
-    // Spring 2026 upload
     menuUploadSpring2026Btn.addEventListener("click", () => {
       closeMenu();
 
@@ -1630,7 +1658,7 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
           await uploadBytes(sref, file, { contentType: file.type || "image/jpeg" });
           const url = await getDownloadURL(sref);
 
-          const photoRef = push(ref(db, "photos"));
+          const photoRef = push(ref(db, "spring2026Photos"));
           await set(photoRef, {
             url,
             storagePath: path,
@@ -1653,7 +1681,6 @@ const menuUploadFall2025Btn = document.getElementById("menuUploadFall2025Btn");
       }
     });
 
-    // Live subscriptions
     onValue(settingsRef, (snap) => {
       settings = snap.val() || {};
       renderSettings();
