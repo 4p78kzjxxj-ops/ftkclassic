@@ -36,7 +36,6 @@
       }
     }
 
-    /* NAV / HEADER */
     .site-header {
       display: flex;
       align-items: center;
@@ -93,7 +92,6 @@
       margin-top: 0.4rem;
     }
 
-    /* CARD */
     .card {
       background: var(--card);
       border-radius: 0.9rem;
@@ -111,7 +109,6 @@
       margin-bottom: 0.6rem;
     }
 
-    /* PLAYER BUBBLES */
     .players-list {
       display: flex;
       flex-direction: column;
@@ -247,6 +244,11 @@
   let matchesLoaded = false;
   let manualStatsLoaded = false;
 
+  function statNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) && n >= 0 ? n : 0;
+  }
+
   function computeWinnerColor(matchObj) {
     const holes = matchObj.holes || [];
     let red = 0;
@@ -287,9 +289,14 @@
       }
 
       const manual = manualStats[playerId] || {};
-      holes += manual.holeWins || 0;
-      wins += manual.matchWins || 0;
-      const tournaments = manual.tournamentsWon || 0;
+
+      holes += statNumber(manual.holeWins);
+      wins += statNumber(manual.matchWins);
+
+      const tournaments =
+        manual.tournamentsWon !== undefined
+          ? statNumber(manual.tournamentsWon)
+          : statNumber(p.tournamentsWon);
 
       rows.push({
         id: playerId,
@@ -307,7 +314,6 @@
       return a.name.localeCompare(b.name);
     });
 
-    // Group ties
     const groups = [];
     let group = [];
 
