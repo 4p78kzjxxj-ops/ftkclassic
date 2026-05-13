@@ -110,64 +110,78 @@
     }
 
     .players-list {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.55rem;
+    }
+
+    @media (min-width: 768px) {
+      .players-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     .player-card {
       border-radius: 0.9rem;
-      border: 2px solid #9ca3af;
+      border: 1px solid #d1d5db;
       background: #ffffff;
-      padding: 0.6rem 0.7rem;
+      padding: 0.65rem;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.45rem;
+      min-height: 105px;
     }
 
     .player-name-row {
       display: flex;
       flex-direction: column;
-      gap: 0.15rem;
+      gap: 0.25rem;
     }
 
     .player-name-main {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.25rem;
+      flex-wrap: wrap;
+      text-align: center;
     }
 
     .player-name-text {
       font-size: 0.9rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .player-trophies {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 2px;
+      min-height: 17px;
     }
 
     .custom-trophy {
-      width: 16px;
-      height: 16px;
+      width: 17px;
+      height: 17px;
       object-fit: contain;
       display: inline-block;
     }
 
     .player-stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+      margin-top: auto;
     }
 
     .stat-chip {
-      font-size: 0.78rem;
-      padding: 0.18rem 0.5rem;
-      border-radius: 999px;
+      font-size: 0.74rem;
+      padding: 0.22rem 0.45rem;
+      border-radius: 0.5rem;
       border: 1px solid #e5e7eb;
       background: #f9fafb;
-      display: inline-flex;
+      display: flex;
+      justify-content: space-between;
       gap: 0.25rem;
     }
 
@@ -323,62 +337,27 @@
       return a.name.localeCompare(b.name);
     });
 
-    const groups = [];
-    let group = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      if (i === 0) {
-        group.push(rows[i]);
-        continue;
-      }
-
-      const a = rows[i];
-      const b = rows[i - 1];
-
-      const tie =
-        a.holesWon === b.holesWon &&
-        a.matchesWon === b.matchesWon &&
-        a.tournamentsWon === b.tournamentsWon;
-
-      if (tie) {
-        group.push(a);
-      } else {
-        groups.push(group);
-        group = [a];
-      }
-    }
-    if (group.length) groups.push(group);
-
-    playersListEl.innerHTML = groups
-      .map(g => {
-        const ref = g[0];
-
-        const names = g
-          .map(p => {
-            const trophies = p.tournamentsWon
-              ? Array.from({ length: p.tournamentsWon })
-                  .map(() => `<img src="trophy.png" class="custom-trophy" alt="Trophy" />`)
-                  .join("")
-              : "";
-
-            return `
-            <div class="player-name-main">
-              <span class="player-name-text">${p.name}</span>
-              <span class="player-trophies">${trophies}</span>
-            </div>`;
-          })
-          .join("");
+    playersListEl.innerHTML = rows
+      .map(p => {
+        const trophies = p.tournamentsWon
+          ? Array.from({ length: p.tournamentsWon })
+              .map(() => `<img src="trophy.png" class="custom-trophy" alt="Trophy" />`)
+              .join("")
+          : "";
 
         return `
         <article class="player-card">
           <div class="player-name-row">
-            ${names}
+            <div class="player-name-main">
+              <span class="player-name-text">${p.name}</span>
+            </div>
+            <span class="player-trophies">${trophies}</span>
           </div>
 
           <div class="player-stats-row">
-            <div class="stat-chip"><span class="stat-label">Holes Won</span><span class="stat-value">${ref.holesWon}</span></div>
-            <div class="stat-chip"><span class="stat-label">Matches Won</span><span class="stat-value">${ref.matchesWon}</span></div>
-            <div class="stat-chip"><span class="stat-label">Tournaments Won</span><span class="stat-value">${ref.tournamentsWon}</span></div>
+            <div class="stat-chip"><span class="stat-label">Holes</span><span class="stat-value">${p.holesWon}</span></div>
+            <div class="stat-chip"><span class="stat-label">Matches</span><span class="stat-value">${p.matchesWon}</span></div>
+            <div class="stat-chip"><span class="stat-label">Tournaments</span><span class="stat-value">${p.tournamentsWon}</span></div>
           </div>
         </article>`;
       })
