@@ -361,6 +361,7 @@
     const playersRef  = ref(db, "players");
     const matchesRef  = ref(db, "matches");
     const photosRef   = ref(db, "photos");
+    const spring2026PhotosRef = ref(db, "spring2026Photos");
 
     const photosRoot = document.getElementById("photosRoot");
     const subtitleEl = document.getElementById("subtitle");
@@ -381,6 +382,7 @@
     let players  = {};
     let matches  = {};
     let photos   = {};
+    let spring2026Photos = {};
 
     let lastPlayersSig = "";
     let lastMatchesSig = "";
@@ -624,7 +626,13 @@
 
     function render() {
       const allPhotos = sortByNewest(
-        toArray(photos).filter((p) => p && p.url && String(p.url).trim() !== "")
+        [
+          ...toArray(photos),
+          ...toArray(spring2026Photos).map(p => ({
+            ...p,
+            folder: "spring2026"
+          }))
+        ].filter((p) => p && p.url && String(p.url).trim() !== "")
       );
 
       const counts = {
@@ -766,6 +774,11 @@
 
     onValue(photosRef, (snap) => {
       photos = snap.val() || {};
+      render();
+    });
+
+    onValue(spring2026PhotosRef, (snap) => {
+      spring2026Photos = snap.val() || {};
       render();
     });
   </script>
