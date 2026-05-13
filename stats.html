@@ -143,7 +143,16 @@
     }
 
     .player-trophies {
-      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .custom-trophy {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      display: inline-block;
     }
 
     .player-stats-row {
@@ -346,7 +355,12 @@
 
         const names = g
           .map(p => {
-            const trophies = p.tournamentsWon ? "🏆".repeat(p.tournamentsWon) : "";
+            const trophies = p.tournamentsWon
+              ? Array.from({ length: p.tournamentsWon })
+                  .map(() => `<img src="trophy.png" class="custom-trophy" alt="Trophy" />`)
+                  .join("")
+              : "";
+
             return `
             <div class="player-name-main">
               <span class="player-name-text">${p.name}</span>
