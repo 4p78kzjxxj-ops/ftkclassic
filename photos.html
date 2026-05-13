@@ -32,7 +32,6 @@
     .site-title{font-weight:800;letter-spacing:-.02em;line-height:1.1;}
     .site-subtitle{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55vw;}
 
-    /* HAMBURGER MENU (right side) */
     .menu-wrap{
       margin-left:auto;
       position:relative;
@@ -105,6 +104,40 @@
     .section-title{font-weight:800;margin-bottom:.75rem;}
     .empty-state{font-size:.85rem;color:var(--muted);text-align:center;padding:.75rem .5rem;}
 
+    .folder-tabs{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:.55rem;
+      margin-bottom:1rem;
+    }
+    @media (max-width:620px){
+      .folder-tabs{grid-template-columns:1fr;}
+    }
+    .folder-tab{
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      background:#fff;
+      padding:.85rem;
+      cursor:pointer;
+      text-align:left;
+      box-shadow:0 6px 16px rgba(15,23,42,.06);
+    }
+    .folder-tab:active{transform:scale(.99);}
+    .folder-tab.active{
+      border-color:#111827;
+      box-shadow:0 10px 24px rgba(15,23,42,.14);
+    }
+    .folder-tab-title{
+      font-size:.95rem;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .folder-tab-sub{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-top:.2rem;
+    }
+
     .group{
       border:1px solid #e5e7eb;border-radius:16px;background:#fff;
       padding:.85rem;margin-bottom:.85rem;
@@ -142,7 +175,6 @@
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
 
-    /* iOS-safe “fullscreen” viewer (CSS overlay, not Fullscreen API) */
     #viewer{
       position:fixed;inset:0;
       background:#000;
@@ -194,12 +226,10 @@
       -webkit-user-drag:none;
     }
 
-    /* Tap zones for prev/next */
     .tap-zone{position:absolute;top:0;bottom:0;width:33%;z-index:10002;}
     .tap-zone.left{left:0;}
     .tap-zone.right{right:0;}
 
-    /* Bottom Done (cannot disappear on iOS) */
     #viewerDone{
       position:fixed;
       left:50%;
@@ -229,7 +259,6 @@
       </div>
     </div>
 
-    <!-- HAMBURGER MENU -->
     <div class="menu-wrap">
       <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Open menu">
         <div class="hamburger-icon" aria-hidden="true">
@@ -250,11 +279,28 @@
   <main>
     <section class="card">
       <div class="section-title">Tournament photos</div>
+
+      <div class="folder-tabs" aria-label="Photo folders">
+        <button class="folder-tab active" type="button" data-folder="spring2026">
+          <div class="folder-tab-title">Spring 2026</div>
+          <div id="spring2026Count" class="folder-tab-sub">0 photos</div>
+        </button>
+
+        <button class="folder-tab" type="button" data-folder="fall2025">
+          <div class="folder-tab-title">Fall 2025</div>
+          <div id="fall2025Count" class="folder-tab-sub">0 photos</div>
+        </button>
+
+        <button class="folder-tab" type="button" data-folder="matchPhotos">
+          <div class="folder-tab-title">Match Photos</div>
+          <div id="matchPhotosCount" class="folder-tab-sub">0 photos</div>
+        </button>
+      </div>
+
       <div id="photosRoot" class="empty-state">Loading photos…</div>
     </section>
   </main>
 
-  <!-- iOS-safe viewer overlay -->
   <div id="viewer" aria-hidden="true">
     <div id="viewerHeader">
       <div id="viewerTitle">Photo</div>
@@ -270,7 +316,6 @@
     <button id="viewerDone" type="button" aria-label="Close photo">Done</button>
   </div>
 
-  <!-- MENU LOGIC -->
   <script>
     (function () {
       const hamburgerBtn = document.getElementById("hamburgerBtn");
@@ -320,7 +365,11 @@
     const photosRoot = document.getElementById("photosRoot");
     const subtitleEl = document.getElementById("subtitle");
 
-    // Viewer
+    const folderTabs = document.querySelectorAll(".folder-tab");
+    const spring2026Count = document.getElementById("spring2026Count");
+    const fall2025Count = document.getElementById("fall2025Count");
+    const matchPhotosCount = document.getElementById("matchPhotosCount");
+
     const viewer = document.getElementById("viewer");
     const viewerImg = document.getElementById("viewerImg");
     const viewerTitle = document.getElementById("viewerTitle");
@@ -336,15 +385,40 @@
     let lastPlayersSig = "";
     let lastMatchesSig = "";
 
-    // Flat gallery for swipe
+    let activeFolder = "spring2026";
+
     let gallery = [];
     let indexById = {};
     let currentIndex = -1;
+
+    const folderLabels = {
+      spring2026: "Spring 2026",
+      fall2025: "Fall 2025",
+      matchPhotos: "Match Photos"
+    };
 
     function esc(s) {
       return String(s ?? "").replace(/[&<>"']/g, (c) => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
       }[c]));
+    }
+
+    function plural(n) {
+      return `${n} photo${n === 1 ? "" : "s"}`;
+    }
+
+    function getPhotoFolder(p) {
+      const f = String(p?.folder || "").trim();
+
+      if (f === "spring2026" || f === "fall2025" || f === "matchPhotos") return f;
+
+      const label = String(p?.matchLabel || "").toLowerCase();
+
+      if (label.includes("spring 2026")) return "spring2026";
+      if (label.includes("fall 2025")) return "fall2025";
+      if (p?.matchId) return "matchPhotos";
+
+      return "matchPhotos";
     }
 
     function getLastName(full) {
@@ -424,6 +498,7 @@
       entries.sort();
       return entries.join("|");
     }
+
     function computeMatchesSig(ms) {
       const entries = Object.entries(ms || {}).map(([id, m]) => {
         const r = Array.isArray(m?.red?.players) ? m.red.players.filter(Boolean).join(",") : "";
@@ -433,7 +508,6 @@
       entries.sort();
       return entries.join("||");
     }
-
 
     window.handleBrokenPhotoCard = function(imgEl) {
       const card = imgEl?.closest?.(".photo-card");
@@ -459,6 +533,7 @@
         indexById = {};
       }
     }
+
     function viewerOpenById(photoId) {
       const idx = indexById[photoId];
       if (idx == null) return;
@@ -491,6 +566,7 @@
       viewerImg.src = p?.url || "";
       viewerTitle.textContent = p?._modalTitle || "Photo";
     }
+
     function nextPhoto(){ viewerSetIndex(currentIndex + 1); }
     function prevPhoto(){ viewerSetIndex(currentIndex - 1); }
 
@@ -507,7 +583,6 @@
       if (e.key === "ArrowLeft") prevPhoto();
     });
 
-    // Swipe detection
     let touchStartX = 0;
     let touchStartY = 0;
     let touching = false;
@@ -536,26 +611,53 @@
       }
     }, { passive: true });
 
+    folderTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        activeFolder = tab.getAttribute("data-folder") || "spring2026";
+
+        folderTabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        render();
+      });
+    });
+
     function render() {
-      const list = sortByNewest(
+      const allPhotos = sortByNewest(
         toArray(photos).filter((p) => p && p.url && String(p.url).trim() !== "")
       );
 
+      const counts = {
+        spring2026: 0,
+        fall2025: 0,
+        matchPhotos: 0
+      };
+
+      allPhotos.forEach((p) => {
+        const folder = getPhotoFolder(p);
+        if (counts[folder] != null) counts[folder]++;
+      });
+
+      spring2026Count.textContent = plural(counts.spring2026);
+      fall2025Count.textContent = plural(counts.fall2025);
+      matchPhotosCount.textContent = plural(counts.matchPhotos);
+
+      const list = allPhotos.filter((p) => getPhotoFolder(p) === activeFolder);
+
       if (!list.length) {
         photosRoot.className = "empty-state";
-        photosRoot.textContent = "No photos yet.";
-        subtitleEl.textContent = "Photos";
+        photosRoot.textContent = `No photos in ${folderLabels[activeFolder] || "this folder"} yet.`;
+        subtitleEl.textContent = folderLabels[activeFolder] || "Photos";
         gallery = [];
         indexById = {};
         return;
       }
 
-      subtitleEl.textContent = `${list.length} item${list.length === 1 ? "" : "s"}`;
+      subtitleEl.textContent = `${folderLabels[activeFolder] || "Photos"} · ${list.length} item${list.length === 1 ? "" : "s"}`;
 
       const groups = buildGroups(list);
       const html = [];
 
-      // rebuild gallery
       gallery = [];
       indexById = {};
 
@@ -627,9 +729,9 @@
       photosRoot.className = "";
       photosRoot.innerHTML = html.join("");
 
-pruneEmptyGroups();
+      pruneEmptyGroups();
 
-            photosRoot.querySelectorAll(".thumb").forEach((el) => {
+      photosRoot.querySelectorAll(".thumb").forEach((el) => {
         const id = el.getAttribute("data-id");
         const open = () => viewerOpenById(id);
         el.addEventListener("click", open);
@@ -642,7 +744,6 @@ pruneEmptyGroups();
       });
     }
 
-    // IMPORTANT: only re-render on players/matches changes if relevant fields changed
     onValue(playersRef, (snap) => {
       const next = snap.val() || {};
       const sig = computePlayersSig(next);
